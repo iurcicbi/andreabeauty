@@ -542,4 +542,4 @@ Progetto sviluppato come esempio di full-stack application con Next.js, TypeScri
 
 **Buon coding! 💈✂️**
 # Email: barber@test.com
-# Password: password123
+# Password: password123# andreamakeup
