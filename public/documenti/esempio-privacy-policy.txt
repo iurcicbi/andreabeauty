@@ -1,0 +1,64 @@
+===========================================
+ESEMPIO - PRIVACY POLICY
+===========================================
+
+Questo è un file di esempio. Sostituiscilo con la tua Privacy Policy ufficiale.
+
+IMPORTANTE: Consulta un legale per creare una Privacy Policy conforme al GDPR
+e alle normative italiane sulla privacy.
+
+---
+
+PRIVACY POLICY - [NOME AZIENDA]
+
+Ultimo aggiornamento: [DATA]
+
+1. TITOLARE DEL TRATTAMENTO
+   [Nome Azienda]
+   [Indirizzo]
+   [Email]
+   [Telefono]
+
+2. DATI RACCOLTI
+   - Nome e Cognome
+   - Numero di telefono
+   - Indirizzo email (se fornito)
+   - Data e ora appuntamento
+
+3. FINALITÀ DEL TRATTAMENTO
+   I dati personali sono raccolti per:
+   - Gestione prenotazioni
+   - Comunicazioni relative agli appuntamenti
+   - Adempimenti contabili e fiscali
+
+4. BASE GIURIDICA
+   Il trattamento è basato su:
+   - Esecuzione del contratto (prenotazione)
+   - Obblighi di legge
+   - Consenso dell'interessato
+
+5. CONSERVAZIONE DEI DATI
+   I dati saranno conservati per:
+   - Durata del rapporto contrattuale
+   - Periodo previsto da obblighi di legge
+
+6. DIRITTI DELL'INTERESSATO
+   Hai diritto di:
+   - Accedere ai tuoi dati
+   - Rettificare dati inesatti
+   - Cancellare i dati
+   - Limitare il trattamento
+   - Opporti al trattamento
+   - Portabilità dei dati
+
+7. CONTATTI
+   Per esercitare i tuoi diritti, contatta:
+   [Email]
+   [Telefono]
+
+---
+
+NOTA: Questo è solo un esempio semplificato.
+Per una Privacy Policy completa e conforme, consulta un avvocato specializzato
+in protezione dei dati personali.
+

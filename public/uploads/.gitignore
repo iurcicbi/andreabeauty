@@ -1,0 +1,6 @@
+# Ignora tutti i file caricati
+*
+# Ma mantieni le cartelle
+!.gitignore
+!logo/.gitkeep
+!documenti/.gitkeep
