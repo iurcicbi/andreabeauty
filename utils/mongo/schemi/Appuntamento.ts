@@ -12,7 +12,8 @@ type TSchemaAppuntamento = {
     telefono: string;
     email?: string;
   };
-  barber: Types.ObjectId;
+  specialista: Types.ObjectId;
+  specialistOld?: Types.ObjectId;
   servizio: Types.ObjectId;
   data: Date;
   oraInizio: string;
@@ -25,8 +26,16 @@ type TSchemaAppuntamento = {
   reminderError?: string;
   reminderErrorAt?: Date;
   twilioMessageSid?: string;
-  cancelledBy?: 'customer' | 'barber';
+  cancelledBy?: 'customer' | 'specialist';
   cancelledAt?: Date;
+  reviewToken?: string;
+  reviewSent: boolean;
+  voucherCode?: string;
+  // Campi per sistema conferma WhatsApp
+  confirmationSent: boolean;
+  confirmationSentAt?: Date;
+  confirmationResponse?: 'si' | 'no' | null;
+  confirmationRespondedAt?: Date;
 }
 
 export type TAppuntamento = {
@@ -40,7 +49,8 @@ const SchemaMongoose = new Schema<TSchemaAppuntamento, ISettings>({
     telefono: { type: String, required: true },
     email: { type: String, required: false }
   },
-  barber: { type: Schema.Types.ObjectId, ref: 'users', required: true },
+  specialista: { type: Schema.Types.ObjectId, ref: 'specialists', required: false },
+  specialistOld: { type: Schema.Types.ObjectId, ref: 'users', required: false },
   servizio: { type: Schema.Types.ObjectId, ref: 'services', required: true },
   data: { type: Date, required: true },
   oraInizio: { type: String, required: true },
@@ -61,9 +71,17 @@ const SchemaMongoose = new Schema<TSchemaAppuntamento, ISettings>({
   cancelledBy: { 
     type: String, 
     required: false,
-    enum: ['customer', 'barber']
+    enum: ['customer', 'specialist']
   },
-  cancelledAt: { type: Date, required: false }
+  cancelledAt: { type: Date, required: false },
+  reviewToken: { type: String, required: false },
+  reviewSent: { type: Boolean, required: true, default: false },
+  voucherCode: { type: String, required: false },
+  // Campi sistema conferma WhatsApp
+  confirmationSent: { type: Boolean, required: true, default: false },
+  confirmationSentAt: { type: Date, required: false },
+  confirmationResponse: { type: String, required: false, enum: ['si', 'no', null], default: null },
+  confirmationRespondedAt: { type: Date, required: false },
 },
 { 
   collection: "appointments", 

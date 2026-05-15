@@ -1,19 +1,21 @@
 {
-  "name": "barbershop-portal",
+  "name": "beauty-salon-portal",
   "version": "1.0.0",
-  "description": "Portale web completo per barber shop con CMS e sistema di prenotazioni",
+  "description": "Beauty salon portal with CMS and booking system",
   "scripts": {
     "dev": "node server.js",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "next lint",
     "setup": "node scripts/setup-completo.js",
-    "setup:barber": "node scripts/crea-barber-test.js",
+    "setup:test": "node scripts/setup-test-data.js",
     "setup:servizi": "node scripts/crea-servizi-test.js",
     "db:clean": "node scripts/pulisci-database.js",
     "test:whatsapp": "node scripts/test-whatsapp.js",
     "test:whatsapp:config": "node scripts/test-whatsapp.js --config",
-    "test:whatsapp:scheduler": "node scripts/test-whatsapp.js --scheduler"
+    "test:whatsapp:scheduler": "node scripts/test-whatsapp.js --scheduler",
+    "migrate:beauty": "node scripts/migra-specialisti.js",
+    "migrate:beauty:auto": "AUTO_MIGRATE=true node scripts/migra-specialisti.js"
   },
   "dependencies": {
     "axios": "^1.6.0",

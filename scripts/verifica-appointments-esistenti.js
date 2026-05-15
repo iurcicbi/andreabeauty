@@ -43,7 +43,7 @@ async function verificaAppuntamentiEsistenti() {
   try {
     console.log('📋 Verifica tutti gli appuntamenti nella collection "appointments"');
     
-    await mongoose.connect('mongodb://localhost:27017/barbershop');
+    await mongoose.connect('mongodb://localhost:27017/beautysalon');
     console.log('✅ Connesso al database');
 
     // Trova tutti gli appuntamenti

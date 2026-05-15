@@ -15,7 +15,7 @@ export default function CMSIndexPage() {
 
   useEffect(() => {
     // Redirect automatico alla dashboard
-    router.push('/cms/cruscotto');
+    router.push('/cms/dashboard');
   }, [router]);
 
   return (

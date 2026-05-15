@@ -15,6 +15,7 @@ interface FiltriProps {
   dataFine: string;
   setDataFine: (value: string) => void;
   onReset: () => void;
+  onSearch?: () => void;
 }
 
 export default function FiltriAppuntamenti({
@@ -22,7 +23,8 @@ export default function FiltriAppuntamenti({
   filtroStato, setFiltroStato,
   dataInizio, setDataInizio,
   dataFine, setDataFine,
-  onReset
+  onReset,
+  onSearch
 }: FiltriProps) {
   const [modalAperto, setModalAperto] = useState(false);
 
@@ -52,7 +54,7 @@ export default function FiltriAppuntamenti({
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Cerca cliente..."
+              placeholder="Caută client..."
               value={ricerca}
               onChange={(e) => setRicerca(e.target.value)}
               className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:outline-none"
@@ -65,7 +67,7 @@ export default function FiltriAppuntamenti({
             className="relative px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
           >
             <Filter className="w-5 h-5" />
-            <span className="hidden sm:inline">Filtri</span>
+            <span className="hidden sm:inline">Filtre</span>
             {filtriAttivi > 0 && (
               <span className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {filtriAttivi}
@@ -78,25 +80,25 @@ export default function FiltriAppuntamenti({
         <Modal
           isOpen={modalAperto}
           onClose={() => setModalAperto(false)}
-          title="Filtri Appuntamenti"
+          title="Filtre programări"
           size="md"
         >
           <div className="space-y-6">
             {/* Stato */}
             <div>
-              <label className="block text-sm font-bold mb-2">
-                Stato Appuntamento
-              </label>
+                <label className="block text-sm font-bold mb-2">
+                  Stare programare
+                </label>
               <select
                 value={filtroStato}
                 onChange={(e) => setFiltroStato(e.target.value)}
                 className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:outline-none"
               >
-                <option value="tutti">Tutti gli stati</option>
-                <option value="confermato">Confermato</option>
-                <option value="completato">Completato</option>
-                <option value="annullato">Annullato</option>
-                <option value="in_attesa">In Attesa</option>
+                <option value="tutti">Toate stările</option>
+                <option value="confermato">Confirmată</option>
+                <option value="completato">Completată</option>
+                <option value="annullato">Anulată</option>
+                <option value="in_attesa">În așteptare</option>
               </select>
             </div>
 
@@ -104,7 +106,7 @@ export default function FiltriAppuntamenti({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold mb-2">
-                  Data Inizio
+                  Data început
                 </label>
                 <input
                   type="date"
@@ -115,7 +117,7 @@ export default function FiltriAppuntamenti({
               </div>
               <div>
                 <label className="block text-sm font-bold mb-2">
-                  Data Fine
+                  Data sfârșit
                 </label>
                 <input
                   type="date"
@@ -129,7 +131,7 @@ export default function FiltriAppuntamenti({
             {/* Filtri rapidi */}
             <div>
               <label className="block text-sm font-bold mb-3">
-                Filtri Rapidi
+                Filtre rapide
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -140,7 +142,7 @@ export default function FiltriAppuntamenti({
                   }}
                   className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Oggi
+                  Astăzi
                 </button>
                 <button
                   onClick={() => {
@@ -153,7 +155,7 @@ export default function FiltriAppuntamenti({
                   }}
                   className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Domani
+                  Mâine
                 </button>
                 <button
                   onClick={() => {
@@ -169,7 +171,7 @@ export default function FiltriAppuntamenti({
                   }}
                   className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Settimana
+                  Săptămâna
                 </button>
                 <button
                   onClick={() => {
@@ -181,7 +183,7 @@ export default function FiltriAppuntamenti({
                   }}
                   className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Mese
+                  Luna
                 </button>
               </div>
             </div>
@@ -192,13 +194,13 @@ export default function FiltriAppuntamenti({
                 onClick={handleReset}
                 className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition-colors"
               >
-                Reset
+                Resetare
               </button>
               <button
                 onClick={handleApplica}
                 className="flex-1 px-4 py-3 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-700 transition-colors"
               >
-                Applica
+                Aplică
               </button>
             </div>
           </div>
@@ -213,11 +215,11 @@ export default function FiltriAppuntamenti({
             <div>
               <label className="block text-sm font-bold mb-2 flex items-center gap-2">
                 <Search className="w-4 h-4" />
-                Cerca Cliente
+                Caută Client
               </label>
               <input
                 type="text"
-                placeholder="Nome, cognome o telefono..."
+                placeholder="Nume, prenume sau telefon..."
                 value={ricerca}
                 onChange={(e) => setRicerca(e.target.value)}
                 className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none"
@@ -226,17 +228,17 @@ export default function FiltriAppuntamenti({
 
             {/* Filtro Stato */}
             <div>
-              <label className="block text-sm font-bold mb-2">Stato</label>
+              <label className="block text-sm font-bold mb-2">Stare</label>
               <select
                 value={filtroStato}
                 onChange={(e) => setFiltroStato(e.target.value)}
                 className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none"
               >
-                <option value="tutti">Tutti</option>
-                <option value="in_attesa">In Attesa</option>
-                <option value="confermato">Confermato</option>
-                <option value="completato">Completato</option>
-                <option value="cancellato">Cancellato</option>
+                <option value="tutti">Toate</option>
+                <option value="in_attesa">În așteptare</option>
+                <option value="confermato">Confirmată</option>
+                <option value="completato">Completată</option>
+                <option value="cancellato">Anulată</option>
               </select>
             </div>
 
@@ -244,7 +246,7 @@ export default function FiltriAppuntamenti({
             <div>
               <label className="block text-sm font-bold mb-2 flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Data Inizio
+                Data început
               </label>
               <input
                 type="date"
@@ -258,7 +260,7 @@ export default function FiltriAppuntamenti({
             <div>
               <label className="block text-sm font-bold mb-2 flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Data Fine
+                Data sfârșit
               </label>
               <input
                 type="date"
@@ -267,6 +269,17 @@ export default function FiltriAppuntamenti({
                 className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none"
               />
             </div>
+          </div>
+
+          {/* Buton Căutare */}
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={() => onSearch?.()}
+              className="px-6 py-2 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              Caută
+            </button>
           </div>
 
           {/* Filtri rapidi - Desktop */}
@@ -280,7 +293,7 @@ export default function FiltriAppuntamenti({
               className="px-3 py-1 text-sm bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors flex items-center gap-1"
             >
               <Calendar className="w-3 h-3" />
-              Oggi
+              Astăzi
             </button>
             <button
               onClick={() => {
@@ -294,7 +307,7 @@ export default function FiltriAppuntamenti({
               className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1"
             >
               <Calendar className="w-3 h-3" />
-              Domani
+              Mâine
             </button>
             <button
               onClick={() => {
@@ -311,7 +324,7 @@ export default function FiltriAppuntamenti({
               className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center gap-1"
             >
               <Calendar className="w-3 h-3" />
-              Questa Settimana
+              Această Săptămână
             </button>
             <button
               onClick={() => {
@@ -324,7 +337,7 @@ export default function FiltriAppuntamenti({
               className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors flex items-center gap-1"
             >
               <Calendar className="w-3 h-3" />
-              Questo Mese
+              Această Lună
             </button>
           </div>
 
@@ -336,7 +349,7 @@ export default function FiltriAppuntamenti({
                 className="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1"
               >
                 <X className="w-3 h-3" />
-                Cancella tutti i filtri
+                Șterge toate filtrele
               </button>
             </div>
           )}

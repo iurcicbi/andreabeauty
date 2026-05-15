@@ -82,7 +82,7 @@ export interface IImpostazioni extends Document {
   testiPrenotazione: {
     titoloPagina: string;
     sottotitoloPagina: string;
-    stepBarber: string;
+    stepSpecialist: string;
     stepServizio: string;
     stepData: string;
     stepOrario: string;
@@ -121,6 +121,7 @@ export interface IImpostazioni extends Document {
     mostraContatti: boolean;
     abilitaPrenotazioni: boolean;
     richiestaConfermaEmail: boolean;
+    oreAnticipo: number; // ore prima dell'appuntamento per inviare richiesta conferma
   };
   
   // METADATA
@@ -161,7 +162,7 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   nomeAzienda: {
     type: String,
     required: true,
-    default: 'Barbershop'
+    default: 'Beauty Salon'
   },
   tagline: {
     type: String,
@@ -169,7 +170,7 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   },
   descrizione: {
     type: String,
-    default: 'Portale di prenotazione per il tuo barber shop di fiducia'
+    default: 'Beauty salon booking portal'
   },
   
   // CONTATTI
@@ -237,22 +238,22 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   testiHomepage: {
     titoloHero: { type: String, default: '' },
     sottotitoloHero: { type: String, default: '' },
-    badgeHero: { type: String, default: 'Premium Barbershop' },
+    badgeHero: { type: String,     default: 'Premium Beauty Salon' },
     testoCtaPrimario: { type: String, default: 'PRENOTA APPUNTAMENTO' },
     testoCtaSecondario: { type: String, default: 'DOVE SIAMO' },
     titoloServizi: { type: String, default: 'I NOSTRI SERVIZI' },
-    sottotitoloServizi: { type: String, default: 'Qualità e professionalità per il tuo look perfetto' },
+    sottotitoloServizi: { type: String,     default: 'Quality and professionalism for your perfect look' },
     titoloOrari: { type: String, default: 'ORARI DI APERTURA' },
-    sottotitoloOrari: { type: String, default: 'Siamo qui per te' },
-    titoloCtaFinale: { type: String, default: 'PRONTO PER IL TUO NUOVO LOOK?' },
-    sottotitoloCtaFinale: { type: String, default: 'Prenota ora il tuo appuntamento e affidati ai nostri professionisti' }
+    sottotitoloOrari: { type: String,     default: 'We are here for you' },
+    titoloCtaFinale: { type: String,     default: 'READY FOR YOUR NEW LOOK?' },
+    sottotitoloCtaFinale: { type: String,     default: 'Book your appointment now and trust our professionals' }
   },
   
   // TESTI PRENOTAZIONE
   testiPrenotazione: {
     titoloPagina: { type: String, default: 'PRENOTA APPUNTAMENTO' },
     sottotitoloPagina: { type: String, default: 'Semplice, veloce, professionale' },
-    stepBarber: { type: String, default: 'SCEGLI IL TUO BARBER' },
+    stepSpecialist: { type: String,     default: 'CHOOSE YOUR SPECIALIST' },
     stepServizio: { type: String, default: 'SCEGLI IL SERVIZIO' },
     stepData: { type: String, default: 'SCEGLI LA DATA' },
     stepOrario: { type: String, default: 'SCEGLI L\'ORARIO' },
@@ -270,9 +271,9 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   
   // SEO
   seo: {
-    titoloPagina: { type: String, default: 'Barber Shop - Prenota il tuo appuntamento' },
-    descrizioneMeta: { type: String, default: 'Portale di prenotazione per il tuo barber shop di fiducia' },
-    keywords: { type: String, default: 'barbershop, barber, taglio capelli, rasatura, prenotazione' },
+    titoloPagina: { type: String,     default: 'Beauty Salon - Book your appointment' },
+    descrizioneMeta: { type: String, default: 'Portale di prenotazione per il tuo beauty salon di fiducia' },
+    keywords: { type: String, default: 'beauty salon, makeup, aesthetic, skincare, booking' },
     ogImage: { type: String, default: '' }
   },
   
@@ -290,7 +291,8 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
     mostraSocial: { type: Boolean, default: true },
     mostraContatti: { type: Boolean, default: true },
     abilitaPrenotazioni: { type: Boolean, default: true },
-    richiestaConfermaEmail: { type: Boolean, default: false }
+    richiestaConfermaEmail: { type: Boolean, default: false },
+    oreAnticipo: { type: Number, default: 24 } // default 24 ore prima
   },
   
   // METADATA

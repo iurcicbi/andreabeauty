@@ -7,7 +7,7 @@
 const mongoose = require('mongoose');
 
 // Connessione MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/barbershop';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/beautysalon';
 
 async function creaServiziTest() {
   try {

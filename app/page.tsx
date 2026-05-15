@@ -71,29 +71,40 @@ export default function HomePage() {
   const [impostazioni, setImpostazioni] = useState<ImpostazioniFrontend | null>(null);
   const [servizi, setServizi] = useState<Servizio[]>([]);
   const [caricamento, setCaricamento] = useState(true);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [menuAperto, setMenuAperto] = useState(false);
 
   useEffect(() => {
     caricaDati();
+    caricaReviews();
   }, []);
+
+  const caricaReviews = async () => {
+    try {
+      const risposta = await webservice.get('/api/reviews?limit=6');
+      setReviews(risposta.dati || []);
+    } catch (err) {
+      console.log('Error loading reviews');
+    }
+  };
 
   const caricaDati = async () => {
     try {
       // Carica impostazioni globali
-      const rispostaImpostazioni = await webservice.get('/api/impostazioni');
+      const rispostaImpostazioni = await webservice.get('/api/settings');
       console.log('📦 Impostazioni caricate:', rispostaImpostazioni.dati);
       setImpostazioni(rispostaImpostazioni.dati);
 
       // Carica servizi attivi solo se abilitati
       if (rispostaImpostazioni.dati?.funzionalita?.mostraServizi !== false) {
-        const rispostaServizi = await webservice.get('/api/servizi');
+        const rispostaServizi = await webservice.get('/api/services');
         const serviziAttivi = rispostaServizi.dati.filter((s: Servizio) => s.attivo !== false);
         setServizi(serviziAttivi);
       }
     } catch (err) {
       console.log('Errore caricamento dati');
       setImpostazioni({
-        nomeAzienda: 'Barbershop',
+        nomeAzienda: 'Beauty Salon',
         tagline: 'Il tuo stile, la nostra passione'
       });
     } finally {
@@ -134,9 +145,9 @@ export default function HomePage() {
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center gap-8">
               <a href="#home" className="text-white/80 hover:text-white transition-colors font-medium">Home</a>
-              <Link href="/contatti" className="text-white/80 hover:text-white transition-colors font-medium">Contatti</Link>
+              <Link href="/contact" className="text-white/80 hover:text-white transition-colors font-medium">Contatti</Link>
               <Link 
-                href="/prenotazione"
+                href="/booking"
                 className="px-6 py-3 bg-white text-black font-bold rounded-none hover:bg-white/90 transition-all border-2 border-white"
               >
                 PRENOTA ORA
@@ -162,9 +173,9 @@ export default function HomePage() {
           <div className="md:hidden bg-black border-t border-white/10">
             <div className="container mx-auto px-4 py-6 space-y-4">
               <a href="#home" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Home</a>
-              <Link href="/contatti" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Contatti</Link>
+              <Link href="/contact" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Contatti</Link>
               <Link 
-                href="/prenotazione"
+                href="/booking"
                 className="block text-center px-6 py-3 bg-white text-black font-bold rounded-none hover:bg-white/90 transition-all border-2 border-white mt-4"
               >
                 PRENOTA ORA
@@ -203,7 +214,7 @@ export default function HomePage() {
             <div className="inline-block mb-8">
               <div className="px-6 py-2 border border-white/30 backdrop-blur-sm">
                 <span className="text-sm tracking-widest uppercase text-white/80">
-                  {impostazioni?.testiHomepage?.badgeHero || 'Premium Barbershop'}
+                  {impostazioni?.testiHomepage?.badgeHero || 'Premium Beauty Salon'}
                 </span>
               </div>
             </div>
@@ -211,7 +222,7 @@ export default function HomePage() {
             {/* Main Title - mostra solo se non c'è logo centrale */}
             {!impostazioni?.logoCentrale && (
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tighter">
-                {impostazioni?.testiHomepage?.titoloHero || impostazioni?.nomeAzienda || 'BARBERSHOP'}
+                {impostazioni?.testiHomepage?.titoloHero || impostazioni?.nomeAzienda || 'BEAUTY SALON'}
               </h1>
             )}
 
@@ -223,7 +234,7 @@ export default function HomePage() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
-                href="/prenotazione"
+                href="/booking"
                 className="group relative px-8 py-4 bg-white text-black font-bold text-lg overflow-hidden transition-all hover:scale-105 w-full sm:w-auto"
               >
                 <span className="relative z-10">
@@ -236,7 +247,7 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/contatti"
+                href="/contact"
                 className="px-8 py-4 border-2 border-white text-white font-bold text-lg hover:bg-white hover:text-black transition-all w-full sm:w-auto"
               >
                 {impostazioni?.testiHomepage?.testoCtaSecondario || 'DOVE SIAMO'}
@@ -325,7 +336,7 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Link
-              href="/prenotazione"
+              href="/booking"
               className="inline-block px-8 py-4 bg-black text-white font-bold text-lg hover:bg-black/90 transition-all"
             >
               PRENOTA ORA →
@@ -370,6 +381,38 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Reviews Section */}
+      {reviews.length > 0 && (
+        <section className="py-20 md:py-32 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">Ce spun clienții noștri</h2>
+              <p className="text-xl text-gray-600">Opiniile voastre contează</p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {reviews.slice(0, 6).map((review: any) => (
+                <div key={review._id} className="bg-white rounded-2xl p-6 shadow-lg">
+                  <div className="flex items-center gap-1 mb-3 text-yellow-400 text-lg">
+                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                  </div>
+                  <p className="text-gray-700 mb-4 italic">{review.comment}</p>
+                  {review.reply && (
+                    <div className="ml-3 pl-3 border-l-2 border-primary-200 mb-3">
+                      <p className="text-xs font-semibold text-primary-600 mb-1">Răspuns:</p>
+                      <p className="text-sm text-gray-600">{review.reply}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between pt-3 border-t">
+                    <span className="font-semibold text-sm">{review.customerName}</span>
+                    <span className="text-xs text-gray-400">{review.serviceName}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA Final */}
       <section className="py-20 md:py-32 bg-white text-black">
         <div className="container mx-auto px-4 text-center">
@@ -380,7 +423,7 @@ export default function HomePage() {
             {impostazioni?.testiHomepage?.sottotitoloCtaFinale || 'Prenota ora il tuo appuntamento e affidati ai nostri professionisti'}
           </p>
           <Link
-            href="/prenotazione"
+            href="/booking"
             className="inline-block px-12 py-5 bg-black text-white font-bold text-xl hover:scale-105 transition-transform"
           >
             {impostazioni?.testiHomepage?.testoCtaPrimario || 'PRENOTA SUBITO'}

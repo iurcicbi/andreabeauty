@@ -18,11 +18,11 @@ async function getMetadata(): Promise<Metadata> {
     const impostazioni = await Impostazioni.getImpostazioni();
     
     return {
-      title: impostazioni.seo?.titoloPagina || 'Barber Shop - Prenota il tuo appuntamento',
-      description: impostazioni.seo?.descrizioneMeta || 'Portale di prenotazione per il tuo barber shop di fiducia',
-      keywords: impostazioni.seo?.keywords || 'barbershop, barber, taglio capelli',
+      title: impostazioni.seo?.titoloPagina || 'Beauty Salon - Prenota il tuo appuntamento',
+      description: impostazioni.seo?.descrizioneMeta || 'Portale di prenotazione per il tuo beauty salon di fiducia',
+      keywords: impostazioni.seo?.keywords || 'beauty salon, makeup, aesthetic, skincare',
       openGraph: {
-        title: impostazioni.seo?.titoloPagina || 'Barber Shop',
+        title: impostazioni.seo?.titoloPagina || 'Beauty Salon',
         description: impostazioni.seo?.descrizioneMeta || 'Portale di prenotazione',
         images: impostazioni.seo?.ogImage ? [impostazioni.seo.ogImage] : [],
       },
@@ -32,8 +32,8 @@ async function getMetadata(): Promise<Metadata> {
     };
   } catch (error) {
     return {
-      title: 'Barber Shop - Prenota il tuo appuntamento',
-      description: 'Portale di prenotazione per il tuo barber shop di fiducia',
+      title: 'Beauty Salon - Prenota il tuo appuntamento',
+      description: 'Portale di prenotazione per il tuo beauty salon di fiducia',
     };
   }
 }

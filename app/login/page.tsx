@@ -35,7 +35,7 @@ export default function LoginPage() {
       setCaricamento(true);
       setErrore('');
 
-      const risposta = await webservice.post('/api/autenticazione/login', {
+      const risposta = await webservice.post('/api/auth/login', {
         email,
         password,
       });
@@ -46,10 +46,10 @@ export default function LoginPage() {
         localStorage.setItem('utente', JSON.stringify(risposta.dati.utente));
 
         // Redirect in base al ruolo
-        if (risposta.dati.utente.ruolo === 'barber') {
-          router.push('/cms/cruscotto');
+        if (risposta.dati.utente.ruolo === 'admin' || risposta.dati.utente.ruolo === 'specialist' || risposta.dati.utente.ruolo === 'barber') {
+          router.push('/cms/dashboard');
         } else {
-          router.push('/prenotazione');
+          router.push('/booking');
         }
       } else {
         setErrore(risposta.errore || 'Errore durante il login');
@@ -66,7 +66,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Barber Shop</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">Beauty Salon</h1>
           <p className="text-gray-400">Accedi al tuo account</p>
         </div>
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Non hai un account?{' '}
-              <Link href="/registrazione" className="text-primary-600 hover:text-primary-700 font-semibold">
+              <Link href="/register" className="text-primary-600 hover:text-primary-700 font-semibold">
                 Registrati
               </Link>
             </p>

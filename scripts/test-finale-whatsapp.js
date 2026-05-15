@@ -42,7 +42,7 @@ async function testFinaleWhatsApp() {
   try {
     console.log('🎯 TEST FINALE SISTEMA WHATSAPP - Collection "appointments"');
     
-    await mongoose.connect('mongodb://localhost:27017/barbershop');
+    await mongoose.connect('mongodb://localhost:27017/beautysalon');
     console.log('✅ Connesso al database');
 
     // 1. Verifica configurazione sistema

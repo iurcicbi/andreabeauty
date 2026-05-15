@@ -41,7 +41,7 @@ async function testPrenotazioneTelefono() {
   try {
     console.log('📱 Test prenotazione con normalizzazione telefono');
     
-    await mongoose.connect('mongodb://localhost:27017/barbershop');
+    await mongoose.connect('mongodb://localhost:27017/beautysalon');
     console.log('✅ Connesso al database');
 
     // Test diversi formati di telefono

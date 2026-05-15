@@ -7,7 +7,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Palette colori per barber shop
+        // Palette colori per beauty salon
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',
@@ -15,7 +15,7 @@ module.exports = {
           600: '#0284c7',
           700: '#0369a1',
         },
-        barber: {
+        brand: {
           dark: '#1a1a1a',
           gold: '#d4af37',
           cream: '#f5f5dc',

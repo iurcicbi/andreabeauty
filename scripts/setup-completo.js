@@ -1,6 +1,6 @@
 /**
  * Script per setup completo del database
- * Crea utente barber + servizi di esempio
+ * Crea utente specialist + servizi di esempio
  * 
  * Uso: node scripts/setup-completo.js
  */
@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
 // Connessione MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/barbershop';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/beautysalon';
 
 async function setupCompleto() {
   try {
@@ -20,8 +20,8 @@ async function setupCompleto() {
     await mongoose.connect(MONGODB_URI);
     console.log('✅ Connesso a MongoDB\n');
 
-    // ==================== UTENTE BARBER ====================
-    console.log('👤 CREAZIONE UTENTE BARBER');
+    // ==================== UTENTE SPECIALIST ====================
+    console.log('👤 CREAZIONE UTENTE SPECIALIST');
     console.log('───────────────────────────────────────────────────');
     
     const UtenteSchema = new mongoose.Schema({
@@ -37,30 +37,30 @@ async function setupCompleto() {
     const Utente = mongoose.models.users || mongoose.model('users', UtenteSchema);
 
     // Verifica se esiste già
-    const barberEsistente = await Utente.findOne({ email: 'barber@test.com' });
+    const specialistEsistente = await Utente.findOne({ email: 'specialist@test.com' });
     
-    if (barberEsistente) {
-      console.log('⚠️  Utente barber già esistente');
-      console.log('📧 Email: barber@test.com');
+    if (specialistEsistente) {
+      console.log('⚠️  Utente specialist già esistente');
+      console.log('📧 Email: specialist@test.com');
       console.log('🔑 Password: password123\n');
     } else {
       // Hash password
       console.log('🔐 Hashing password...');
       const passwordHash = await bcrypt.hash('password123', 10);
 
-      // Crea utente barber
-      const barber = await Utente.create({
+      // Crea utente specialist
+      const specialist = await Utente.create({
         nome: 'Mario',
         cognome: 'Rossi',
-        email: 'barber@test.com',
+        email: 'specialist@test.com',
         password: passwordHash,
         telefono: '3331234567',
-        ruolo: 'barber',
+        ruolo: 'specialist',
         attivo: true,
       });
 
-      console.log('✅ Utente barber creato con successo!');
-      console.log('📧 Email: barber@test.com');
+      console.log('✅ Utente specialist creato con successo!');
+      console.log('📧 Email: specialist@test.com');
       console.log('🔑 Password: password123\n');
     }
 
@@ -174,15 +174,15 @@ async function setupCompleto() {
 
     console.log('📋 CREDENZIALI ACCESSO:\n');
     
-    console.log('🔐 BARBER (Accesso CMS):');
-    console.log('   Email:    barber@test.com');
+    console.log('🔐 SPECIALIST (Accesso CMS):');
+    console.log('   Email:    specialist@test.com');
     console.log('   Password: password123');
     console.log('   URL:      http://localhost:3000/cms\n');
 
     console.log('👤 UTENTE NORMALE:');
     console.log('   Email:    utente@test.com');
     console.log('   Password: password123');
-    console.log('   URL:      http://localhost:3000/prenotazione\n');
+    console.log('   URL:      http://localhost:3000/booking\n');
 
     const totalServizi = await Servizio.countDocuments();
     console.log(`✂️  SERVIZI: ${totalServizi} servizi disponibili`);

@@ -26,7 +26,7 @@ import { Schema, Types, model, models } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaPrenotazioneTemporanea = {
-  barber: Types.ObjectId;
+  specialist: Types.ObjectId;
   data: Date;
   oraInizio: string;
   durata: number;
@@ -39,9 +39,9 @@ export type TPrenotazioneTemporanea = {
 } & TSchemaPrenotazioneTemporanea;
 
 const SchemaMongoose = new Schema<TSchemaPrenotazioneTemporanea, ISettings>({
-  barber: { 
+  specialist: { 
     type: Schema.Types.ObjectId, 
-    ref: 'users', 
+    ref: 'specialists', 
     required: true,
     index: true  // Indice per query veloci
   },
@@ -76,7 +76,7 @@ const SchemaMongoose = new Schema<TSchemaPrenotazioneTemporanea, ISettings>({
 });
 
 // Indice composto per query di disponibilità
-SchemaMongoose.index({ barber: 1, data: 1, scadenza: 1 });
+SchemaMongoose.index({ specialist: 1, data: 1, scadenza: 1 });
 
 // TTL Index: MongoDB rimuove automaticamente i documenti scaduti
 SchemaMongoose.index({ scadenza: 1 }, { expireAfterSeconds: 0 });

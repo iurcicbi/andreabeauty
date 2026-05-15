@@ -41,7 +41,7 @@ async function creaAppuntamentoTestWhatsApp() {
   try {
     console.log('📱 Creazione appuntamento di test per WhatsApp nella collection "appointments"');
     
-    await mongoose.connect('mongodb://localhost:27017/barbershop');
+    await mongoose.connect('mongodb://localhost:27017/beautysalon');
     console.log('✅ Connesso al database');
 
     // Elimina eventuali appuntamenti di test precedenti
@@ -62,7 +62,7 @@ async function creaAppuntamentoTestWhatsApp() {
         email: 'mario.rossi@email.com',
         telefono: '+393288625535'
       },
-      // Usa ObjectId esistenti dal database (prendi il primo barber e servizio disponibili)
+      // Usa ObjectId esistenti dal database (prendi il primo specialist e servizio disponibili)
       barber: new mongoose.Types.ObjectId('699009e2eb7a0f177a4c4349'), // ID di esempio
       servizio: new mongoose.Types.ObjectId('699009e2eb7a0f177a4c434d'), // ID di esempio
       data: domani,

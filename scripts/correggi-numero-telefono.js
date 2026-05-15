@@ -41,7 +41,7 @@ async function correggiNumeroTelefono() {
   try {
     console.log('📞 Correzione formato numero telefono per WhatsApp');
     
-    await mongoose.connect('mongodb://localhost:27017/barbershop');
+    await mongoose.connect('mongodb://localhost:27017/beautysalon');
     console.log('✅ Connesso al database');
 
     // Trova l'appuntamento di Iurie

@@ -157,7 +157,7 @@ export function requestUpload(link, dati) {
  */
 export const AUTH_LOGIN = "/autenticazione/login";
 export const AUTH_LOGOUT = "/autenticazione/logout";
-export const AUTH_REGISTER = "/autenticazione/registrazione";
+export const AUTH_REGISTER = "/auth/register";
 
 /**
  * METODI HTTP STANDARD

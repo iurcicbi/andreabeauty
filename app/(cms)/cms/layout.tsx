@@ -41,7 +41,9 @@ import {
   User, 
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MessageSquare,
+  Gift
 } from 'lucide-react';
 
 // ============================================
@@ -56,7 +58,7 @@ export default function CMSLayout({
   // HOOK DI NEXT.JS
   // ============================================
   const router = useRouter();      // Per fare redirect: router.push('/login')
-  const pathname = usePathname();  // Contiene l'URL corrente: es. "/cms/appuntamenti"
+  const pathname = usePathname();  // Contiene l'URL corrente: es. "/cms/appointments"
 
   // ============================================
   // STATI DEL COMPONENTE (useState)
@@ -80,7 +82,7 @@ export default function CMSLayout({
   // setSidebarAperta: funzione per cambiare la larghezza
 
   const [logoCMS, setLogoCMS] = useState<string>('');
-  const [nomeAzienda, setNomeAzienda] = useState<string>('Barber CMS');
+  const [nomeAzienda, setNomeAzienda] = useState<string>('Beauty Salon CMS');
   
   // ============================================
   // EFFECT: VERIFICA AUTENTICAZIONE ALL'AVVIO
@@ -110,13 +112,13 @@ export default function CMSLayout({
   // ============================================
   const caricaImpostazioni = async () => {
     try {
-      const response = await fetch('/api/impostazioni');
+      const response = await fetch('/api/settings');
       const data = await response.json();
       console.log('📦 Layout CMS - Impostazioni caricate:', data.dati);
       if (data.dati) {
         // Usa logoCMS se disponibile, altrimenti logo principale
         const logoUrl = data.dati.logoCMS || data.dati.logo || '';
-        const nome = data.dati.nomeAzienda || 'Barber CMS';
+        const nome = data.dati.nomeAzienda || 'Beauty Salon CMS';
         console.log('Layout CMS - Logo CMS:', logoUrl);
         console.log('Layout CMS - Nome Azienda:', nome);
         
@@ -158,10 +160,7 @@ export default function CMSLayout({
       // Esempio: '{"nome":"Mario"}' diventa { nome: "Mario" }
       const utenteData = JSON.parse(utenteStr);
       
-      // CASO 2: AUTENTICATO MA RUOLO SBAGLIATO
-      // Verifica che l'utente sia un barbiere (solo loro possono accedere al CMS)
-      if (utenteData.ruolo !== 'barber') {
-        // Se non è barbiere, redirect alla home page
+      if (utenteData.ruolo !== 'admin' && utenteData.ruolo !== 'specialist' && utenteData.ruolo !== 'barber') {
         router.push('/');
         return;
       }
@@ -214,14 +213,16 @@ export default function CMSLayout({
   }
 
   const menuItems = [
-    { href: '/cms/cruscotto', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/cms/appuntamenti', label: 'Appuntamenti', icon: Calendar },
-    { href: '/cms/barber', label: 'Gestione Barber', icon: Scissors },
-    { href: '/cms/servizi', label: 'Servizi', icon: Scissors },
-    { href: '/cms/orari', label: 'Orari', icon: Clock },
-    { href: '/cms/disponibilita', label: 'Disponibilità Team', icon: Users },
-    { href: '/cms/frontend', label: 'Frontend', icon: Settings },
-    { href: '/cms/profilo', label: 'Profilo', icon: User },
+    { href: '/cms/dashboard', label: 'Panou de control', icon: LayoutDashboard },
+    { href: '/cms/appointments', label: 'Programări', icon: Calendar },
+    { href: '/cms/specialist', label: 'Specialiști', icon: Scissors },
+    { href: '/cms/reviews', label: 'Recenzii', icon: MessageSquare },
+    { href: '/cms/vouchers', label: 'Vouchere', icon: Gift },
+    { href: '/cms/services', label: 'Servicii', icon: Scissors },
+    { href: '/cms/hours', label: 'Orar', icon: Clock },
+    { href: '/cms/availability', label: 'Disponibilitate echipă', icon: Users },
+    { href: '/cms/appearance', label: 'Aspect', icon: Settings },
+    { href: '/cms/profile', label: 'Profil', icon: User },
   ];
 
   // ============================================
@@ -250,7 +251,7 @@ export default function CMSLayout({
           {/* Logo e Toggle */}
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <Link 
-              href="/cms/cruscotto" 
+              href="/cms/dashboard" 
               className={`flex items-center gap-2 ${!sidebarAperta && 'hidden'}`}
             >
               {logoCMS ? (
@@ -274,7 +275,7 @@ export default function CMSLayout({
             <button
               onClick={() => setSidebarAperta(!sidebarAperta)}
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label={sidebarAperta ? 'Chiudi sidebar' : 'Apri sidebar'}
+              aria-label={sidebarAperta ? 'Închide bara laterală' : 'Deschide bara laterală'}
             >
               {sidebarAperta ? (
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
@@ -336,7 +337,7 @@ export default function CMSLayout({
           <div className="p-4 border-t border-gray-200 space-y-2">
             {sidebarAperta && (
               <div className="px-4 py-2 text-gray-600">
-                <div className="text-sm">Ciao,</div>
+                <div className="text-sm">Salut,</div>
                 <div className="font-semibold truncate">{utente?.nome}</div>
               </div>
             )}
@@ -355,7 +356,7 @@ export default function CMSLayout({
               `}
             >
               <LogOut className="w-5 h-5" />
-              {sidebarAperta && <span className="ml-3">Logout</span>}
+              {sidebarAperta && <span className="ml-3">Deconectare</span>}
               
               {!sidebarAperta && (
                 <div className="
@@ -368,7 +369,7 @@ export default function CMSLayout({
                   pointer-events-none
                   z-50
                 ">
-                  Logout
+                  Deconectare
                 </div>
               )}
             </button>
@@ -409,7 +410,7 @@ export default function CMSLayout({
       {/* ========================================
           AREA CONTENUTO PRINCIPALE
           ======================================== */}
-      <div className="flex-1 flex flex-col pb-32 md:pb-0">
+      <div className="flex-1 flex flex-col md:pb-0">
         
         {/* HEADER */}
         <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
@@ -427,7 +428,7 @@ export default function CMSLayout({
               <button
                 onClick={handleLogout}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                aria-label="Logout"
+                aria-label="Deconectare"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -438,6 +439,7 @@ export default function CMSLayout({
         {/* MAIN CONTENT */}
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           {children}
+          <div className="h-48 md:h-0" />
         </main>
       </div>
     </div>

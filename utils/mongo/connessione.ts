@@ -17,6 +17,13 @@
 
 import mongoose from 'mongoose';
 
+// Pre-registrazione schemi per garantire disponibilità in tutte le route
+// Necessario perché Next.js compila ogni route in isolamento
+import '@/utils/mongo/schemi/Appuntamento';
+import '@/utils/mongo/schemi/Specialist';
+import '@/utils/mongo/schemi/Servizio';
+import '@/utils/mongo/schemi/Utente';
+
 // Interfaccia per il tipo di cache globale
 interface MongooseCache {
   conn: typeof mongoose | null;

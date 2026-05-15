@@ -28,7 +28,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret-key-change-in-production';
 export interface TokenPayload {
   id: string;
   email: string;
-  ruolo: 'utente' | 'barber';
+  ruolo: 'utente' | 'specialist' | 'barber' | 'admin';
   iat?: number; // issued at
   exp?: number; // expiration
 }
@@ -94,17 +94,26 @@ export async function verificaToken(req: NextRequest | Request): Promise<TokenPa
  * Verifica che l'utente abbia il ruolo richiesto.
  * 
  * @param req - Richiesta HTTP
- * @param ruoloRichiesto - Ruolo necessario ('utente' o 'barber')
+ * @param ruoloRichiesto - Ruolo necessario ('utente' o 'specialist')
  * @returns Dati utente se il ruolo è corretto
  * @throws Errore se il ruolo non corrisponde
  */
 export async function richiedeRuolo(
   req: NextRequest | Request,
-  ruoloRichiesto: 'utente' | 'barber'
+  ruoloRichiesto: 'utente' | 'specialist'
 ): Promise<TokenPayload> {
   const utente = await verificaToken(req);
 
-  if (utente.ruolo !== ruoloRichiesto) {
+  // Admin ha sempre accesso a tutto
+  if (utente.ruolo === 'admin') {
+    return utente;
+  }
+
+  const ruoliValidi = ruoloRichiesto === 'specialist'
+    ? ['specialist', 'barber']
+    : [ruoloRichiesto];
+
+  if (!ruoliValidi.includes(utente.ruolo)) {
     throw new Error(`Accesso negato. Ruolo richiesto: ${ruoloRichiesto}`);
   }
 

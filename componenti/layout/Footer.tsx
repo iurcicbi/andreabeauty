@@ -35,7 +35,7 @@ export default function Footer() {
 
   const caricaImpostazioni = async () => {
     try {
-      const risposta = await webservice.get('/api/impostazioni');
+      const risposta = await webservice.get('/api/settings');
       setImpostazioni(risposta.dati);
     } catch (err) {
       console.log('Nessuna impostazione trovata');
@@ -154,10 +154,10 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-bold mb-6 tracking-wide uppercase">Link Utili</h4>
             <div className="space-y-3">
-              <Link href="/prenotazione" className="block text-white/70 hover:text-white transition-colors">
+              <Link href="/booking" className="block text-white/70 hover:text-white transition-colors">
                 → Prenota Appuntamento
               </Link>
-              <Link href="/contatti" className="block text-white/70 hover:text-white transition-colors">
+              <Link href="/contact" className="block text-white/70 hover:text-white transition-colors">
                 → Dove Siamo
               </Link>
               {impostazioni.linkPrivacyPolicy && (

@@ -25,7 +25,7 @@
 // IMPORT DEI MODULI NECESSARI
 // ============================================
 import Link from 'next/link';        // Crea link per navigare senza ricaricare la pagina
-import { usePathname } from 'next/navigation'; // Legge l'URL corrente (es. /cms/appuntamenti)
+import { usePathname } from 'next/navigation'; // Legge l'URL corrente (es. /cms/appointments)
 import { useState, useEffect } from 'react';    // Crea variabili che possono cambiare (es. sidebar aperta/chiusa)
 import webservice from '@/utils/webservice'; // Per caricare le impostazioni
 import { 
@@ -37,6 +37,8 @@ import {
   Palette, 
   Settings, 
   User,
+  MessageSquare,
+  Gift,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -64,14 +66,16 @@ interface SidebarProps {
 // - label: il testo da mostrare
 // - icon: il componente icona da mostrare
 const menuItems = [
-  { href: '/cms/cruscotto', label: 'Dashboard', icon: BarChart3 },
-  { href: '/cms/appuntamenti', label: 'Appuntamenti', icon: Calendar },
-  { href: '/cms/servizi', label: 'Servizi', icon: Scissors },
-  { href: '/cms/barber', label: 'Barber', icon: Users },
-  { href: '/cms/orari', label: 'Orari', icon: Clock },
-  { href: '/cms/frontend', label: 'Frontend', icon: Palette },
-  { href: '/cms/impostazioni', label: 'Impostazioni', icon: Settings },
-  { href: '/cms/profilo', label: 'Profilo', icon: User },
+  { href: '/cms/dashboard', label: 'Panou de control', icon: BarChart3 },
+  { href: '/cms/appointments', label: 'Programări', icon: Calendar },
+  { href: '/cms/services', label: 'Servicii', icon: Scissors },
+  { href: '/cms/specialist', label: 'Specialiști', icon: Users },
+  { href: '/cms/reviews', label: 'Recenzii', icon: MessageSquare },
+  { href: '/cms/vouchers', label: 'Vouchere', icon: Gift },
+  { href: '/cms/hours', label: 'Orar', icon: Clock },
+  { href: '/cms/appearance', label: 'Aspect', icon: Palette },
+  { href: '/cms/settings', label: 'Setări', icon: Settings },
+  { href: '/cms/profile', label: 'Profil', icon: User },
 ];
 
 // ============================================
@@ -87,7 +91,7 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
   // ============================================
   
   // usePathname() legge l'URL corrente
-  // Esempio: se siamo su /cms/appuntamenti, pathname sarà "/cms/appuntamenti"
+  // Esempio: se siamo su /cms/appointments, pathname sarà "/cms/appointments"
   // Questo serve per capire quale link evidenziare
   const pathname = usePathname();
   
@@ -100,7 +104,7 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
   
   // Stato per il logo dinamico
   const [logoCMS, setLogoCMS] = useState<string>('');
-  const [nomeAzienda, setNomeAzienda] = useState<string>('Barber CMS');
+  const [nomeAzienda, setNomeAzienda] = useState<string>('Beauty Salon CMS');
   
   // Stato per menu attivo immediato
   const [menuAttivo, setMenuAttivo] = useState(pathname);
@@ -122,12 +126,12 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
 
   const caricaImpostazioni = async () => {
     try {
-      const risposta = await webservice.get('/api/impostazioni');
+      const risposta = await webservice.get('/api/settings');
       console.log('📦 Sidebar - Impostazioni caricate:', risposta.dati);
       if (risposta.dati) {
         // Usa logoCMS se disponibile, altrimenti logo principale
         const logoUrl = risposta.dati.logoCMS || risposta.dati.logo || '';
-        const nome = risposta.dati.nomeAzienda || 'Barber CMS';
+        const nome = risposta.dati.nomeAzienda || 'Beauty Salon CMS';
         console.log('Sidebar - Logo CMS:', logoUrl);
         console.log('Sidebar - Nome Azienda:', nome);
         
@@ -179,11 +183,9 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
           
           {/* 
             Link è il componente di Next.js per navigare
-            href="/cms/cruscotto": dove porta il link
-            hidden: se sidebarAperta è false, nasconde il logo/testo
-          */}
-          <Link 
-            href="/cms/cruscotto" 
+            href="/cms/dashboard": dove porta il link
+
+  href="/cms/dashboard" 
             className={`flex items-center gap-2 ${!sidebarAperta && 'hidden'}`}
           >
             {logoCMS ? (
@@ -220,7 +222,7 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
           <button
             onClick={() => setSidebarAperta(!sidebarAperta)}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label={sidebarAperta ? 'Chiudi sidebar' : 'Apri sidebar'} // Per accessibilità
+            aria-label={sidebarAperta ? 'Închide bara laterală' : 'Deschide bara laterală'} // Pentru accesibilitate
           >
             {sidebarAperta ? (
               <ChevronLeft className="w-4 h-4" />
@@ -312,7 +314,7 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
           */}
           {sidebarAperta && (
             <div className="px-4 py-2 text-gray-600">
-              <div className="text-sm">Ciao,</div>
+              <div className="text-sm">Salut,</div>
               <div className="font-semibold truncate">{utente.nome}</div>
               {utente.email && sidebarAperta && (
                 <div className="text-xs text-gray-500 truncate">{utente.email}</div>
@@ -339,12 +341,12 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
             `}
           >
             <LogOut className="w-5 h-5" />
-            {sidebarAperta && <span className="ml-3">Logout</span>}
+            {sidebarAperta && <span className="ml-3">Deconectare</span>}
             
-            {/* Tooltip per logout quando sidebar è chiusa */}
+            {/* Tooltip pentru deconectare când bara laterală este închisă */}
             {!sidebarAperta && (
               <div className="absolute left-16 bg-gray-800 text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                Logout
+                Deconectare
               </div>
             )}
           </button>

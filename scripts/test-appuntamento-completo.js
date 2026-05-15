@@ -53,7 +53,7 @@ async function testSistemaCompleto() {
     console.log('🚀 Avvio test completo sistema WhatsApp');
     
     // Connetti al database
-    await mongoose.connect('mongodb://localhost:27017/barbershop');
+    await mongoose.connect('mongodb://localhost:27017/beautysalon');
     console.log('✅ Connesso al database');
 
     // Crea appuntamento di test per domani alle 14:30

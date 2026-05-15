@@ -50,7 +50,7 @@ async function testScheduler24h() {
   try {
     console.log('🕐 Test Scheduler 24h - Creazione appuntamento per promemoria automatico');
     
-    await mongoose.connect('mongodb://localhost:27017/barbershop');
+    await mongoose.connect('mongodb://localhost:27017/beautysalon');
     console.log('✅ Connesso al database');
 
     // Crea appuntamento esattamente 24 ore nel futuro
