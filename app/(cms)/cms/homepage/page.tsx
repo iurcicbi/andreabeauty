@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Eye, EyeOff, MoveUp, MoveDown, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
 import webservice from '@/utils/webservice';
+import ImageUploader from '@/componenti/cms/ImageUploader';
 
 export default function GestioneHomepage() {
   const [impostazioni, setImpostazioni] = useState<any>(null);
@@ -531,16 +532,18 @@ export default function GestioneHomepage() {
                     </button>
                   </div>
                   <div className="grid md:grid-cols-3 gap-3">
-                    <InputField
-                      label="URL Immagine"
-                      value={img.url || ''}
-                      onChange={(v) => {
-                        const attuali = [...(sezioni.galleria?.immagini || [])];
-                        attuali[i] = { ...attuali[i], url: v };
-                        aggiornaSezione('galleria', 'immagini', attuali);
-                      }}
-                      placeholder="https://..."
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Imagine</label>
+                      <ImageUploader
+                        value={img.url || ''}
+                        onChange={(v) => {
+                          const attuali = [...(sezioni.galleria?.immagini || [])];
+                          attuali[i] = { ...attuali[i], url: v };
+                          aggiornaSezione('galleria', 'immagini', attuali);
+                        }}
+                        folder="gallery"
+                      />
+                    </div>
                     <InputField
                       label="Didascalia"
                       value={img.didascalia || ''}
