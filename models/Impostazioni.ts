@@ -133,6 +133,18 @@ export interface IImpostazioni extends Document {
       testoPulsante: string;
       immagineBackground: string;
     };
+    galleria: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      layout: 'grid-2' | 'grid-3' | 'grid-4' | 'masonry';
+      immagini: {
+        url: string;
+        didascalia: string;
+        alt: string;
+      }[];
+    };
   };
   
   // TESTI HOMEPAGE (deprecato - mantenuto per compatibilità)
@@ -384,6 +396,18 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
       sottotitolo: { type: String, default: 'Prenota ora il tuo appuntamento e affidati ai nostri professionisti' },
       testoPulsante: { type: String, default: 'PRENOTA SUBITO' },
       immagineBackground: { type: String, default: '' }
+    },
+    galleria: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 8 },
+      titolo: { type: String, default: 'GALLERIA' },
+      sottotitolo: { type: String, default: 'I nostri lavori' },
+      layout: { type: String, enum: ['grid-2', 'grid-3', 'grid-4', 'masonry'], default: 'grid-3' },
+      immagini: [{
+        url: { type: String, default: '' },
+        didascalia: { type: String, default: '' },
+        alt: { type: String, default: '' }
+      }]
     }
   },
   

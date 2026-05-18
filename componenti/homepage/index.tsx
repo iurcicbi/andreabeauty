@@ -1,2 +1,8 @@
-// Esporta tutti i componenti delle sezioni homepage
 export { default as SezioneHero } from './SezioneHero';
+export { default as SezioneServizi } from './SezioneServizi';
+export { default as SezioneAbout } from './SezioneAbout';
+export { default as SezioneOrari } from './SezioneOrari';
+export { default as SezioneRecensioni } from './SezioneRecensioni';
+export { default as SezioneContatti } from './SezioneContatti';
+export { default as SezioneCtaFinale } from './SezioneCtaFinale';
+export { default as SezioneGalleria } from './SezioneGalleria';

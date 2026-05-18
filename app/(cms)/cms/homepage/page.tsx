@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, MoveUp, MoveDown, Image as ImageIcon } from 'lucide-react';
+import { Save, Eye, EyeOff, MoveUp, MoveDown, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
 import webservice from '@/utils/webservice';
 
 export default function GestioneHomepage() {
@@ -327,6 +327,68 @@ export default function GestioneHomepage() {
           </div>
         </SezioneCard>
 
+        {/* ORARI */}
+        <SezioneCard
+          titolo="Orari di Apertura"
+          descrizione="Mostra gli orari del tuo salone"
+          attiva={sezioni.orari?.attiva !== false}
+          ordine={sezioni.orari?.ordine || 4}
+          onToggle={() => toggleSezione('orari')}
+          onCambiaOrdine={(dir: 'su' | 'giu') => cambiaOrdine('orari', dir)}
+        >
+          <div className="grid md:grid-cols-2 gap-4">
+            <InputField
+              label="Titolo"
+              value={sezioni.orari?.titolo || ''}
+              onChange={(v) => aggiornaSezione('orari', 'titolo', v)}
+              placeholder="ORARI DI APERTURA"
+            />
+            <InputField
+              label="Sottotitolo"
+              value={sezioni.orari?.sottotitolo || ''}
+              onChange={(v) => aggiornaSezione('orari', 'sottotitolo', v)}
+              placeholder="Siamo qui per te"
+            />
+          </div>
+          <TextareaField
+            label="Descrizione (opzionale)"
+            value={sezioni.orari?.descrizione || ''}
+            onChange={(v) => aggiornaSezione('orari', 'descrizione', v)}
+            placeholder="Descrizione opzionale..."
+          />
+        </SezioneCard>
+
+        {/* RECENSIONI */}
+        <SezioneCard
+          titolo="Recensioni"
+          descrizione="Mostra le recensioni dei clienti"
+          attiva={sezioni.recensioni?.attiva !== false}
+          ordine={sezioni.recensioni?.ordine || 5}
+          onToggle={() => toggleSezione('recensioni')}
+          onCambiaOrdine={(dir: 'su' | 'giu') => cambiaOrdine('recensioni', dir)}
+        >
+          <div className="grid md:grid-cols-2 gap-4">
+            <InputField
+              label="Titolo"
+              value={sezioni.recensioni?.titolo || ''}
+              onChange={(v) => aggiornaSezione('recensioni', 'titolo', v)}
+              placeholder="Cosa dicono i nostri clienti"
+            />
+            <InputField
+              label="Sottotitolo"
+              value={sezioni.recensioni?.sottotitolo || ''}
+              onChange={(v) => aggiornaSezione('recensioni', 'sottotitolo', v)}
+              placeholder="Le tue opinioni contano"
+            />
+          </div>
+          <InputField
+            label="Numero Massimo Recensioni"
+            value={String(sezioni.recensioni?.numeroMassimo ?? 6)}
+            onChange={(v) => aggiornaSezione('recensioni', 'numeroMassimo', Number(v) || 6)}
+            placeholder="6"
+          />
+        </SezioneCard>
+
         {/* CONTATTI */}
         <SezioneCard
           titolo="Contatti"
@@ -399,6 +461,111 @@ export default function GestioneHomepage() {
             onChange={(v) => aggiornaSezione('ctaFinale', 'sottotitolo', v)}
             placeholder="Prenota ora il tuo appuntamento..."
           />
+        </SezioneCard>
+
+        {/* GALLERIA */}
+        <SezioneCard
+          titolo="Galleria"
+          descrizione="Mostra una galleria di immagini"
+          attiva={sezioni.galleria?.attiva !== false}
+          ordine={sezioni.galleria?.ordine || 8}
+          onToggle={() => toggleSezione('galleria')}
+          onCambiaOrdine={(dir: 'su' | 'giu') => cambiaOrdine('galleria', dir)}
+        >
+          <div className="grid md:grid-cols-2 gap-4">
+            <InputField
+              label="Titolo"
+              value={sezioni.galleria?.titolo || ''}
+              onChange={(v) => aggiornaSezione('galleria', 'titolo', v)}
+              placeholder="GALLERIA"
+            />
+            <InputField
+              label="Sottotitolo"
+              value={sezioni.galleria?.sottotitolo || ''}
+              onChange={(v) => aggiornaSezione('galleria', 'sottotitolo', v)}
+              placeholder="I nostri lavori"
+            />
+          </div>
+          <div className="mt-4">
+            <SelectField
+              label="Layout"
+              value={sezioni.galleria?.layout || 'grid-3'}
+              onChange={(v) => aggiornaSezione('galleria', 'layout', v)}
+              options={[
+                { value: 'grid-2', label: '2 Colonne' },
+                { value: 'grid-3', label: '3 Colonne' },
+                { value: 'grid-4', label: '4 Colonne' },
+                { value: 'masonry', label: 'Masonry' },
+              ]}
+            />
+          </div>
+
+          {/* Immagini */}
+          <div className="mt-6 border-t pt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-semibold">Immagini</h4>
+              <button
+                onClick={() => {
+                  const attuali = sezioni.galleria?.immagini || [];
+                  aggiornaSezione('galleria', 'immagini', [...attuali, { url: '', didascalia: '', alt: '' }]);
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 bg-primary-600 text-white text-sm rounded hover:bg-primary-700"
+              >
+                <Plus className="w-4 h-4" /> Aggiungi
+              </button>
+            </div>
+            <div className="space-y-4">
+              {(sezioni.galleria?.immagini || []).map((img: any, i: number) => (
+                <div key={i} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-gray-600">Immagine {i + 1}</span>
+                    <button
+                      onClick={() => {
+                        const attuali = [...(sezioni.galleria?.immagini || [])];
+                        attuali.splice(i, 1);
+                        aggiornaSezione('galleria', 'immagini', attuali);
+                      }}
+                      className="p-1 text-red-500 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <InputField
+                      label="URL Immagine"
+                      value={img.url || ''}
+                      onChange={(v) => {
+                        const attuali = [...(sezioni.galleria?.immagini || [])];
+                        attuali[i] = { ...attuali[i], url: v };
+                        aggiornaSezione('galleria', 'immagini', attuali);
+                      }}
+                      placeholder="https://..."
+                    />
+                    <InputField
+                      label="Didascalia"
+                      value={img.didascalia || ''}
+                      onChange={(v) => {
+                        const attuali = [...(sezioni.galleria?.immagini || [])];
+                        attuali[i] = { ...attuali[i], didascalia: v };
+                        aggiornaSezione('galleria', 'immagini', attuali);
+                      }}
+                      placeholder="Testo visibile al passaggio"
+                    />
+                    <InputField
+                      label="Alt Text"
+                      value={img.alt || ''}
+                      onChange={(v) => {
+                        const attuali = [...(sezioni.galleria?.immagini || [])];
+                        attuali[i] = { ...attuali[i], alt: v };
+                        aggiornaSezione('galleria', 'immagini', attuali);
+                      }}
+                      placeholder="SEO alt text"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </SezioneCard>
       </div>
 
