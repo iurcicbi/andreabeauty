@@ -1,60 +1,75 @@
 /**
- * Custom server for Next.js
- * Server personalizzato per gestire Next.js con Node.js
+ * PRODUCTION SERVER - Next.js + New Backend Architecture
+ * 
+ * Bootstraps the new modular backend alongside Next.js.
+ * WhatsApp worker runs in a separate process (docker-compose).
  */
 
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 
-// Determina se siamo in sviluppo o produzione
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || 'localhost';
 const port = process.env.PORT || 3000;
 
-// Crea l'app Next.js
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-console.log('🚀 Avvio server Next.js...');
+// Load .env files before environment validation
+try { require('dotenv').config({ path: '.env' }); } catch (_) {}
+try { require('dotenv').config({ path: '.env.local', override: true }); } catch (_) {}
 
-app.prepare().then(() => {
+// Fail-fast: validate environment on startup
+require('./src/config/env');
+
+async function main() {
+  await app.prepare();
+
+  // Bootstrap new architecture (logging, Redis, queue workers)
+  try {
+    const { bootstrap } = await import('./src/bootstrap');
+    await bootstrap();
+  } catch (err) {
+    console.error('❌ Bootstrap error:', err.message);
+    console.log('⚠️ Server continuing without bootstrap services');
+  }
+
   createServer(async (req, res) => {
     try {
-      // Parsing dell'URL
       const parsedUrl = parse(req.url, true);
-      
-      // Gestisci la richiesta con Next.js
       await handle(req, res, parsedUrl);
     } catch (err) {
-      console.error('❌ Errore nella gestione della richiesta:', req.url, err);
+      console.error('❌ Request error:', req.url, err);
       res.statusCode = 500;
       res.end('Internal Server Error');
     }
   }).listen(port, (err) => {
     if (err) throw err;
-    console.log(`✅ Server pronto su http://${hostname}:${port}`);
-    console.log(`📦 Ambiente: ${dev ? 'development' : 'production'}`);
-    console.log(`⏰ ${new Date().toLocaleString('it-IT')}`);
+    console.log(`✅ Server ready on http://${hostname}:${port}`);
+    console.log(`📦 Environment: ${dev ? 'development' : 'production'}`);
   });
+}
+
+main().catch(err => {
+  console.error('❌ Fatal startup error:', err);
+  process.exit(1);
 });
 
-// Gestione errori non catturati
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+process.on('unhandledRejection', (reason) => {
+  console.error('❌ Unhandled Rejection:', reason);
 });
 
-// Gestione chiusura graceful
 process.on('SIGTERM', () => {
-  console.log('⚠️ SIGTERM ricevuto, chiusura server...');
+  console.log('⚠️ Shutting down...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('⚠️ SIGINT ricevuto, chiusura server...');
+  console.log('⚠️ Shutting down...');
   process.exit(0);
 });

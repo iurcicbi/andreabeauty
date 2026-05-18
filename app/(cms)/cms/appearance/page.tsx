@@ -321,7 +321,7 @@ export default function FrontendPage() {
               <p className="text-sm text-blue-800">
                 <strong>💡 Sugestie:</strong> Introdu coordonatele GPS pentru a-ți afișa poziția pe Google Maps.
                 Le poți găsi pe <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="underline">Google Maps</a> 
-                (clic dreapta → "Ce este aici?")
+                (clic dreapta → &lsquo;Ce este aici?&rsquo;)
               </p>
             </div>
 

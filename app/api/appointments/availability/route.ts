@@ -18,6 +18,7 @@ import Specialist from '@/utils/mongo/schemi/Specialist';
 import Appuntamento from '@/utils/mongo/schemi/Appuntamento';
 import Servizio from '@/utils/mongo/schemi/Servizio';
 import PrenotazioneTemporanea from '@/utils/mongo/schemi/PrenotazioneTemporanea';
+import Sede from '@/utils/mongo/schemi/Sede';
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
     const specialistId = searchParams.get('specialistId');
     const data = searchParams.get('data');
     const durata = parseInt(searchParams.get('durata') || '30');
+    const sedeId = searchParams.get('sedeId');
 
     if (!specialistId || !data) {
       return NextResponse.json(
@@ -118,9 +120,32 @@ export async function GET(req: NextRequest) {
 
     console.log('🔒 Active temporary blocks:', blocchiTemporanei.length);
 
+    let oraInizioSlot = orarioGiorno.oraInizio || '09:00';
+    let oraFineSlot = orarioGiorno.oraFine || '18:00';
+
+    if (sedeId) {
+      const sedeMatch = (id: any) => id?.toString() === sedeId;
+      const tuttoGiorno = sedeMatch(orarioGiorno.sede);
+      const soloMattina = !tuttoGiorno && sedeMatch(orarioGiorno.sedeMattina);
+      const soloPomeriggio = !tuttoGiorno && !soloMattina && sedeMatch(orarioGiorno.sedePomeriggio);
+
+      if (!tuttoGiorno && !soloMattina && !soloPomeriggio) {
+        return NextResponse.json({
+          successo: true,
+          dati: { slot: [], sediDisponibili: [] },
+        });
+      }
+
+      if (soloMattina && orarioGiorno.pausa?.oraInizio) {
+        oraFineSlot = orarioGiorno.pausa.oraInizio;
+      } else if (soloPomeriggio && orarioGiorno.pausa?.oraFine) {
+        oraInizioSlot = orarioGiorno.pausa.oraFine;
+      }
+    }
+
     const slot = generaSlotOrari(
-      orarioGiorno.oraInizio || '09:00',
-      orarioGiorno.oraFine || '18:00',
+      oraInizioSlot,
+      oraFineSlot,
       orarioGiorno.pausa,
       durata,
       appuntamenti,
@@ -131,17 +156,17 @@ export async function GET(req: NextRequest) {
 
     console.log('✅ Slot generati:', slot.length);
     console.log('📊 Slot disponibili:', slot.filter(s => s.disponibile).length);
-    console.log('📊 Generation params:', {
-      oraInizio: orarioGiorno.oraInizio || '09:00',
-      oraFine: orarioGiorno.oraFine || '18:00',
-      pausa: orarioGiorno.pausa,
-      durataServizio: durata,
-      durataSlot: specialist.impostazioni?.durataSlot || 15,
-    });
+
+    const sediDisponibili = await calcolaSediDelGiorno(
+      orarioGiorno,
+      dataObj,
+      durata,
+      appuntamenti,
+    );
 
     return NextResponse.json({
       successo: true,
-      dati: { slot },
+      dati: { slot, sediDisponibili },
     });
 
   } catch (errore: any) {
@@ -151,6 +176,66 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Calcola le sedi e postazioni disponibili per lo specialista in un dato giorno
+ */
+async function calcolaSediDelGiorno(
+  orarioGiorno: any,
+  dataObj: Date,
+  durataServizio: number,
+  appuntamenti: any[],
+): Promise<any[]> {
+  const sedi: any[] = [];
+
+  const sediDaCaricare = new Set<string>();
+  if (orarioGiorno.sede) sediDaCaricare.add(orarioGiorno.sede.toString());
+  if (orarioGiorno.sedeMattina) sediDaCaricare.add(orarioGiorno.sedeMattina.toString());
+  if (orarioGiorno.sedePomeriggio) sediDaCaricare.add(orarioGiorno.sedePomeriggio.toString());
+
+  if (sediDaCaricare.size === 0) return [];
+
+  const sediDocs = await Sede.find({ _id: { $in: Array.from(sediDaCaricare) }, attivo: true });
+
+  const buildSedeInfo = (sedeId: string | undefined, postazioneNome: string | undefined, fascia: string) => {
+    if (!sedeId) return null;
+    const sedeDoc = sediDocs.find(s => s._id.toString() === sedeId.toString());
+    if (!sedeDoc) return null;
+
+    const postazioniOccupate = appuntamenti
+      .filter((a: any) => a.sede?.toString() === sedeId.toString() && a.postazione)
+      .map((a: any) => a.postazione);
+
+    const postazioniDisponibili = (sedeDoc.postazioni || [])
+      .filter((p: any) => p.attivo)
+      .map((p: any) => ({
+        _id: p._id,
+        nome: p.nome,
+        descrizione: p.descrizione,
+        occupato: postazioniOccupate.includes(p.nome),
+      }));
+
+    return {
+      _id: sedeDoc._id,
+      nome: sedeDoc.nome,
+      indirizzo: sedeDoc.indirizzo,
+      citta: sedeDoc.citta,
+      postazioni: postazioniDisponibili,
+      postazioneDefault: postazioneNome || null,
+      fascia,
+    };
+  };
+
+  const sedeDefault = buildSedeInfo(orarioGiorno.sede?.toString(), orarioGiorno.postazione, 'intera_giornata');
+  const sedeMattina = buildSedeInfo(orarioGiorno.sedeMattina?.toString(), orarioGiorno.postazioneMattina, 'mattina');
+  const sedePomeriggio = buildSedeInfo(orarioGiorno.sedePomeriggio?.toString(), orarioGiorno.postazionePomeriggio, 'pomeriggio');
+
+  if (sedeDefault) sedi.push(sedeDefault);
+  if (sedeMattina) sedi.push(sedeMattina);
+  if (sedePomeriggio) sedi.push(sedePomeriggio);
+
+  return sedi;
 }
 
 /**

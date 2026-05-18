@@ -34,6 +34,9 @@ const SchemaMongoose = new Schema<TSchemaUtente, ISettings>({
   versionKey: false 
 });
 
+if (process.env.NODE_ENV === 'development' && models.users) {
+  delete models.users;
+}
 const UtenteSchema = models.users || model('users', SchemaMongoose);
 
 export default UtenteSchema;

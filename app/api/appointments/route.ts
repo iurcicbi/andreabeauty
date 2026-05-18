@@ -27,6 +27,7 @@ import { calcolaOraFine } from '@/utils/helpers';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import Voucher from '@/utils/mongo/schemi/Voucher';
+import Sede from '@/utils/mongo/schemi/Sede';
 
 /**
  * GET - Recupera appuntamenti
@@ -56,15 +57,20 @@ export async function GET(req: NextRequest) {
     } else if (utente.ruolo === 'specialist' || utente.ruolo === 'barber') {
       let specialistId = utente.id;
       try {
-        const specialist = await Specialist.findOne({ utente: utente.id });
-        if (specialist) {
-          specialistId = specialist._id.toString();
-          console.log('📋 Found specialist profile:', specialistId);
-        } else {
-          console.log('📋 No specialist profile found for user:', utente.id);
+        let specialist = await Specialist.findOne({ utente: utente.id });
+        if (!specialist) {
+          specialist = await Specialist.create({
+            utente: utente.id,
+            biografia: '',
+            specializzazioni: [],
+            telefono: '',
+            attivo: true,
+          });
+          console.log('📋 Auto-created specialist profile:', specialist._id);
         }
+        specialistId = specialist._id.toString();
       } catch (e) {
-        console.log('📋 Error finding specialist:', e);
+        console.log('📋 Error finding/creating specialist:', e);
       }
       filtro['$or'] = [
         { specialista: specialistId },
@@ -115,12 +121,14 @@ export async function GET(req: NextRequest) {
     }
 
     // Recupera appuntamenti con populate (join)
+    void Sede;
     const appuntamenti = await Appuntamento.find(filtro)
       .populate({
         path: 'specialista',
         populate: { path: 'utente', select: 'nome cognome' }
       })
       .populate('servizio', 'nome durata prezzo categoria')
+      .populate('sede', 'nome citta')
       .sort({ data: 1, oraInizio: 1 });
 
     const voucherCodes = [...new Set(appuntamenti.filter(a => a.voucherCode).map(a => a.voucherCode))] as string[];
@@ -209,6 +217,8 @@ export async function POST(req: NextRequest) {
       clienteEmail,
       clienteTelefono,
       voucherCode,
+      sedeId,
+      postazione,
     } = body;
 
     // ========================================================================
@@ -227,19 +237,42 @@ export async function POST(req: NextRequest) {
     // GESTIONE CLIENTE
     // ========================================================================
     let idCliente;
+    let datiClientePerAppuntamento;
+
+    console.log('🔍 Dati cliente ricevuti:', { clienteNome, clienteCognome, clienteTelefono, clienteEmail });
 
     if (clienteId) {
       // Caso 1: Cliente esistente selezionato
       idCliente = clienteId;
     } else if (clienteNome && clienteCognome && clienteTelefono) {
-      // Caso 2: Nuovo cliente da creare
+      // Caso 2: Nuovo cliente da creare o aggiornare
       
       // Verifica se esiste già per telefono
       let clienteEsistente = await Utente.findOne({ telefono: clienteTelefono });
       
       if (clienteEsistente) {
+        console.log('📞 Cliente esistente trovato:', clienteEsistente.nome, clienteEsistente.cognome);
+        
+        // Aggiorna i dati del cliente esistente con quelli forniti
+        clienteEsistente.nome = clienteNome;
+        clienteEsistente.cognome = clienteCognome;
+        if (clienteEmail) {
+          clienteEsistente.email = clienteEmail;
+        }
+        await clienteEsistente.save();
+        
         idCliente = clienteEsistente._id;
+        
+        // Usa i dati aggiornati per l'appuntamento
+        datiClientePerAppuntamento = {
+          nome: clienteNome,
+          cognome: clienteCognome,
+          telefono: clienteTelefono,
+          email: clienteEmail || clienteEsistente.email
+        };
       } else {
+        console.log('👤 Creazione nuovo cliente');
+        
         // Crea nuovo cliente
         const passwordTemp = Math.random().toString(36).slice(-8);
         const salt = await bcrypt.genSalt(10);
@@ -256,6 +289,14 @@ export async function POST(req: NextRequest) {
         });
 
         idCliente = nuovoCliente._id;
+        
+        // Usa i dati del nuovo cliente per l'appuntamento
+        datiClientePerAppuntamento = {
+          nome: clienteNome,
+          cognome: clienteCognome,
+          telefono: clienteTelefono,
+          email: clienteEmail || `${clienteTelefono}@temp.com`
+        };
       }
     } else {
       // Caso 3: Utente loggato prenota per sé
@@ -364,23 +405,32 @@ export async function POST(req: NextRequest) {
     // CREA APPUNTAMENTO
     // ========================================================================
     
-    // Recupera i dati del cliente per salvarli embedded
-    const cliente = await Utente.findById(idCliente);
-    if (!cliente) {
-      return NextResponse.json(
-        { successo: false, errore: 'Cliente non trovato' },
-        { status: 404 }
-      );
-    }
-
-    // Prepara dati appuntamento
-    const datiAppuntamento: any = {
-      utente: {
+    // Se abbiamo già i dati del cliente preparati, usali, altrimenti recuperali dal database
+    let datiCliente;
+    if (datiClientePerAppuntamento) {
+      datiCliente = datiClientePerAppuntamento;
+      console.log('✅ Usando dati cliente preparati:', datiCliente);
+    } else {
+      // Recupera i dati del cliente dal database
+      const cliente = await Utente.findById(idCliente);
+      if (!cliente) {
+        return NextResponse.json(
+          { successo: false, errore: 'Cliente non trovato' },
+          { status: 404 }
+        );
+      }
+      datiCliente = {
         nome: cliente.nome,
         cognome: cliente.cognome,
         telefono: cliente.telefono,
         email: cliente.email
-      },
+      };
+      console.log('📋 Dati cliente dal database:', datiCliente);
+    }
+
+    // Prepara dati appuntamento
+    const datiAppuntamento: any = {
+      utente: datiCliente,
       servizio: servizioId,
       data: dataAppuntamento,
       oraInizio,
@@ -391,7 +441,9 @@ export async function POST(req: NextRequest) {
       reminderSent: false,
       reviewToken: crypto.randomBytes(24).toString('hex'),
       reviewSent: false,
-      voucherCode: voucherCode || undefined
+      voucherCode: voucherCode || undefined,
+      sede: sedeId || undefined,
+      postazione: postazione || undefined,
     };
 
     // Aggiungi campo specialista

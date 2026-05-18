@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
 import Specialist from '@/utils/mongo/schemi/Specialist';
 import Utente from '@/utils/mongo/schemi/Utente';
-import '@/utils/mongo/schemi/Servizio';
+import Servizio from '@/utils/mongo/schemi/Servizio';
 import { richiedeRuolo } from '@/utils/middleware/autenticazione';
 import bcrypt from 'bcryptjs';
 
@@ -11,7 +11,9 @@ export async function GET(req: NextRequest) {
     await richiedeRuolo(req, 'specialist');
     await connessioneMongoDB();
 
-    Utente;
+    // Forza la registrazione degli schemi in Mongoose prima del populate
+    void Utente;
+    void Servizio;
 
     const specialists = await Specialist.find()
       .populate('utente', 'nome cognome email telefono ruolo attivo')

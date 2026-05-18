@@ -2,7 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
 import Specialist from '@/utils/mongo/schemi/Specialist';
 import Servizio from '@/utils/mongo/schemi/Servizio';
-import '@/utils/mongo/schemi/Utente';
+import Utente from '@/utils/mongo/schemi/Utente';
+
+function specialistLavoraInSede(orariSettimanali: any, sedeId: string): boolean {
+  if (!orariSettimanali) return false;
+  for (const zi of Object.keys(orariSettimanali)) {
+    const g = orariSettimanali[zi];
+    if (!g.aperto) continue;
+    if (g.sede?.toString() === sedeId) return true;
+    if (g.sedeMattina?.toString() === sedeId) return true;
+    if (g.sedePomeriggio?.toString() === sedeId) return true;
+  }
+  return false;
+}
+
+function getGiorniInSede(orariSettimanali: any, sedeId: string): string[] {
+  const nomi: Record<string, string> = {
+    lunedi: 'Luni', martedi: 'Marți', mercoledi: 'Miercuri',
+    giovedi: 'Joi', venerdi: 'Vineri', sabato: 'Sâmbătă', domenica: 'Duminică',
+  };
+  const giorni: string[] = [];
+  if (!orariSettimanali) return giorni;
+  for (const zi of Object.keys(orariSettimanali)) {
+    const g = orariSettimanali[zi];
+    if (!g.aperto) continue;
+    if (g.sede?.toString() === sedeId || g.sedeMattina?.toString() === sedeId || g.sedePomeriggio?.toString() === sedeId) {
+      giorni.push(nomi[zi] || zi);
+    }
+  }
+  return giorni;
+}
 
 export async function GET(
   req: NextRequest,
@@ -10,6 +39,7 @@ export async function GET(
 ) {
   try {
     await connessioneMongoDB();
+    void Utente;
 
     const servizio = await Servizio.findById(params.id);
     if (!servizio) {
@@ -19,6 +49,9 @@ export async function GET(
       );
     }
 
+    const searchParams = req.nextUrl.searchParams;
+    const sedeId = searchParams.get('sedeId');
+
     const specialists = await Specialist.find({
       specializzazioni: params.id,
       attivo: true,
@@ -27,7 +60,7 @@ export async function GET(
       .populate('specializzazioni', 'nome categoria durata prezzo')
       .lean();
 
-    const formatted = specialists.map((s: any) => ({
+    let formatted = specialists.map((s: any) => ({
       _id: s._id,
       nome: s.utente?.nome || '',
       cognome: s.utente?.cognome || '',
@@ -39,6 +72,14 @@ export async function GET(
       impostazioni: s.impostazioni,
       servizi: s.specializzazioni || [],
     }));
+
+    if (sedeId) {
+      formatted = formatted.filter(s => specialistLavoraInSede(s.orariSettimanali, sedeId));
+      formatted = formatted.map(s => ({
+        ...s,
+        giorniSede: getGiorniInSede(s.orariSettimanali, sedeId),
+      }));
+    }
 
     return NextResponse.json({
       successo: true,

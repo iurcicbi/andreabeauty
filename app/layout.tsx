@@ -7,7 +7,6 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { initializeScheduler } from '@/lib/scheduler/init';
 import dbConnect from '@/utils/mongodb';
 import Impostazioni from '@/models/Impostazioni';
 
@@ -40,11 +39,6 @@ async function getMetadata(): Promise<Metadata> {
 
 export async function generateMetadata(): Promise<Metadata> {
   return await getMetadata();
-}
-
-// Inizializza lo scheduler all'avvio dell'applicazione
-if (typeof window === 'undefined') {
-  initializeScheduler();
 }
 
 export default function RootLayout({

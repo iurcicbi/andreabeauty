@@ -42,8 +42,7 @@ const SchemaMongoose = new Schema<TSchemaPrenotazioneTemporanea, ISettings>({
   specialist: { 
     type: Schema.Types.ObjectId, 
     ref: 'specialists', 
-    required: true,
-    index: true  // Indice per query veloci
+    required: true
   },
   data: { 
     type: Date, 
@@ -81,6 +80,9 @@ SchemaMongoose.index({ specialist: 1, data: 1, scadenza: 1 });
 // TTL Index: MongoDB rimuove automaticamente i documenti scaduti
 SchemaMongoose.index({ scadenza: 1 }, { expireAfterSeconds: 0 });
 
+if (process.env.NODE_ENV === 'development' && models.temporary_bookings) {
+  delete models.temporary_bookings;
+}
 const PrenotazioneTemporaneaSchema = models.temporary_bookings || model('temporary_bookings', SchemaMongoose);
 
 export default PrenotazioneTemporaneaSchema;

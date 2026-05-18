@@ -9,6 +9,12 @@ type TGiornoLavorativo = {
     oraInizio: string;
     oraFine: string;
   };
+  sede?: Types.ObjectId;
+  postazione?: string;
+  sedeMattina?: Types.ObjectId;
+  postazioneMattina?: string;
+  sedePomeriggio?: Types.ObjectId;
+  postazionePomeriggio?: string;
 };
 
 type TGiornoChiusura = {
@@ -61,6 +67,12 @@ const GiornoLavorativoSchema = new Schema({
     },
     required: false,
   },
+  sede: { type: Schema.Types.ObjectId, ref: 'sedi', required: false },
+  postazione: { type: String, required: false },
+  sedeMattina: { type: Schema.Types.ObjectId, ref: 'sedi', required: false },
+  postazioneMattina: { type: String, required: false },
+  sedePomeriggio: { type: Schema.Types.ObjectId, ref: 'sedi', required: false },
+  postazionePomeriggio: { type: String, required: false },
 }, { _id: false });
 
 const GiornoChiusuraSchema = new Schema({
@@ -148,6 +160,9 @@ const SchemaMongoose = new Schema<TSchemaSpecialist, ISettings>({
   versionKey: false
 });
 
+if (process.env.NODE_ENV === 'development' && models.specialists) {
+  delete models.specialists;
+}
 const SpecialistSchema = models.specialists || model('specialists', SchemaMongoose);
 
 export default SpecialistSchema;

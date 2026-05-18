@@ -8,8 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/utils/mongodb';
 import ImpostazioniModel from '@/models/Impostazioni';
+import { verificaToken } from '@/utils/middleware/autenticazione';
 
-// Cast per TypeScript - il modello ha i metodi statici definiti
 const Impostazioni = ImpostazioniModel as any;
 
 export async function GET() {
@@ -32,6 +32,14 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    const utente = await verificaToken(request);
+    if (utente.ruolo !== 'admin') {
+      return NextResponse.json(
+        { successo: false, errore: 'Accesso negato: solo admin può modificare le impostazioni' },
+        { status: 403 }
+      );
+    }
+
     await dbConnect();
     const dati = await request.json();
     
@@ -43,10 +51,14 @@ export async function PUT(request: NextRequest) {
       messaggio: 'Impostazioni aggiornate con successo'
     });
   } catch (errore: any) {
+    const messaggio = errore.message?.includes('Token')
+      ? 'Autenticazione richiesta'
+      : 'Errore nell\'aggiornamento delle impostazioni';
+    const status = errore.message?.includes('Token') ? 401 : 500;
     console.error('❌ Errore PUT /api/settings:', errore);
     return NextResponse.json(
-      { successo: false, errore: 'Errore nell\'aggiornamento delle impostazioni' },
-      { status: 500 }
+      { successo: false, errore: messaggio },
+      { status }
     );
   }
 }

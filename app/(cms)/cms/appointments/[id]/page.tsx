@@ -95,17 +95,19 @@ export default function ModificaAppuntamentoPage() {
   
   // Controlla se l'appuntamento è nel passato
   const [isPassato, setIsPassato] = useState(false);
+  const [specialistaId, setSpecialistaId] = useState('');
 
   useEffect(() => {
     caricaAppuntamento();
     caricaServizi();
+    caricaProfiloSpecialista();
   }, [id]);
 
   useEffect(() => {
-    if (data && servizioSelezionato && appuntamento) {
+    if (data && servizioSelezionato && appuntamento && specialistaId) {
       caricaSlotDisponibili();
     }
-  }, [data, servizioSelezionato]);
+  }, [data, servizioSelezionato, specialistaId]);
 
   const caricaAppuntamento = async () => {
     try {
@@ -144,21 +146,28 @@ export default function ModificaAppuntamentoPage() {
     }
   };
 
+  const caricaProfiloSpecialista = async () => {
+    try {
+      const risposta = await webservice.get('/api/specialist/profile');
+      if (risposta.dati && risposta.dati._id) {
+        setSpecialistaId(risposta.dati._id);
+      }
+    } catch (err) {
+      console.error('Errore caricamento profilo specialista:', err);
+    }
+  };
+
   const caricaSlotDisponibili = async () => {
     try {
       setCaricamentoSlot(true);
+      if (!specialistaId) return;
       
-      const utenteStr = localStorage.getItem('utente');
-      if (!utenteStr) return;
-      
-      const utente = JSON.parse(utenteStr);
       const servizio = servizi.find(s => s._id === servizioSelezionato);
-      
       if (!servizio) return;
       
       const risposta = await webservice.get('/api/appointments/availability', {
         params: {
-          specialistId: utente.id,
+          specialistId: specialistaId,
           data: data,
           durata: servizio.durata,
         },

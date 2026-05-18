@@ -74,19 +74,22 @@ export default function NuovoAppuntamentoPage() {
   const [caricamentoSlot, setCaricamentoSlot] = useState(false);
   const [errore, setErrore] = useState('');
   const [successo, setSuccesso] = useState('');
+  const [specialistaId, setSpecialistaId] = useState('');
+  const [caricamentoSpecialista, setCaricamentoSpecialista] = useState(true);
 
-  // Carica clienti e servizi all'avvio
+  // Carica clienti, servizi e profilo specialista all'avvio
   useEffect(() => {
     caricaClienti();
     caricaServizi();
+    caricaProfiloSpecialista();
   }, []);
 
-  // Carica slot disponibili quando cambiano data o servizio
+  // Carica slot disponibili quando cambiano data, servizio o profilo specialista
   useEffect(() => {
-    if (data && servizioSelezionato) {
+    if (data && servizioSelezionato && specialistaId) {
       caricaSlotDisponibili();
     }
-  }, [data, servizioSelezionato]);
+  }, [data, servizioSelezionato, specialistaId]);
 
   const caricaClienti = async () => {
     try {
@@ -106,22 +109,38 @@ export default function NuovoAppuntamentoPage() {
     }
   };
 
+  const caricaProfiloSpecialista = async () => {
+    try {
+      const risposta = await webservice.get('/api/specialist/profile');
+      if (risposta.dati && risposta.dati._id) {
+        setSpecialistaId(risposta.dati._id);
+      }
+    } catch (err) {
+      console.error('Errore caricamento profilo specialista:', err);
+    } finally {
+      setCaricamentoSpecialista(false);
+    }
+  };
+
   const caricaSlotDisponibili = async () => {
     try {
       setCaricamentoSlot(true);
-      
-      // Recupera ID specialist dal localStorage
-      const utenteStr = localStorage.getItem('utente');
-      if (!utenteStr) return;
-      
-      const utente = JSON.parse(utenteStr);
-      
-      const risposta = await webservice.get(
-        `/api/appointments/availability?specialistId=${utente.id}&servizioId=${servizioSelezionato}&data=${data}`
-      );
-      
-      setSlotDisponibili(risposta.dati.slotDisponibili);
-      setOraSelezionata('');  // Reset ora selezionata
+      if (!specialistaId) return;
+
+      const servizio = servizi.find(s => s._id === servizioSelezionato);
+      if (!servizio) return;
+
+      const risposta = await webservice.get('/api/appointments/availability', {
+        params: {
+          specialistId: specialistaId,
+          data: data,
+          durata: servizio.durata,
+        },
+      });
+
+      const slot = risposta.dati.slot || [];
+      setSlotDisponibili(slot.map((s: any) => s.ora));
+      setOraSelezionata('');
     } catch (err) {
       console.error('Errore caricamento slot:', err);
       setSlotDisponibili([]);
@@ -184,18 +203,14 @@ export default function NuovoAppuntamentoPage() {
       setCaricamento(true);
       setErrore('');
 
-      // Recupera ID specialist
-      const utenteStr = localStorage.getItem('utente');
-      if (!utenteStr) {
-        setErrore('Sesiune expirată');
+      if (!specialistaId) {
+        setErrore('Profilo specialista non trovato');
         return;
       }
-      
-      const utente = JSON.parse(utenteStr);
 
       // Prepara dati appuntamento
       const datiAppuntamento: any = {
-        specialistaId: utente.id,
+        specialistaId: specialistaId,
         servizioId: servizioSelezionato,
         data,
         oraInizio: oraSelezionata,

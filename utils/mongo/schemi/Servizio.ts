@@ -34,6 +34,9 @@ const SchemaMongoose = new Schema<TSchemaServizio, ISettings>({
   versionKey: false 
 });
 
+if (process.env.NODE_ENV === 'development' && models.services) {
+  delete models.services;
+}
 const ServizioSchema = models.services || model('services', SchemaMongoose);
 
 export default ServizioSchema;

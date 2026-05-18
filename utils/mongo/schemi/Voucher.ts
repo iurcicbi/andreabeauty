@@ -58,6 +58,9 @@ const SchemaMongoose = new Schema<TSchemaVoucher, ISettings>({
 SchemaMongoose.index({ code: 1 });
 SchemaMongoose.index({ status: 1 });
 
+if (process.env.NODE_ENV === 'development' && models.vouchers) {
+  delete models.vouchers;
+}
 const VoucherSchema = models.vouchers || model('vouchers', SchemaMongoose);
 
 export default VoucherSchema;

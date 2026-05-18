@@ -18,14 +18,14 @@ type TSchemaAppuntamento = {
   data: Date;
   oraInizio: string;
   oraFine: string;
-  stato: 'in_attesa' | 'confermato' | 'completato' | 'cancellato';
+  stato: 'in_attesa' | 'confermato' | 'completato' | 'cancellato' | 'scaduto';
   note?: string;
   // Campi per sistema promemoria WhatsApp
   reminderSent: boolean;
   reminderSentAt?: Date;
   reminderError?: string;
   reminderErrorAt?: Date;
-  twilioMessageSid?: string;
+  reminderExpiresAt?: Date;
   cancelledBy?: 'customer' | 'specialist';
   cancelledAt?: Date;
   reviewToken?: string;
@@ -36,6 +36,8 @@ type TSchemaAppuntamento = {
   confirmationSentAt?: Date;
   confirmationResponse?: 'si' | 'no' | null;
   confirmationRespondedAt?: Date;
+  sede?: Types.ObjectId;
+  postazione?: string;
 }
 
 export type TAppuntamento = {
@@ -59,7 +61,7 @@ const SchemaMongoose = new Schema<TSchemaAppuntamento, ISettings>({
     type: String, 
     required: true, 
     default: 'in_attesa',
-    enum: ['in_attesa', 'confermato', 'completato', 'cancellato']
+    enum: ['in_attesa', 'confermato', 'completato', 'cancellato', 'scaduto']
   },
   note: { type: String, required: false, default: '' },
   // Campi sistema promemoria WhatsApp
@@ -67,7 +69,7 @@ const SchemaMongoose = new Schema<TSchemaAppuntamento, ISettings>({
   reminderSentAt: { type: Date, required: false },
   reminderError: { type: String, required: false },
   reminderErrorAt: { type: Date, required: false },
-  twilioMessageSid: { type: String, required: false },
+  reminderExpiresAt: { type: Date, required: false },
   cancelledBy: { 
     type: String, 
     required: false,
@@ -82,6 +84,8 @@ const SchemaMongoose = new Schema<TSchemaAppuntamento, ISettings>({
   confirmationSentAt: { type: Date, required: false },
   confirmationResponse: { type: String, required: false, enum: ['si', 'no', null], default: null },
   confirmationRespondedAt: { type: Date, required: false },
+  sede: { type: Schema.Types.ObjectId, ref: 'sedi', required: false },
+  postazione: { type: String, required: false },
 },
 { 
   collection: "appointments", 
@@ -89,6 +93,9 @@ const SchemaMongoose = new Schema<TSchemaAppuntamento, ISettings>({
   versionKey: false 
 });
 
+if (process.env.NODE_ENV === 'development' && models.appointments) {
+  delete models.appointments;
+}
 const AppuntamentoSchema = models.appointments || model('appointments', SchemaMongoose);
 
 export default AppuntamentoSchema;

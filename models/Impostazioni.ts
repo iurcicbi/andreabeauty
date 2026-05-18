@@ -63,7 +63,79 @@ export interface IImpostazioni extends Document {
     youtube: string;
   };
   
-  // TESTI HOMEPAGE
+  // SEZIONI DINAMICHE HOMEPAGE
+  sezioniHomepage: {
+    hero: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      badge: string;
+      testoCtaPrimario: string;
+      testoCtaSecondario: string;
+      immagineBackground: string;
+      mostraLogo: boolean;
+      mostraInfoRapide: boolean;
+    };
+    servizi: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      descrizione: string;
+      immagineBackground: string;
+      layoutGriglia: 'grid-2' | 'grid-3' | 'grid-4';
+      mostraPrezzi: boolean;
+      mostraDurata: boolean;
+    };
+    about: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      descrizione: string;
+      immagine: string;
+      statistiche: {
+        anni: { valore: string; label: string; };
+        clienti: { valore: string; label: string; };
+        qualita: { valore: string; label: string; };
+      };
+    };
+    orari: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      descrizione: string;
+    };
+    recensioni: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      numeroMassimo: number;
+    };
+    contatti: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      descrizione: string;
+      mostraMappa: boolean;
+      urlMappa: string;
+      mostraSocial: boolean;
+    };
+    ctaFinale: {
+      attiva: boolean;
+      ordine: number;
+      titolo: string;
+      sottotitolo: string;
+      testoPulsante: string;
+      immagineBackground: string;
+    };
+  };
+  
+  // TESTI HOMEPAGE (deprecato - mantenuto per compatibilità)
   testiHomepage: {
     titoloHero: string;
     sottotitoloHero: string;
@@ -234,7 +306,88 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
     youtube: { type: String, default: '' }
   },
   
-  // TESTI HOMEPAGE
+  // SEZIONI DINAMICHE HOMEPAGE
+  sezioniHomepage: {
+    hero: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 1 },
+      titolo: { type: String, default: '' },
+      sottotitolo: { type: String, default: '' },
+      badge: { type: String, default: 'Premium Beauty Salon' },
+      testoCtaPrimario: { type: String, default: 'PRENOTA APPUNTAMENTO' },
+      testoCtaSecondario: { type: String, default: 'DOVE SIAMO' },
+      immagineBackground: { type: String, default: '' },
+      mostraLogo: { type: Boolean, default: true },
+      mostraInfoRapide: { type: Boolean, default: true }
+    },
+    servizi: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 2 },
+      titolo: { type: String, default: 'I NOSTRI SERVIZI' },
+      sottotitolo: { type: String, default: 'Qualità e professionalità per il tuo look perfetto' },
+      descrizione: { type: String, default: '' },
+      immagineBackground: { type: String, default: '' },
+      layoutGriglia: { type: String, enum: ['grid-2', 'grid-3', 'grid-4'], default: 'grid-3' },
+      mostraPrezzi: { type: Boolean, default: true },
+      mostraDurata: { type: Boolean, default: true }
+    },
+    about: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 3 },
+      titolo: { type: String, default: 'CHI SIAMO' },
+      sottotitolo: { type: String, default: 'La nostra storia, la tua bellezza' },
+      descrizione: { type: String, default: 'Siamo un team di professionisti appassionati, dedicati a far emergere la bellezza unica di ogni cliente. Con anni di esperienza nel settore, offriamo servizi di alta qualità in un ambiente elegante e accogliente.' },
+      immagine: { type: String, default: '' },
+      statistiche: {
+        anni: {
+          valore: { type: String, default: '10+' },
+          label: { type: String, default: 'Anni Esperienza' }
+        },
+        clienti: {
+          valore: { type: String, default: '5K+' },
+          label: { type: String, default: 'Clienti Felici' }
+        },
+        qualita: {
+          valore: { type: String, default: '100%' },
+          label: { type: String, default: 'Professionalità' }
+        }
+      }
+    },
+    orari: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 4 },
+      titolo: { type: String, default: 'ORARI DI APERTURA' },
+      sottotitolo: { type: String, default: 'Siamo qui per te' },
+      descrizione: { type: String, default: '' }
+    },
+    recensioni: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 5 },
+      titolo: { type: String, default: 'Cosa dicono i nostri clienti' },
+      sottotitolo: { type: String, default: 'Le tue opinioni contano' },
+      numeroMassimo: { type: Number, default: 6 }
+    },
+    contatti: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 6 },
+      titolo: { type: String, default: 'CONTATTACI' },
+      sottotitolo: { type: String, default: 'Siamo qui per te' },
+      descrizione: { type: String, default: '' },
+      mostraMappa: { type: Boolean, default: true },
+      urlMappa: { type: String, default: '' },
+      mostraSocial: { type: Boolean, default: true }
+    },
+    ctaFinale: {
+      attiva: { type: Boolean, default: true },
+      ordine: { type: Number, default: 7 },
+      titolo: { type: String, default: 'PRONTO PER IL TUO NUOVO LOOK?' },
+      sottotitolo: { type: String, default: 'Prenota ora il tuo appuntamento e affidati ai nostri professionisti' },
+      testoPulsante: { type: String, default: 'PRENOTA SUBITO' },
+      immagineBackground: { type: String, default: '' }
+    }
+  },
+  
+  // TESTI HOMEPAGE (deprecato - mantenuto per compatibilità)
   testiHomepage: {
     titoloHero: { type: String, default: '' },
     sottotitoloHero: { type: String, default: '' },

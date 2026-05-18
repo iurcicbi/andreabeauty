@@ -1,120 +1,63 @@
 /**
- * WEBHOOK WHATSAPP - GESTIONE RISPOSTE CONFERMA APPUNTAMENTO
- * 
- * Twilio chiama questo endpoint quando il cliente risponde al messaggio.
- * 
- * Flusso:
- * - Cliente risponde SI/CONFERMO/OK → appuntamento confermato
- * - Cliente risponde NO/CANCELLA/ANNULLA → appuntamento cancellato
- * - Risposta non riconosciuta → nessuna azione, log per debug
+ * WEBHOOK WHATSAPP - TRIGGER MANUALE MESSAGGI IN ARRIVO
+ *
+ * Nota: con whatsapp-web.js i messaggi in arrivo vengono gestiti
+ * direttamente dal listener in lib/cron/reminders.js (evento 'message').
+ *
+ * Questo endpoint è mantenuto per:
+ * - Compatibilità con eventuali integrazioni esterne
+ * - Trigger manuale per test
+ * - Health check del sistema
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import connessioneMongoDB from '@/utils/mongo/connessione';
-import Appuntamento from '@/utils/mongo/schemi/Appuntamento';
+
+export async function GET(_request: NextRequest) {
+  return NextResponse.json({
+    message: 'Sistema WhatsApp attivo (whatsapp-web.js)',
+    info: 'I messaggi in arrivo vengono gestiti in tempo reale dal listener interno.',
+    timestamp: new Date().toISOString(),
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📱 Webhook WhatsApp ricevuto');
+    // Verifica autorizzazione
+    const authHeader = request.headers.get('authorization');
+    const expectedAuth = process.env.CRON_SECRET;
 
-    // Parse form-data da Twilio
-    const formData = await request.formData();
-    const body = Object.fromEntries(formData.entries());
+    if (expectedAuth && authHeader !== `Bearer ${expectedAuth}`) {
+      return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 });
+    }
 
-    console.log('📦 Dati webhook:', {
-      From: body.From,
-      To: body.To,
-      Body: body.Body,
-      MessageSid: body.MessageSid,
+    const body = await request.json().catch(() => ({}));
+    const { from, message } = body as { from?: string; message?: string };
+
+    if (!from || !message) {
+      return NextResponse.json(
+        { error: 'Parametri mancanti: from, message' },
+        { status: 400 }
+      );
+    }
+
+    // Simula un messaggio in arrivo per test
+    const { onIncomingMessage } = require('@/lib/cron/reminders') as {
+      onIncomingMessage: (msg: { from: string; body: string }) => Promise<void>;
+    };
+
+    await onIncomingMessage({ from, body: message });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Messaggio processato',
+      from,
+      body: message,
     });
-
-    const fromNumber = body.From as string;
-    const messageBody = (body.Body as string)?.trim().toUpperCase();
-
-    if (!fromNumber || !messageBody) {
-      console.log('⚠️ Dati webhook incompleti');
-      return xmlResponse();
-    }
-
-    // Rimuovi prefisso whatsapp:
-    const phoneNumber = fromNumber.replace('whatsapp:', '');
-    console.log('📞 Numero cliente:', phoneNumber);
-    console.log('💬 Messaggio ricevuto:', messageBody);
-
-    await connessioneMongoDB();
-
-    // Trova il prossimo appuntamento del cliente a cui è stata inviata
-    // la richiesta di conferma ma non ha ancora risposto
-    const appuntamento = await Appuntamento.findOne({
-      'utente.telefono': phoneNumber,
-      confirmationSent: true,
-      confirmationResponse: null,
-      stato: { $in: ['in_attesa', 'confermato'] },
-      data: { $gte: new Date() }
-    }).sort({ data: 1 });
-
-    if (!appuntamento) {
-      console.log('❌ Nessun appuntamento in attesa di conferma per:', phoneNumber);
-      return xmlResponse();
-    }
-
-    console.log('📅 Appuntamento trovato:', {
-      id: appuntamento._id,
-      cliente: `${appuntamento.utente.nome} ${appuntamento.utente.cognome}`,
-      data: appuntamento.data,
-      stato: appuntamento.stato
-    });
-
-    // Interpreta la risposta
-    const isConfirm = ['SI', 'SÌ', 'S', 'YES', 'OK', 'CONFERMO', 'CONFERMA', '1'].some(
-      kw => messageBody.includes(kw)
-    );
-    const isCancel = ['NO', 'N', 'CANCELLA', 'CANCELLO', 'ANNULLA', 'ANNULLO', '0'].some(
-      kw => messageBody.includes(kw)
-    );
-
-    if (isConfirm) {
-      await Appuntamento.findByIdAndUpdate(appuntamento._id, {
-        stato: 'confermato',
-        confirmationResponse: 'si',
-        confirmationRespondedAt: new Date()
-      });
-
-      console.log('✅ Appuntamento confermato dal cliente:', appuntamento._id);
-
-    } else if (isCancel) {
-      await Appuntamento.findByIdAndUpdate(appuntamento._id, {
-        stato: 'cancellato',
-        confirmationResponse: 'no',
-        confirmationRespondedAt: new Date(),
-        cancelledBy: 'customer',
-        cancelledAt: new Date()
-      });
-
-      console.log('❌ Appuntamento cancellato dal cliente:', appuntamento._id);
-
-    } else {
-      console.log('❓ Risposta non riconosciuta:', messageBody, '— nessuna azione');
-    }
-
-    return xmlResponse();
-
   } catch (error: any) {
     console.error('❌ Errore webhook WhatsApp:', error);
-    return xmlResponse();
+    return NextResponse.json(
+      { error: 'Errore interno', message: error.message },
+      { status: 500 }
+    );
   }
-}
-
-/**
- * Risposta XML vuota per Twilio (non invia messaggi automatici)
- * Il template Twilio gestisce già il testo del messaggio inviato.
- */
-function xmlResponse() {
-  return new NextResponse(
-    '<Response></Response>',
-    {
-      status: 200,
-      headers: { 'Content-Type': 'application/xml' }
-    }
-  );
 }

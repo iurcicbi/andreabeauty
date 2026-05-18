@@ -43,6 +43,9 @@ SchemaMongoose.index({ specialist: 1, service: 1 }, { unique: true });
 SchemaMongoose.index({ specialist: 1 });
 SchemaMongoose.index({ service: 1 });
 
+if (process.env.NODE_ENV === 'development' && models.specialist_services) {
+  delete models.specialist_services;
+}
 const SpecialistServiceSchema = models.specialist_services || model('specialist_services', SchemaMongoose);
 
 export default SpecialistServiceSchema;

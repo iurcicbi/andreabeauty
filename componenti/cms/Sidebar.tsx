@@ -42,7 +42,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Building
+  Building,
+  MapPin
 } from 'lucide-react';
 
 // ============================================
@@ -70,6 +71,7 @@ const menuItems = [
   { href: '/cms/appointments', label: 'Programări', icon: Calendar },
   { href: '/cms/services', label: 'Servicii', icon: Scissors },
   { href: '/cms/specialist', label: 'Specialiști', icon: Users },
+  { href: '/cms/locations', label: 'Locații', icon: MapPin },
   { href: '/cms/reviews', label: 'Recenzii', icon: MessageSquare },
   { href: '/cms/vouchers', label: 'Vouchere', icon: Gift },
   { href: '/cms/hours', label: 'Orar', icon: Clock },
@@ -201,7 +203,14 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
                   if (parent) {
                     const fallback = document.createElement('div');
                     fallback.className = 'flex items-center gap-2';
-                    fallback.innerHTML = '<div class="flex items-center gap-2"><div class="w-6 h-6 bg-primary-600 rounded flex items-center justify-center"><svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><span class="font-bold text-gray-800">' + nomeAzienda + '</span></div>';
+                    const svgContainer = document.createElement('div');
+                    svgContainer.className = 'w-6 h-6 bg-primary-600 rounded flex items-center justify-center';
+                    svgContainer.innerHTML = '<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>';
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'font-bold text-gray-800';
+                    textSpan.textContent = nomeAzienda;
+                    fallback.appendChild(svgContainer);
+                    fallback.appendChild(textSpan);
                     parent.appendChild(fallback);
                   }
                 }}

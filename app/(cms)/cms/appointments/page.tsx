@@ -35,7 +35,8 @@ import {
   Clock, 
   Edit3, 
   CheckCircle, 
-  FileText 
+  FileText,
+  MapPin 
 } from 'lucide-react';
 
 interface Appuntamento {
@@ -51,6 +52,8 @@ interface Appuntamento {
   voucherCode?: string;
   voucher?: { type: string; value: number };
   prezzoFinale?: number;
+  sede?: { nome: string; citta: string; };
+  postazione?: string;
 }
 
 export default function AppuntamentiPage() {
@@ -276,6 +279,7 @@ onClick={() => router.push('/cms/appointments/new')}
                   <div className="flex justify-between"><span className="text-gray-400">Client</span><span className="font-medium">{app.utente.nome} {app.utente.cognome}</span></div>
                   <div className="flex justify-between"><span className="text-gray-400">Specialist</span><span className="font-medium">{app.specialista?.utente?.nome} {app.specialista?.utente?.cognome}</span></div>
                   <div className="flex justify-between"><span className="text-gray-400">Serviciu</span><span className="font-medium">{app.servizio?.nome || '—'} · {formattaPrezzo(app.servizio?.prezzo || 0)}{app.prezzoFinale !== undefined && <span className="text-green-600 font-bold ml-1">→ {formattaPrezzo(app.prezzoFinale)}</span>}</span></div>
+                  {app.sede && <div className="flex justify-between"><span className="text-gray-400">Locație</span><span className="font-medium">{app.sede.nome}{app.postazione ? ` · ${app.postazione}` : ''}</span></div>}
                   {app.voucherCode && <div className="flex justify-between"><span className="text-gray-400">🎟 Voucher</span><span className="text-green-700 font-medium">{app.voucherCode}</span></div>}
                 </div>
                 {app.note && <p className="text-xs text-gray-400">📝 {app.note}</p>}
@@ -310,6 +314,7 @@ onClick={() => router.push('/cms/appointments/new')}
                   <p className="text-xs font-semibold text-primary-600">{formattaPrezzo(app.servizio?.prezzo || 0)}</p>
                   {app.prezzoFinale !== undefined && <p className="text-xs text-green-600 font-bold">→ {formattaPrezzo(app.prezzoFinale)}</p>}
                   {app.voucherCode && <p className="text-xs text-green-600 font-medium mt-1">🎟 {app.voucherCode}</p>}
+                  {app.sede && <p className="text-xs text-gray-500 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" />{app.sede.nome}{app.postazione ? ` · ${app.postazione}` : ''}</p>}
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Stare</p>

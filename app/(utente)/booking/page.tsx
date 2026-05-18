@@ -26,6 +26,7 @@ interface Specialist {
   _id: string;
   nome: string;
   cognome: string;
+  giorniSede?: string[];
 }
 
 interface SlotOrario {
@@ -41,13 +42,13 @@ interface GiornoChiusura {
   oraFine?: string;
 }
 
-type Step = 'servizio' | 'specialist' | 'data' | 'ora' | 'conferma';
+type Step = 'locatie' | 'servizio' | 'specialist' | 'data' | 'ora' | 'conferma';
 
 export default function PrenotazionePage() {
   const router = useRouter();
   
   // Stati principali
-  const [step, setStep] = useState<Step>('servizio');
+  const [step, setStep] = useState<Step>('locatie');
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [servizi, setServizi] = useState<Servizio[]>([]);
   const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist | null>(null);
@@ -69,6 +70,12 @@ export default function PrenotazionePage() {
   const [anno, setAnno] = useState(new Date().getFullYear());
   const [slotOrari, setSlotOrari] = useState<SlotOrario[]>([]);
   const [specialistClosures, setSpecialistClosures] = useState<GiornoChiusura[]>([]);
+
+  // Stati sede e postazione
+  const [sediPubbliche, setSediPubbliche] = useState<any[]>([]);
+  const [sediDisponibili, setSediDisponibili] = useState<any[]>([]);
+  const [sedeSelezionata, setSedeSelezionata] = useState<any>(null);
+  const [postazioneSelezionata, setPostazioneSelezionata] = useState<string>('');
   
   // Stati UI
   const [caricamento, setCaricamento] = useState(true);
@@ -131,9 +138,13 @@ export default function PrenotazionePage() {
   const caricaDati = async () => {
     try {
       setCaricamento(true);
-      const rispostaServizi = await webservice.get('/api/services');
-      const serviziAttivi = rispostaServizi.dati.filter((s: Servizio) => s.attivo !== false);
+      const [servRes, sediRes] = await Promise.all([
+        webservice.get('/api/services'),
+        webservice.get('/api/public/sedi'),
+      ]);
+      const serviziAttivi = servRes.dati.filter((s: Servizio) => s.attivo !== false);
       setServizi(serviziAttivi);
+      setSediPubbliche(sediRes.dati || []);
     } catch (err: any) {
       setErrore('Error loading data');
     } finally {
@@ -144,7 +155,9 @@ export default function PrenotazionePage() {
   const caricaSpecialistiPerServizio = async (serviceId: string) => {
     try {
       setCaricamentoSpecialisti(true);
-      const risposta = await webservice.get(`/api/services/${serviceId}/specialists`);
+      const params: any = {};
+      if (sedeSelezionata?._id) params.sedeId = sedeSelezionata._id;
+      const risposta = await webservice.get(`/api/services/${serviceId}/specialists`, { params });
       setSpecialists(risposta.dati || []);
     } catch (err) {
       setSpecialists([]);
@@ -158,17 +171,31 @@ export default function PrenotazionePage() {
 
     try {
       setCaricamentoSlot(true);
+      setSediDisponibili([]);
+      setSedeSelezionata(null);
+      setPostazioneSelezionata('');
       const dataStr = dateToLocalString(data);
-      const risposta = await webservice.get('/api/appointments/availability', {
-        params: {
-          specialistId: selectedSpecialist._id,
-          data: dataStr,
-          durata: servizioSelezionato.durata,
-        },
-      });
+      const paramsAva: any = {
+        specialistId: selectedSpecialist._id,
+        data: dataStr,
+        durata: servizioSelezionato.durata,
+      };
+      if (sedeSelezionata?._id) paramsAva.sedeId = sedeSelezionata._id;
+      const risposta = await webservice.get('/api/appointments/availability', { params: paramsAva });
       setSlotOrari(risposta.dati.slot || []);
+      setSediDisponibili(risposta.dati.sediDisponibili || []);
+
+      if (sedeSelezionata && risposta.dati.sediDisponibili) {
+        const sedeAgg = risposta.dati.sediDisponibili.find(
+          (s: any) => s._id === sedeSelezionata._id
+        );
+        if (sedeAgg) {
+          setSedeSelezionata(sedeAgg);
+        }
+      }
     } catch (err) {
       setSlotOrari([]);
+      setSediDisponibili([]);
     } finally {
       setCaricamentoSlot(false);
     }
@@ -201,6 +228,17 @@ export default function PrenotazionePage() {
         });
       }
     }, 100);
+  };
+
+  const handleSelezionaSede = (sede: any) => {
+    setSedeSelezionata(sede);
+    setPostazioneSelezionata(
+      sede.postazioni?.filter((p: any) => p.attivo).length === 1
+        ? sede.postazioni.find((p: any) => p.attivo)?.nome || ''
+        : ''
+    );
+    setStep('servizio');
+    scrollToSection('step-servizio');
   };
 
   const handleSelezionaServizio = async (servizio: Servizio) => {
@@ -291,6 +329,13 @@ export default function PrenotazionePage() {
         payload.voucherCode = voucherCode;
       }
 
+      if (sedeSelezionata) {
+        payload.sedeId = sedeSelezionata._id;
+      }
+      if (postazioneSelezionata) {
+        payload.postazione = postazioneSelezionata;
+      }
+
       await webservice.post('/api/appointments', payload);
 
       const params = new URLSearchParams({
@@ -300,6 +345,13 @@ export default function PrenotazionePage() {
         ora: oraSelezionata,
         prezzo: `€${servizioSelezionato.prezzo.toFixed(2)}`,
       });
+
+      if (sedeSelezionata) {
+        params.set('sede', sedeSelezionata.nome);
+      }
+      if (postazioneSelezionata) {
+        params.set('postazione', postazioneSelezionata);
+      }
 
       router.push(`/booking/success?${params.toString()}`);
     } catch (err: any) {
@@ -433,6 +485,12 @@ export default function PrenotazionePage() {
         <div className="max-w-4xl mx-auto mb-6 md:mb-12">
           <div className="flex items-center justify-between mb-2 md:mb-4">
             {[
+              { key: 'locatie', label: 'Location', icon: (
+                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              )},
               { key: 'servizio', label: 'Service', icon: (
                 <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
@@ -468,7 +526,7 @@ export default function PrenotazionePage() {
                 <div className={`w-8 h-8 md:w-12 md:h-12 border-2 flex items-center justify-center font-bold transition-all ${
                   step === s.key 
                     ? 'bg-white text-black border-white scale-110' 
-                    : ['servizio', 'specialist', 'data', 'ora', 'conferma'].indexOf(step) > index
+                    : ['locatie', 'servizio', 'specialist', 'data', 'ora', 'conferma'].indexOf(step) > index
                     ? 'bg-white/20 text-white border-white/20'
                     : 'bg-transparent text-white/40 border-white/20'
                 }`}>
@@ -486,7 +544,7 @@ export default function PrenotazionePage() {
             <div 
               className="absolute h-full bg-white transition-all duration-500"
               style={{ 
-                width: `${(['servizio', 'specialist', 'data', 'ora', 'conferma'].indexOf(step) + 1) * 20}%` 
+                width: `${(['locatie', 'servizio', 'specialist', 'data', 'ora', 'conferma'].indexOf(step) + 1) * 16.67}%` 
               }}
             />
           </div>
@@ -494,13 +552,78 @@ export default function PrenotazionePage() {
 
         {errore && <div className="max-w-4xl mx-auto mb-6"><Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} /></div>}
 
-        {/* STEP 1: SERVIZIO */}
+        {/* STEP 1: LOCATION */}
+        {step === 'locatie' && (
+          <div id="step-locatie" className="max-w-4xl mx-auto">
+            <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-8 text-center tracking-tight">
+              CHOOSE YOUR LOCATION
+            </h2>
+
+            {sediPubbliche.length === 0 ? (
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 text-center">
+                <svg className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <p className="text-lg md:text-xl text-white/60">No locations available</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                {sediPubbliche.map((sede: any) => (
+                  <div
+                    key={sede._id}
+                    onClick={() => handleSelezionaSede(sede)}
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 p-5 md:p-8 hover:bg-white/10 transition-all cursor-pointer group"
+                  >
+                    <svg className="w-10 h-10 md:w-14 md:h-14 mx-auto mb-3 md:mb-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <h3 className="text-lg md:text-xl font-bold mb-1 text-center">{sede.nome}</h3>
+                    <p className="text-sm text-white/60 text-center">{sede.indirizzo}</p>
+                    {sede.citta && <p className="text-sm text-white/60 text-center">{sede.citta}</p>}
+                    <div className="mt-3 text-center">
+                      <span className="text-xs text-white/40">
+                        {sede.postazioni?.filter((p: any) => p.attivo).length || 0} stations
+                      </span>
+                    </div>
+                    <button className="w-full mt-3 md:mt-4 bg-white text-black py-2.5 md:py-3 font-bold hover:bg-white/90 transition-all text-xs md:text-base">
+                      SELECT →
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* STEP 2: SERVIZIO */}
         {step === 'servizio' && (
           <div id="step-servizio" className="max-w-6xl mx-auto">
-            <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-8 text-center tracking-tight">
-              {testiPrenotazione.stepServizio}
-            </h2>
+            <div className="flex items-center justify-between mb-4 md:mb-8">
+              <h2 className="text-xl md:text-3xl font-bold tracking-tight">
+                {testiPrenotazione.stepServizio}
+              </h2>
+              <button
+                onClick={() => { setStep('locatie'); scrollToSection('step-locatie'); }}
+                className="text-white/70 hover:text-white font-medium text-xs md:text-base"
+              >
+                ← Back
+              </button>
+            </div>
             
+            {sedeSelezionata && (
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 md:p-4 mb-4 md:mb-8">
+                <p className="text-center text-sm md:text-base">
+                  <span className="text-white/60">Location:</span>{' '}
+                  <span className="font-bold">{sedeSelezionata.nome}</span>
+                  {sedeSelezionata.indirizzo && (
+                    <span className="text-white/40 ml-2">· {sedeSelezionata.indirizzo}, {sedeSelezionata.citta}</span>
+                  )}
+                </p>
+              </div>
+            )}
+
             {servizi.length === 0 ? (
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 text-center">
                 <svg className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -568,6 +691,9 @@ export default function PrenotazionePage() {
             
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 md:p-4 mb-4 md:mb-8">
               <p className="text-center text-sm md:text-base">
+                <span className="text-white/60">Location:</span>{' '}
+                <span className="font-bold">{sedeSelezionata?.nome}</span>
+                <span className="mx-2 text-white/20">·</span>
                 <span className="text-white/60">Service:</span>{' '}
                 <span className="font-bold">{servizioSelezionato.nome}</span>
               </p>
@@ -600,9 +726,14 @@ export default function PrenotazionePage() {
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                       <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 text-center tracking-tight">
+                    <h3 className="text-lg md:text-xl font-bold mb-1 text-center tracking-tight">
                       {specialist.nome} {specialist.cognome}
                     </h3>
+                    {specialist.giorniSede && specialist.giorniSede.length > 0 && (
+                      <p className="text-xs text-white/50 text-center mb-3">
+                        Disponibil: {specialist.giorniSede.join(', ')}
+                      </p>
+                    )}
                     <button className="w-full bg-white text-black py-2.5 md:py-3 font-bold hover:bg-white/90 transition-all text-sm md:text-base">
                       SELECT →
                     </button>
@@ -736,28 +867,77 @@ export default function PrenotazionePage() {
                   </p>
                 </div>
 
+                {/* Location info */}
+                {sedeSelezionata && (
+                  <div className="mb-4 md:mb-6 bg-white/10 p-3 md:p-4">
+                    <div className="flex items-center gap-2 text-sm md:text-base">
+                      <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      <span className="text-white/60">Location:</span>
+                      <span className="font-bold">{sedeSelezionata.nome}</span>
+                      <span className="text-white/40 ml-2 text-xs">{sedeSelezionata.indirizzo}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Station selection */}
+                {sedeSelezionata?.postazioni?.length > 0 && (
+                  <div className="mb-4 md:mb-6">
+                    <h3 className="text-sm md:text-base font-bold mb-2 md:mb-3 tracking-tight">STATION</h3>
+                    <div className="flex flex-wrap gap-2 md:gap-3">
+                      {sedeSelezionata.postazioni
+                        .filter((p: any) => p.attivo !== false)
+                        .map((p: any) => (
+                        <button
+                          key={p.nome}
+                          onClick={() => !p.occupato && setPostazioneSelezionata(p.nome)}
+                          disabled={p.occupato}
+                          className={`px-3 py-2 md:px-4 md:py-3 font-bold text-xs md:text-sm transition-all ${
+                            postazioneSelezionata === p.nome
+                              ? 'bg-white text-black'
+                              : p.occupato
+                              ? 'bg-white/10 text-white/30 cursor-not-allowed line-through'
+                              : 'bg-white/5 text-white/80 border border-white/20 hover:bg-white/10'
+                          }`}
+                        >
+                          {p.nome}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {caricamentoSlot ? (
                   <div className="text-center py-8 md:py-12">
                     <Caricamento />
                     <p className="text-white/60 mt-4 text-sm md:text-base">Loading times...</p>
                   </div>
                 ) : slotOrari.length > 0 ? (
-                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 md:gap-3">
-                    {slotOrari.map((slot) => (
-                      <button
-                        key={slot.ora}
-                        onClick={() => slot.disponibile && handleSelezionaOra(slot.ora)}
-                        disabled={!slot.disponibile}
-                        className={`py-3 md:py-4 px-1 md:px-2 font-bold text-sm md:text-lg transition-all ${
-                          slot.disponibile
-                            ? 'bg-white text-black hover:bg-white/90 cursor-pointer'
-                            : 'bg-white/10 text-white/40 cursor-not-allowed'
-                        }`}
-                      >
-                        {slot.ora}
-                      </button>
-                    ))}
-                  </div>
+                  <>
+                    {/* Show separator if sede/postazione section was shown */}
+                    {(sediDisponibili.length > 0 || (sedeSelezionata && sedeSelezionata.postazioni?.length > 0)) && (
+                      <div className="border-t border-white/10 my-4 md:my-6"></div>
+                    )}
+                    <h3 className="text-sm md:text-base font-bold mb-2 md:mb-3 tracking-tight">TIME</h3>
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 md:gap-3">
+                      {slotOrari.map((slot) => (
+                        <button
+                          key={slot.ora}
+                          onClick={() => slot.disponibile && handleSelezionaOra(slot.ora)}
+                          disabled={!slot.disponibile}
+                          className={`py-3 md:py-4 px-1 md:px-2 font-bold text-sm md:text-lg transition-all ${
+                            slot.disponibile
+                              ? 'bg-white text-black hover:bg-white/90 cursor-pointer'
+                              : 'bg-white/10 text-white/40 cursor-not-allowed'
+                          }`}
+                        >
+                          {slot.ora}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center py-8 md:py-12">
                     <svg className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -796,6 +976,15 @@ export default function PrenotazionePage() {
                     <p className="text-sm text-white/60 mb-1">Date</p>
                     <p className="font-bold">{dataSelezionata.toLocaleDateString('it-IT')}</p>
                   </div>
+                  {sedeSelezionata && (
+                    <div>
+                      <p className="text-sm text-white/60 mb-1">Location</p>
+                      <p className="font-bold">{sedeSelezionata.nome}</p>
+                      {postazioneSelezionata && (
+                        <p className="text-sm text-white/60">Station: {postazioneSelezionata}</p>
+                      )}
+                    </div>
+                  )}
                   <div className="flex justify-between pt-4 border-t border-white/10">
                     <span className="text-white/60">Total</span>
                     <span className="font-bold text-xl">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>
@@ -903,6 +1092,18 @@ export default function PrenotazionePage() {
                       <span className="text-white/60">Time</span>
                       <span className="font-bold">{oraSelezionata}</span>
                     </div>
+                    {sedeSelezionata && (
+                      <div className="flex justify-between items-center text-sm md:text-base">
+                        <span className="text-white/60">Location</span>
+                        <span className="font-bold text-right">{sedeSelezionata.nome}</span>
+                      </div>
+                    )}
+                    {postazioneSelezionata && (
+                      <div className="flex justify-between items-center text-sm md:text-base">
+                        <span className="text-white/60">Station</span>
+                        <span className="font-bold">{postazioneSelezionata}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center text-sm md:text-base">
                       <span className="text-white/60">Duration</span>
                       <span className="font-bold">{servizioSelezionato?.durata} min</span>

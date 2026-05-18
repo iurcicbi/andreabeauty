@@ -9,10 +9,11 @@
 
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function PrenotazioneErrorePage() {
+function ContenutoErrore() {
   const searchParams = useSearchParams();
   const errore = searchParams.get('errore') || 'Si è verificato un errore durante la prenotazione';
 
@@ -135,7 +136,7 @@ export default function PrenotazioneErrorePage() {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-gray-600">
-            Ci scusiamo per l'inconveniente 🙏
+            Ci scusiamo per l&apos;inconveniente 🙏
           </p>
           <p className="text-sm text-gray-500 mt-2">
             Il nostro team è sempre disponibile per aiutarti
@@ -143,5 +144,13 @@ export default function PrenotazioneErrorePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PrenotazioneErrorePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+      <ContenutoErrore />
+    </Suspense>
   );
 }

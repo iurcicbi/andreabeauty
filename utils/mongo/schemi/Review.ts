@@ -63,6 +63,9 @@ const SchemaMongoose = new Schema<TSchemaReview, ISettings>({
 SchemaMongoose.index({ specialist: 1, status: 1 });
 SchemaMongoose.index({ status: 1, created_at: -1 });
 
+if (process.env.NODE_ENV === 'development' && models.reviews) {
+  delete models.reviews;
+}
 const ReviewSchema = models.reviews || model('reviews', SchemaMongoose);
 
 export default ReviewSchema;

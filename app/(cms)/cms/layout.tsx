@@ -43,7 +43,8 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageSquare,
-  Gift
+  Gift,
+  MapPin
 } from 'lucide-react';
 
 // ============================================
@@ -216,9 +217,11 @@ export default function CMSLayout({
     { href: '/cms/dashboard', label: 'Panou de control', icon: LayoutDashboard },
     { href: '/cms/appointments', label: 'Programări', icon: Calendar },
     { href: '/cms/specialist', label: 'Specialiști', icon: Scissors },
+    { href: '/cms/locations', label: 'Locații', icon: MapPin },
     { href: '/cms/reviews', label: 'Recenzii', icon: MessageSquare },
     { href: '/cms/vouchers', label: 'Vouchere', icon: Gift },
     { href: '/cms/services', label: 'Servicii', icon: Scissors },
+    { href: '/cms/homepage', label: 'Homepage', icon: LayoutDashboard },
     { href: '/cms/hours', label: 'Orar', icon: Clock },
     { href: '/cms/availability', label: 'Disponibilitate echipă', icon: Users },
     { href: '/cms/appearance', label: 'Aspect', icon: Settings },
@@ -240,9 +243,11 @@ export default function CMSLayout({
       <aside 
         className={`
           hidden md:block
+          fixed left-0 top-0 h-screen
           bg-white                    
           border-r border-gray-200    
           transition-all duration-300  
+          z-40
           ${sidebarAperta ? 'w-64' : 'w-20'}
         `}
       >
@@ -410,7 +415,7 @@ export default function CMSLayout({
       {/* ========================================
           AREA CONTENUTO PRINCIPALE
           ======================================== */}
-      <div className="flex-1 flex flex-col md:pb-0">
+      <div className={`flex-1 flex flex-col md:pb-0 ${sidebarAperta ? 'md:ml-64' : 'md:ml-20'}`}>
         
         {/* HEADER */}
         <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">

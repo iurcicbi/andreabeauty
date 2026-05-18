@@ -3,14 +3,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { runReminderScheduler } from '@/services/reminderScheduler';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     console.log('🔄 Test manuale scheduler avviato');
-    
-    await runReminderScheduler();
-    
+
+    const { runDailyReminders } = require('@/lib/cron/reminders');
+    await runDailyReminders();
+
     return NextResponse.json({
       success: true,
       message: 'Scheduler eseguito manualmente con successo',
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Errore test scheduler:', error);
-    
+
     return NextResponse.json({
       success: false,
       error: error.message,
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json({
     message: 'Endpoint test scheduler - usa POST per eseguire',
     usage: 'POST /api/test/scheduler'

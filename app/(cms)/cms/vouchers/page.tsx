@@ -153,7 +153,7 @@ export default function VouchersPage() {
 
   const getServiceLabel = (v: Voucher) => {
     if (v.appliesToAll) return 'Orice serviciu';
-    if (v.services?.length > 0) return v.services.map(s => s.nume).join(', ');
+    if (v.services?.length > 0) return v.services.map(s => s.nome).join(', ');
     return 'Niciun serviciu';
   };
 

@@ -39,3 +39,9 @@ next-env.d.ts
 *.swp
 *.swo
 *~
+
+# WhatsApp session (whatsapp-web.js)
+.wwebjs_auth/
+.wwebjs_cache/
+.wwebjs_test/
+.wwebjs_reminders/

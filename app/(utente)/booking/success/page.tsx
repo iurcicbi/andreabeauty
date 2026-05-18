@@ -9,11 +9,11 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function PrenotazioneSuccessoPage() {
+function ContenutoSuccesso() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [countdown, setCountdown] = useState(10);
@@ -157,7 +157,7 @@ export default function PrenotazioneSuccessoPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 mt-0.5">•</span>
-                  <span>Ti consigliamo di arrivare 5 minuti prima dell'orario prenotato</span>
+                  <span>Ti consigliamo di arrivare 5 minuti prima dell&apos;orario prenotato</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 mt-0.5">•</span>
@@ -221,5 +221,13 @@ export default function PrenotazioneSuccessoPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PrenotazioneSuccessoPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+      <ContenutoSuccesso />
+    </Suspense>
   );
 }

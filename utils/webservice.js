@@ -155,9 +155,9 @@ export function requestUpload(link, dati) {
 /**
  * ENDPOINTS AUTENTICAZIONE
  */
-export const AUTH_LOGIN = "/autenticazione/login";
-export const AUTH_LOGOUT = "/autenticazione/logout";
-export const AUTH_REGISTER = "/auth/register";
+export const AUTH_LOGIN = "/api/auth/login";
+export const AUTH_LOGOUT = "/api/auth/logout";
+export const AUTH_REGISTER = "/api/auth/register";
 
 /**
  * METODI HTTP STANDARD

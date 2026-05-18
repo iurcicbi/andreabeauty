@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import webservice from '@/utils/webservice';
 import Bottone from '@/componenti/interfaccia/Bottone';
@@ -8,7 +8,7 @@ import Messaggio from '@/componenti/comuni/Messaggio';
 import Caricamento from '@/componenti/comuni/Caricamento';
 import { Star, CheckCircle } from 'lucide-react';
 
-export default function ReviewPage() {
+function ContenutoReview() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -138,5 +138,13 @@ export default function ReviewPage() {
         </Bottone>
       </div>
     </div>
+  );
+}
+
+export default function ReviewPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+      <ContenutoReview />
+    </Suspense>
   );
 }

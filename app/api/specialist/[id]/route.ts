@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
 import Specialist from '@/utils/mongo/schemi/Specialist';
-import '@/utils/mongo/schemi/Servizio';
+import Utente from '@/utils/mongo/schemi/Utente';
+import Servizio from '@/utils/mongo/schemi/Servizio';
 
 export async function GET(
   req: NextRequest,
@@ -9,6 +10,10 @@ export async function GET(
 ) {
   try {
     await connessioneMongoDB();
+
+    // Forza la registrazione degli schemi in Mongoose prima del populate
+    void Utente;
+    void Servizio;
 
     console.log('🔍 API /api/specialist/[id] - Searching specialist by ID:', params.id);
 

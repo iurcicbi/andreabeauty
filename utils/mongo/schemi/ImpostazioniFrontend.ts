@@ -75,6 +75,9 @@ const SchemaMongoose = new Schema<TSchemaImpostazioniFrontend, ISettings>({
   timestamps: true,
 });
 
+if (process.env.NODE_ENV === 'development' && models.ImpostazioniFrontend) {
+  delete models.ImpostazioniFrontend;
+}
 const ImpostazioniFrontend = models.ImpostazioniFrontend || model<TSchemaImpostazioniFrontend, ISettings>('ImpostazioniFrontend', SchemaMongoose);
 
 export default ImpostazioniFrontend;
