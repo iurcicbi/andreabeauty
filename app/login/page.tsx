@@ -64,7 +64,6 @@ export default function LoginPage() {
               <path d="M12 8v8M8 12h8"/>
             </svg>
           </div>
-          <h1 className="text-3xl font-light text-[#4a4a4a] tracking-[0.15em] uppercase">Beauty Salon</h1>
           <p className="text-[#8a8a7a] mt-2 text-sm tracking-wide">Acces în contul tău</p>
         </div>
 

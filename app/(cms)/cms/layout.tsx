@@ -233,7 +233,7 @@ export default function CMSLayout({
   // ============================================
   return (
     // Layout responsive: mobile = colonna, desktop = sidebar + contenuto
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#faf7f2] flex flex-col md:flex-row">
       
       {/* ========================================
           SIDEBAR - MOBILE: BOTTOM NAV, DESKTOP: SIDEBAR
@@ -244,8 +244,8 @@ export default function CMSLayout({
         className={`
           hidden md:block
           fixed left-0 top-0 h-screen
-          bg-white                    
-          border-r border-gray-200    
+          bg-white/95 backdrop-blur-sm
+          border-r border-[#e8dccc]    
           transition-all duration-300  
           z-40
           ${sidebarAperta ? 'w-64' : 'w-20'}
@@ -254,7 +254,7 @@ export default function CMSLayout({
         <div className="h-full flex flex-col">
           
           {/* Logo e Toggle */}
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="p-4 border-b border-[#e8dccc]/80 flex items-center justify-between">
             <Link 
               href="/cms/dashboard" 
               className={`flex items-center gap-2 ${!sidebarAperta && 'hidden'}`}
@@ -271,21 +271,21 @@ export default function CMSLayout({
                 />
               ) : (
                 <>
-                  <Scissors className="w-6 h-6 text-primary-600" />
-                  <span className="font-bold text-gray-800">{nomeAzienda}</span>
+                  <Scissors className="w-6 h-6 text-[#c9a96e]" />
+                  <span className="font-bold text-[#4a4a4a]">{nomeAzienda}</span>
                 </>
               )}
             </Link>
             
             <button
               onClick={() => setSidebarAperta(!sidebarAperta)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-lg hover:bg-[#f0ebe2] transition-colors"
               aria-label={sidebarAperta ? 'Închide bara laterală' : 'Deschide bara laterală'}
             >
               {sidebarAperta ? (
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                <ChevronLeft className="w-5 h-5 text-[#8a8a7a]" />
               ) : (
-                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <ChevronRight className="w-5 h-5 text-[#8a8a7a]" />
               )}
             </button>
           </div>
@@ -306,8 +306,8 @@ export default function CMSLayout({
                     group                     
                     ${
                       pathname === item.href  
-                        ? 'bg-primary-100 text-primary-700 font-semibold'  
-                        : 'text-gray-600 hover:bg-gray-100'                
+                        ? 'bg-[#c9a96e]/10 text-[#8a6a3a] font-semibold'  
+                        : 'text-[#6a6a5a] hover:bg-[#f0ebe2]'                
                     }
                   `}
                 >
@@ -320,7 +320,7 @@ export default function CMSLayout({
                   {!sidebarAperta && (
                     <div className="
                       absolute left-16          
-                      bg-gray-800 text-white    
+                      bg-[#4a4a4a] text-white   
                       px-2 py-1 rounded         
                       text-sm                    
                       opacity-0                  
@@ -339,9 +339,9 @@ export default function CMSLayout({
           </nav>
 
           {/* Profilo e Logout */}
-          <div className="p-4 border-t border-gray-200 space-y-2">
+          <div className="p-4 border-t border-[#e8dccc]/80 space-y-2">
             {sidebarAperta && (
-              <div className="px-4 py-2 text-gray-600">
+              <div className="px-4 py-2 text-[#6a6a5a]">
                 <div className="text-sm">Salut,</div>
                 <div className="font-semibold truncate">{utente?.nome}</div>
               </div>
@@ -354,7 +354,7 @@ export default function CMSLayout({
                 w-full                    
                 px-4 py-3                 
                 rounded-lg                 
-                text-red-600 hover:bg-red-50  
+                text-red-500 hover:bg-red-50  
                 transition-colors          
                 group
                 ${!sidebarAperta && 'justify-center'}
@@ -366,7 +366,7 @@ export default function CMSLayout({
               {!sidebarAperta && (
                 <div className="
                   absolute left-16
-                  bg-gray-800 text-white
+                  bg-[#4a4a4a] text-white
                   px-2 py-1 rounded
                   text-sm
                   opacity-0 group-hover:opacity-100
@@ -382,7 +382,7 @@ export default function CMSLayout({
         </div>
       </aside>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[#e8dccc] z-50 safe-area-bottom">
         <div className="grid grid-cols-4 gap-1 p-2">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
@@ -397,8 +397,8 @@ export default function CMSLayout({
                   transition-colors
                   ${
                     pathname === item.href
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-600 active:bg-gray-100'
+                      ? 'bg-[#c9a96e]/10 text-[#8a6a3a]'
+                      : 'text-[#6a6a5a] active:bg-[#f0ebe2]'
                   }
                 `}
               >
@@ -418,21 +418,21 @@ export default function CMSLayout({
       <div className={`flex-1 flex flex-col md:pb-0 ${sidebarAperta ? 'md:ml-64' : 'md:ml-20'}`}>
         
         {/* HEADER */}
-        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-[#e8dccc]/60 sticky top-0 z-40">
           <div className="px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg md:text-xl font-semibold text-gray-800 truncate">
+              <h1 className="text-lg md:text-xl font-semibold text-[#4a4a4a] truncate">
                 {menuItems.find(item => item.href === pathname)?.label || 'CMS'}
               </h1>
             </div>
             
             <div className="md:hidden flex items-center gap-2">
-              <span className="text-sm text-gray-600 truncate max-w-[100px]">
+              <span className="text-sm text-[#6a6a5a] truncate max-w-[100px]">
                 {utente?.nome}
               </span>
               <button
                 onClick={handleLogout}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 aria-label="Deconectare"
               >
                 <LogOut className="w-5 h-5" />
