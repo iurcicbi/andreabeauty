@@ -7,18 +7,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Palette colori per beauty salon
+        // Palette calda beige/aurie pentru beauty salon
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
+          50: '#faf7f2',
+          100: '#f0ebe2',
+          200: '#e8dccc',
+          300: '#d4bfa0',
+          400: '#c9a96e',
+          500: '#c9a96e',
+          600: '#b8975a',
+          700: '#8a6a3a',
+          800: '#6a4a2a',
         },
         brand: {
           dark: '#1a1a1a',
-          gold: '#d4af37',
-          cream: '#f5f5dc',
+          gold: '#c9a96e',
+          cream: '#faf7f2',
         },
       },
       // Breakpoint ottimizzati per mobile-first

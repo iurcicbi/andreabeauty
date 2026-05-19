@@ -63,7 +63,7 @@ export default function LoginPage() {
               <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
               <path d="M12 8v8M8 12h8"/>
             </svg>
-          </div>
+          </div> 
           <p className="text-[#8a8a7a] mt-2 text-sm tracking-wide">Acces în contul tău</p>
         </div>
 
