@@ -65,6 +65,8 @@ export interface IImpostazioni extends Document {
   
   // SEZIONI DINAMICHE HOMEPAGE
   sezioniHomepage: {
+    colorePrimario: string;
+    coloreSecondario: string;
     hero: {
       attiva: boolean;
       ordine: number;
@@ -72,77 +74,159 @@ export interface IImpostazioni extends Document {
       sottotitolo: string;
       badge: string;
       testoCtaPrimario: string;
+      urlCtaPrimario: string;
       testoCtaSecondario: string;
+      urlCtaSecondario: string;
       immagineBackground: string;
       mostraLogo: boolean;
       mostraInfoRapide: boolean;
+      coloreSfondo: string;
     };
     servizi: {
       attiva: boolean;
+      mostraNelMenu: boolean;
+      nomeMenu: string;
       ordine: number;
       titolo: string;
       sottotitolo: string;
       descrizione: string;
+      badge: string;
       immagineBackground: string;
       layoutGriglia: 'grid-2' | 'grid-3' | 'grid-4';
+      stileCard: 'classic' | 'minimal' | 'exploreaza';
       mostraPrezzi: boolean;
       mostraDurata: boolean;
+      serviziSelezionati: string[];
+      coloreSfondo: string;
     };
     about: {
       attiva: boolean;
+      mostraNelMenu: boolean;
+      nomeMenu: string;
       ordine: number;
       titolo: string;
       sottotitolo: string;
       descrizione: string;
       immagine: string;
+      nomeFondatore: string;
+      ruoloFondatore: string;
+      testoCta: string;
+      urlCta: string;
+      dettagli: {
+        titolo: string;
+        descrizione: string;
+        icona: string;
+      }[];
       statistiche: {
         anni: { valore: string; label: string; };
         clienti: { valore: string; label: string; };
         qualita: { valore: string; label: string; };
       };
+      coloreSfondo: string;
     };
     orari: {
       attiva: boolean;
+      mostraNelMenu: boolean;
+      nomeMenu: string;
       ordine: number;
       titolo: string;
       sottotitolo: string;
       descrizione: string;
+      coloreSfondo: string;
     };
     recensioni: {
       attiva: boolean;
+      mostraNelMenu: boolean;
+      nomeMenu: string;
       ordine: number;
+      badge: string;
       titolo: string;
       sottotitolo: string;
       numeroMassimo: number;
+      mostraNome: boolean;
+      mostraServizio: boolean;
+      mostraStelle: boolean;
+      numeroColonne: number;
+      layout: 'classic' | 'social' | 'whatsapp' | 'carousel' | 'compact';
+      arataInEvidenta: boolean;
+      coloreSfondo: string;
     };
     contatti: {
       attiva: boolean;
+      mostraNelMenu: boolean;
+      nomeMenu: string;
       ordine: number;
       titolo: string;
-      sottotitolo: string;
+      badge: string;
+      testoLink: string;
+      urlLink: string;
       descrizione: string;
+      emailGenerale: string;
+      telefonoGenerale: string;
+      labelInquiries: string;
       mostraMappa: boolean;
       urlMappa: string;
       mostraSocial: boolean;
+      coloreSfondo: string;
+      mostraLocazioni: boolean;
+      sedi: {
+        nome: string;
+        indirizzo: string;
+        cap: string;
+        citta: string;
+        telefono: string;
+        email: string;
+        urlMappa: string;
+        programma: {
+          giorno: string;
+          orario: string;
+          chiuso: boolean;
+        }[];
+      }[];
     };
     ctaFinale: {
       attiva: boolean;
+      mostraNelMenu: boolean;
+      nomeMenu: string;
       ordine: number;
       titolo: string;
       sottotitolo: string;
       testoPulsante: string;
       immagineBackground: string;
+      coloreSfondo: string;
     };
     galleria: {
-      attiva: boolean;
+      attiva: boolean;      mostraNelMenu: boolean;
+      nomeMenu: string;
       ordine: number;
+      badge: string;
       titolo: string;
       sottotitolo: string;
-      layout: 'grid-2' | 'grid-3' | 'grid-4' | 'masonry';
+      layout: 'grid-2' | 'grid-3' | 'grid-4' | 'grid-custom' | 'masonry';
       immagini: {
         url: string;
         didascalia: string;
         alt: string;
+      }[];
+      mostraPulsantePortfolio: boolean;
+      testoPulsantePortfolio: string;
+      testoNascondiPortfolio: string;
+      urlPulsantePortfolio: string;
+      coloreSfondo: string;
+    };
+    filosofia: {
+      attiva: boolean;
+      mostraNelMenu: boolean;
+      nomeMenu: string;
+      ordine: number;
+      badge: string;
+      titolo: string;
+      immagine: string;
+      coloreSfondo: string;
+      pilastri: {
+        titolo: string;
+        descrizione: string;
+        icona: string;
       }[];
     };
   };
@@ -204,6 +288,7 @@ export interface IImpostazioni extends Document {
     mostraSocial: boolean;
     mostraContatti: boolean;
     abilitaPrenotazioni: boolean;
+    mostraPrezziFrontend: boolean;
     richiestaConfermaEmail: boolean;
     oreAnticipo: number; // ore prima dell'appuntamento per inviare richiesta conferma
   };
@@ -320,6 +405,8 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   
   // SEZIONI DINAMICHE HOMEPAGE
   sezioniHomepage: {
+    colorePrimario: { type: String, default: '#FFF8F0' },
+    coloreSecondario: { type: String, default: '#F5EEE1' },
     hero: {
       attiva: { type: Boolean, default: true },
       ordine: { type: Number, default: 1 },
@@ -327,29 +414,45 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
       sottotitolo: { type: String, default: '' },
       badge: { type: String, default: 'Premium Beauty Salon' },
       testoCtaPrimario: { type: String, default: 'PRENOTA APPUNTAMENTO' },
+      urlCtaPrimario: { type: String, default: '/booking' },
       testoCtaSecondario: { type: String, default: 'DOVE SIAMO' },
+      urlCtaSecondario: { type: String, default: '#contact' },
       immagineBackground: { type: String, default: '' },
       mostraLogo: { type: Boolean, default: true },
-      mostraInfoRapide: { type: Boolean, default: true }
+      mostraInfoRapide: { type: Boolean, default: true },
+      coloreSfondo: { type: String, default: '' }
     },
     servizi: {
       attiva: { type: Boolean, default: true },
+      mostraNelMenu: { type: Boolean, default: true },
+      nomeMenu: { type: String, default: 'Servizi' },
       ordine: { type: Number, default: 2 },
       titolo: { type: String, default: 'I NOSTRI SERVIZI' },
       sottotitolo: { type: String, default: 'Qualità e professionalità per il tuo look perfetto' },
       descrizione: { type: String, default: '' },
       immagineBackground: { type: String, default: '' },
       layoutGriglia: { type: String, enum: ['grid-2', 'grid-3', 'grid-4'], default: 'grid-3' },
+      stileCard: { type: String, enum: ['classic', 'minimal', 'exploreaza'], default: 'classic' },
+      badge: { type: String, default: 'I NOSTRI SERVIZI' },
       mostraPrezzi: { type: Boolean, default: true },
-      mostraDurata: { type: Boolean, default: true }
+      mostraDurata: { type: Boolean, default: true },
+      serviziSelezionati: { type: [String], default: [] },
+      coloreSfondo: { type: String, default: '' }
     },
     about: {
       attiva: { type: Boolean, default: true },
+      mostraNelMenu: { type: Boolean, default: true },
+      nomeMenu: { type: String, default: 'Chi Siamo' },
       ordine: { type: Number, default: 3 },
       titolo: { type: String, default: 'CHI SIAMO' },
       sottotitolo: { type: String, default: 'La nostra storia, la tua bellezza' },
       descrizione: { type: String, default: 'Siamo un team di professionisti appassionati, dedicati a far emergere la bellezza unica di ogni cliente. Con anni di esperienza nel settore, offriamo servizi di alta qualità in un ambiente elegante e accogliente.' },
       immagine: { type: String, default: '' },
+      nomeFondatore: { type: String, default: '' },
+      ruoloFondatore: { type: String, default: 'Founder & Makeup Artist' },
+      testoCta: { type: String, default: '' },
+      urlCta: { type: String, default: '/booking' },
+      dettagli: { type: [{ titolo: String, descrizione: String, icona: String }], default: [] },
       statistiche: {
         anni: {
           valore: { type: String, default: '10+' },
@@ -363,51 +466,117 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
           valore: { type: String, default: '100%' },
           label: { type: String, default: 'Professionalità' }
         }
-      }
+      },
+      coloreSfondo: { type: String, default: '' }
     },
     orari: {
       attiva: { type: Boolean, default: true },
+      mostraNelMenu: { type: Boolean, default: true },
+      nomeMenu: { type: String, default: 'Orari' },
       ordine: { type: Number, default: 4 },
       titolo: { type: String, default: 'ORARI DI APERTURA' },
       sottotitolo: { type: String, default: 'Siamo qui per te' },
-      descrizione: { type: String, default: '' }
+      descrizione: { type: String, default: '' },
+      coloreSfondo: { type: String, default: '' }
     },
     recensioni: {
       attiva: { type: Boolean, default: true },
+      mostraNelMenu: { type: Boolean, default: true },
+      nomeMenu: { type: String, default: 'Recenzii' },
       ordine: { type: Number, default: 5 },
-      titolo: { type: String, default: 'Cosa dicono i nostri clienti' },
-      sottotitolo: { type: String, default: 'Le tue opinioni contano' },
-      numeroMassimo: { type: Number, default: 6 }
+      badge: { type: String, default: 'EXPERIENȚE' },
+      titolo: { type: String, default: 'Perspective Comune asupra Eleganței' },
+      sottotitolo: { type: String, default: '' },
+      numeroMassimo: { type: Number, default: 6 },
+      mostraNome: { type: Boolean, default: true },
+      mostraServizio: { type: Boolean, default: true },
+      mostraStelle: { type: Boolean, default: false },
+      numeroColonne: { type: Number, default: 2 },
+      layout: { type: String, enum: ['classic', 'social', 'whatsapp', 'carousel', 'compact'], default: 'classic' },
+      arataInEvidenta: { type: Boolean, default: false },
+      coloreSfondo: { type: String, default: '' }
     },
     contatti: {
       attiva: { type: Boolean, default: true },
+      mostraNelMenu: { type: Boolean, default: true },
+      nomeMenu: { type: String, default: 'Contatti' },
       ordine: { type: Number, default: 6 },
-      titolo: { type: String, default: 'CONTATTACI' },
-      sottotitolo: { type: String, default: 'Siamo qui per te' },
+      titolo: { type: String, default: 'Contactați-ne' },
       descrizione: { type: String, default: '' },
-      mostraMappa: { type: Boolean, default: true },
-      urlMappa: { type: String, default: '' },
-      mostraSocial: { type: Boolean, default: true }
+      labelInquiries: { type: String, default: 'GENERAL INQUIRIES' },
+      emailGenerale: { type: String, default: '' },
+      telefonoGenerale: { type: String, default: '' },
+      testoLink: { type: String, default: 'EXPLORE THE SPACES' },
+      urlLink: { type: String, default: '' },
+      mostraLocazioni: { type: Boolean, default: false },
+      coloreSfondo: { type: String, default: '' },
+      sedi: [{
+        nome: { type: String, default: '' },
+        indirizzo: { type: String, default: '' },
+        cap: { type: String, default: '' },
+        citta: { type: String, default: '' },
+        telefono: { type: String, default: '' },
+        email: { type: String, default: '' },
+        urlMappa: { type: String, default: '' },
+        programma: [{
+          giorno: { type: String, default: '' },
+          orario: { type: String, default: '' },
+          chiuso: { type: Boolean, default: false },
+        }],
+      }],
     },
     ctaFinale: {
       attiva: { type: Boolean, default: true },
+      mostraNelMenu: { type: Boolean, default: true },
+      nomeMenu: { type: String, default: '' },
       ordine: { type: Number, default: 7 },
       titolo: { type: String, default: 'PRONTO PER IL TUO NUOVO LOOK?' },
       sottotitolo: { type: String, default: 'Prenota ora il tuo appuntamento e affidati ai nostri professionisti' },
       testoPulsante: { type: String, default: 'PRENOTA SUBITO' },
-      immagineBackground: { type: String, default: '' }
+      immagineBackground: { type: String, default: '' },
+      coloreSfondo: { type: String, default: '' }
     },
     galleria: {
       attiva: { type: Boolean, default: true },
+      mostraNelMenu: { type: Boolean, default: true },
+      nomeMenu: { type: String, default: 'Galleria' },
       ordine: { type: Number, default: 8 },
-      titolo: { type: String, default: 'GALLERIA' },
-      sottotitolo: { type: String, default: 'I nostri lavori' },
-      layout: { type: String, enum: ['grid-2', 'grid-3', 'grid-4', 'masonry'], default: 'grid-3' },
+      badge: { type: String, default: 'ARHIVĂ VIZUALĂ' },
+      titolo: { type: String, default: 'Arta Tenului Impecabil' },
+      sottotitolo: { type: String, default: '' },
+      layout: { type: String, enum: ['grid-2', 'grid-3', 'grid-4', 'grid-custom', 'masonry'], default: 'grid-custom' },
       immagini: [{
         url: { type: String, default: '' },
         didascalia: { type: String, default: '' },
         alt: { type: String, default: '' }
-      }]
+      }],
+      mostraPulsantePortfolio: { type: Boolean, default: true },
+      testoPulsantePortfolio: { type: String, default: 'VEZI TOT PORTOFOLIUL' },
+      testoNascondiPortfolio: { type: String, default: 'ASCUNDE PORTOFOLIUL' },
+      urlPulsantePortfolio: { type: String, default: '/portfolio' },
+      coloreSfondo: { type: String, default: '' }
+    },
+    filosofia: {
+      attiva: { type: Boolean, default: false },
+      mostraNelMenu: { type: Boolean, default: false },
+      nomeMenu: { type: String, default: 'Filosofia' },
+      ordine: { type: Number, default: 9 },
+      badge: { type: String, default: 'ATELIER & FILOSOFIA' },
+      titolo: { type: String, default: 'Dincolo de Suprafață' },
+      immagine: { type: String, default: '' },
+      coloreSfondo: { type: String, default: '' },
+      pilastri: {
+        type: [{
+          titolo: { type: String, default: '' },
+          descrizione: { type: String, default: '' },
+          icona: { type: String, default: 'diamond' },
+        }],
+        default: [
+          { titolo: 'Fundament Științific', descrizione: 'Inspirată de \'Cosmetica Medicală\', abordarea noastră prioritizează sănătatea pielii ca fundament suprem pentru orice aplicație artistică.', icona: 'science' },
+          { titolo: 'Aură Holistică', descrizione: 'Nu aplicăm doar produse; cultivăm o esență. Fiecare tratament este o experiență meditativă de lux și îngrijire.', icona: 'spa' },
+          { titolo: 'Precizie Intenționată', descrizione: 'Precizia este limbajul nostru. Fiecare mișcare este calculată pentru a îmbunătăți armonia structurală și simetria facială.', icona: 'architecture' },
+        ]
+      }
     }
   },
   
@@ -468,6 +637,7 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
     mostraSocial: { type: Boolean, default: true },
     mostraContatti: { type: Boolean, default: true },
     abilitaPrenotazioni: { type: Boolean, default: true },
+    mostraPrezziFrontend: { type: Boolean, default: true },
     richiestaConfermaEmail: { type: Boolean, default: false },
     oreAnticipo: { type: Number, default: 24 } // default 24 ore prima
   },

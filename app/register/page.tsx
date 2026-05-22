@@ -77,11 +77,11 @@ export default function RegistrazionePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#FBEEF2] to-[#F4D9DE] flex items-center justify-center px-4 py-8">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Beauty Salon</h1>
-          <p className="text-gray-400">Crea il tuo account</p>
+          <h1 className="text-4xl font-bold text-[#4A3035] mb-2">Beauty Salon</h1>
+          <p className="text-[#A07078]">Crea il tuo account</p>
         </div>
 
         <Card>
@@ -154,9 +154,9 @@ export default function RegistrazionePage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-[#A07078]">
               Hai già un account?{' '}
-              <Link href="/login" className="text-primary-600 hover:text-primary-700 font-semibold">
+              <Link href="/login" className="text-[#E0B2B7] hover:text-[#C49098] font-semibold">
                 Accedi
               </Link>
             </p>
@@ -164,7 +164,7 @@ export default function RegistrazionePage() {
         </Card>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/" className="text-[#A07078] hover:text-[#4A3035] transition-colors">
             ← Torna alla home
           </Link>
         </div>

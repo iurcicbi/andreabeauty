@@ -17,6 +17,7 @@ import Card from '@/componenti/interfaccia/Card';
 import Caricamento from '@/componenti/comuni/Caricamento';
 import Messaggio from '@/componenti/comuni/Messaggio';
 import { formattaPrezzo } from '@/utils/helpers';
+import FeaturedReviewsBlock from '@/componenti/homepage/FeaturedReviewsBlock';
 
 interface Servizio {
   _id: string;
@@ -29,6 +30,7 @@ interface Servizio {
 
 export default function ServiziPage() {
   const [servizi, setServizi] = useState<Servizio[]>([]);
+  const [mostraPrezzi, setMostraPrezzi] = useState(true);
   const [caricamento, setCaricamento] = useState(true);
   const [errore, setErrore] = useState('');
 
@@ -39,8 +41,12 @@ export default function ServiziPage() {
   const caricaServizi = async () => {
     try {
       setCaricamento(true);
-      const risposta = await webservice.get('/api/services');
-      setServizi(risposta.dati);
+      const [rispostaServizi, rispostaSettings] = await Promise.all([
+        webservice.get('/api/services'),
+        webservice.get('/api/settings'),
+      ]);
+      setServizi(rispostaServizi.dati);
+      setMostraPrezzi(rispostaSettings.dati?.funzionalita?.mostraPrezziFrontend !== false);
     } catch (err) {
       setErrore('Errore nel caricamento dei servizi');
       console.error(err);
@@ -92,12 +98,14 @@ export default function ServiziPage() {
                       <p className="text-sm text-gray-500">Durata</p>
                       <p className="font-semibold">{servizio.durata} min</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Prezzo</p>
-                      <p className="font-bold text-primary-600 text-xl">
-                        {formattaPrezzo(servizio.prezzo)}
-                      </p>
-                    </div>
+                    {mostraPrezzi && (
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Prezzo</p>
+                        <p className="font-bold text-primary-600 text-xl">
+                          {formattaPrezzo(servizio.prezzo)}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
@@ -110,6 +118,17 @@ export default function ServiziPage() {
             Nessun servizio disponibile al momento.
           </p>
         )}
+
+        <FeaturedReviewsBlock limit={4} />
+
+        <div className="text-center mt-8 mb-12">
+          <a
+            href="/booking"
+            className="inline-block bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+          >
+            Prenota Appuntamento
+          </a>
+        </div>
       </div>
     </div>
   );

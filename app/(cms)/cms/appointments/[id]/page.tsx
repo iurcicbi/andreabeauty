@@ -221,7 +221,7 @@ export default function ModificaAppuntamentoPage() {
       }, 1500);
 
     } catch (err: any) {
-      const messaggio = err.response?.data?.errore || 'Errore durante l\'aggiornamento';
+      const messaggio = err.response?.data?.errore || 'Eroare în timpul actualizării';
       setErrore(messaggio);
     } finally {
       setSalvando(false);
@@ -241,7 +241,7 @@ export default function ModificaAppuntamentoPage() {
         router.push('/cms/appointments');
       }, 1500);
     } catch (err: any) {
-      setErrore(err.response?.data?.errore || 'Errore durante l\'eliminazione');
+      setErrore(err.response?.data?.errore || 'Eroare în timpul ștergerii');
       setSalvando(false);
     }
   };
@@ -447,8 +447,8 @@ export default function ModificaAppuntamentoPage() {
                     {appuntamento.voucher?.type === 'free' ? ' — Gratuit' : appuntamento.voucher?.type === 'percentage' ? ` — -${appuntamento.voucher.value}%` : appuntamento.voucher?.type === 'fixed' ? ` — -€${appuntamento.voucher.value}` : ''}
                   </p>
                 )}
-                <p><strong>Data:</strong> {new Date(data).toLocaleDateString('it-IT')}</p>
-                <p><strong>Orario:</strong> {oraSelezionata}</p>
+                <p><strong>Data:</strong> {new Date(data).toLocaleDateString('ro-RO')}</p>
+                <p><strong>Oră:</strong> {oraSelezionata}</p>
                 <p><strong>Stato:</strong> <span className="capitalize">{stato.replace('_', ' ')}</span></p>
               </div>
             )}

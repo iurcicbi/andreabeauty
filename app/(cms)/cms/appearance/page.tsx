@@ -6,9 +6,8 @@ import Bottone from '@/componenti/interfaccia/Bottone';
 import Messaggio from '@/componenti/comuni/Messaggio';
 import Caricamento from '@/componenti/comuni/Caricamento';
 import webservice from '@/utils/webservice';
-import Tabs from '@/componenti/comuni/Tabs';
 import { 
-  Settings, 
+  Settings,
   Image as ImageIcon, 
   Trash2, 
   Save, 

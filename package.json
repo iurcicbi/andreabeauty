@@ -16,6 +16,9 @@
     "migrate:beauty:auto": "AUTO_MIGRATE=true node scripts/migra-specialisti.js"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "argon2": "^0.44.0",
     "axios": "^1.6.0",
     "bcryptjs": "^2.4.3",

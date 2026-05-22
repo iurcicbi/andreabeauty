@@ -60,6 +60,7 @@ export default function ServiziPage() {
   const [servizi, setServizi] = useState<Servizio[]>([]);
   const [mostraForm, setMostraForm] = useState(false);
   const [servizioCorrente, setServizioCorrente] = useState<Servizio | null>(null);
+  const [mostraPrezziFrontend, setMostraPrezziFrontend] = useState(true);
   
   const [formData, setFormData] = useState({
     nome: '',
@@ -96,22 +97,15 @@ export default function ServiziPage() {
     caricamento: false,
   });
 
-  const categorie = [
-    { value: 'capelli', label: 'Păr' },
-    { value: 'barba', label: 'Barbă' },
-    { value: 'combo', label: 'Combo (Tunsoare + Barbă)' },
-    { value: 'colorazione', label: 'Colorație' },
-    { value: 'trattamenti', label: 'Tratamente' },
-    { value: 'altro', label: 'Altele' },
-  ];
+
 
   const durateComuni = [
     { value: 15, label: '15 minute' },
-    { value: 20, label: '20 minute (Barbă)' },
-    { value: 30, label: '30 minute (Tunsoare)' },
+    { value: 20, label: '20 minute ' },
+    { value: 30, label: '30 minute' },
     { value: 45, label: '45 minute' },
-    { value: 50, label: '50 minute (Tunsoare + Barbă)' },
-    { value: 60, label: '60 minute (Colorație)' },
+    { value: 50, label: '50 minute' },
+    { value: 60, label: '60 minute' },
     { value: 90, label: '90 minute' },
     { value: 120, label: '120 minute' },
   ];
@@ -123,12 +117,33 @@ export default function ServiziPage() {
   const caricaServizi = async () => {
     try {
       setCaricamento(true);
-      const risposta = await webservice.get('/api/services/cms');
+      const [risposta, rispostaSettings] = await Promise.all([
+        webservice.get('/api/services/cms'),
+        webservice.get('/api/settings'),
+      ]);
       setServizi(risposta.dati);
+      setMostraPrezziFrontend(rispostaSettings.dati?.funzionalita?.mostraPrezziFrontend !== false);
     } catch (err) {
       setErrore('Eroare la încărcarea serviciilor');
     } finally {
       setCaricamento(false);
+    }
+  };
+
+  const handleTogglePrezziFrontend = async () => {
+    try {
+      const nuovoValore = !mostraPrezziFrontend;
+      const risposta = await webservice.get('/api/settings');
+      const impostazioni = risposta.dati;
+      impostazioni.funzionalita = {
+        ...impostazioni.funzionalita,
+        mostraPrezziFrontend: nuovoValore,
+      };
+      await webservice.put('/api/settings', impostazioni);
+      setMostraPrezziFrontend(nuovoValore);
+      setSuccesso(nuovoValore ? 'Prețurile sunt acum vizibile pe site' : 'Prețurile sunt acum ascunse pe site');
+    } catch (err) {
+      setErrore('Eroare la salvarea setării');
     }
   };
 
@@ -262,6 +277,17 @@ export default function ServiziPage() {
           <p className="text-sm text-gray-600 mt-1">
             {servizi.length} servicii • {servizi.filter(s => s.attivo).length} active
           </p>
+          <label className="inline-flex items-center gap-2 mt-2 cursor-pointer text-sm">
+            <input
+              type="checkbox"
+              checked={mostraPrezziFrontend}
+              onChange={handleTogglePrezziFrontend}
+              className="w-4 h-4"
+            />
+            <span className={mostraPrezziFrontend ? 'text-green-700 font-medium' : 'text-red-600 font-medium'}>
+              {mostraPrezziFrontend ? 'Prețuri vizibile pe site' : 'Prețuri ascunse pe site'}
+            </span>
+          </label>
         </div>
         {/* Pulsante Nuovo - Solo Desktop */}
         {!mostraForm && (
@@ -300,20 +326,7 @@ export default function ServiziPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-              <div>
-                <label className="label">Categorie</label>
-                <select
-                  value={formData.categoria}
-                  onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="input-field"
-                >
-                  {categorie.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+
 
               <div>
                 <label className="label">Durată</label>

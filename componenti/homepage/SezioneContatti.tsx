@@ -1,105 +1,215 @@
 'use client';
 
+type Sede = {
+  nome: string;
+  indirizzo: string;
+  cap?: string;
+  citta?: string;
+  telefono?: string;
+  email?: string;
+  urlMappa?: string;
+  programma?: { giorno: string; orario: string; chiuso?: boolean }[];
+};
+
 export default function SezioneContatti({
   config,
   impostazioni,
+  bgIndex = 0,
 }: {
   config: any;
   impostazioni: any;
+  bgIndex?: number;
 }) {
-  const titolo = config.titolo || 'CONTATTACI';
-  const sottotitolo = config.sottotitolo || 'Siamo qui per te';
+  const titolo = config.titolo || 'Contactați-ne';
   const descrizione = config.descrizione || '';
-  const mostraMappa = config.mostraMappa !== false;
-  const mostraSocial = config.mostraSocial !== false;
-  const urlMappa = config.urlMappa || '';
-  const social = impostazioni?.social || {};
+  const labelInquiries = config.labelInquiries || 'GENERAL INQUIRIES';
+  const emailGenerale = config.emailGenerale || impostazioni?.email || '';
+  const telefonoGenerale = config.telefonoGenerale || impostazioni?.telefono || '';
+  const testoLink = config.testoLink || '';
+  const urlLink = config.urlLink || '#';
+  const sedi: Sede[] = config.sedi || [];
+
+  const colorePrimario = config.colorePrimario || '#FFF8F0';
+  const coloreSecondario = config.coloreSecondario || '#F5EEE1';
+  const bgColor = config.coloreSfondo || (bgIndex % 2 === 0 ? colorePrimario : coloreSecondario);
+
+  const PinIcon = () => (
+    <svg className="w-5 h-5 text-[#7f756d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0z" />
+    </svg>
+  );
 
   return (
-    <section id="contact" className="py-20 md:py-32 bg-white text-black">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">{titolo}</h2>
-          <p className="text-xl text-black/60 mb-4">{sottotitolo}</p>
-          {descrizione && <p className="text-black/50 mb-12 max-w-2xl mx-auto">{descrizione}</p>}
-        </div>
+    <>
+      {/* ── PARTE SUPERIORE: titolo + email/telefono ── */}
+      <section id="contact" className="py-20 md:py-28" style={{ backgroundColor: bgColor }}>
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-end">
 
-        <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-          <div className="space-y-6">
-            {impostazioni?.telefono && (
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-full shrink-0">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="text-sm text-black/50 uppercase tracking-wider">Telefono</div>
-                  <a href={`tel:${impostazioni.telefono}`} className="font-medium hover:underline">{impostazioni.telefono}</a>
-                </div>
-              </div>
-            )}
-            {impostazioni?.email && (
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-full shrink-0">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="text-sm text-black/50 uppercase tracking-wider">Email</div>
-                  <a href={`mailto:${impostazioni.email}`} className="font-medium hover:underline">{impostazioni.email}</a>
-                </div>
-              </div>
-            )}
-            {impostazioni?.indirizzo && (
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-full shrink-0">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="text-sm text-black/50 uppercase tracking-wider">Indirizzo</div>
-                  <span className="font-medium">{impostazioni.indirizzo}{impostazioni.citta ? `, ${impostazioni.citta}` : ''}</span>
-                </div>
-              </div>
-            )}
-            {mostraSocial && (
-              <div className="flex gap-4 pt-4">
-                {social.instagram && (
-                  <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                  </a>
-                )}
-                {social.facebook && (
-                  <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3V2z"/></svg>
-                  </a>
-                )}
-                {social.tiktok && (
-                  <a href={social.tiktok} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/><path d="M21 12h-4a5 5 0 0 1-5-5V3h-2v5a7 7 0 0 0 7 7h4v-3z"/></svg>
-                  </a>
-                )}
-                {social.whatsapp && (
-                  <a href={social.whatsapp} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                  </a>
+              {/* Sinistra: titolo + descrizione */}
+              <div>
+                <h2
+                  className="text-4xl md:text-5xl text-[#1e1b14] mb-6 leading-tight"
+                  style={{ fontFamily: 'Playfair Display, serif', fontWeight: 600, lineHeight: 1.1 }}
+                >
+                  {titolo}
+                </h2>
+                {descrizione && (
+                  <p
+                    className="text-[#4d453e] text-sm leading-relaxed max-w-md"
+                    style={{ fontFamily: 'Manrope, sans-serif', lineHeight: 1.75 }}
+                  >
+                    {descrizione}
+                  </p>
                 )}
               </div>
-            )}
-          </div>
 
-          {mostraMappa && urlMappa && (
-            <div className="h-80 rounded-lg overflow-hidden border border-black/10">
-              <iframe src={urlMappa} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+              {/* Destra: label + email + telefono, allineati in basso a destra */}
+              {(emailGenerale || telefonoGenerale) && (
+                <div className="flex justify-start md:justify-end">
+                  <div className="flex flex-col gap-3 text-left md:text-right">
+                    {labelInquiries && (
+                      <span
+                        className="text-[10px] tracking-[0.2em] uppercase text-[#7f756d] font-semibold"
+                        style={{ fontFamily: 'Manrope, sans-serif' }}
+                      >
+                        {labelInquiries}
+                      </span>
+                    )}
+                    {emailGenerale && (
+                      <a
+                        href={`mailto:${emailGenerale}`}
+                        className="text-2xl md:text-3xl text-[#1e1b14] hover:opacity-70 transition-opacity"
+                        style={{ fontFamily: 'Playfair Display, serif', fontWeight: 500 }}
+                      >
+                        {emailGenerale}
+                      </a>
+                    )}
+                    {telefonoGenerale && (
+                      <a
+                        href={`tel:${telefonoGenerale}`}
+                        className="text-base text-[#4d453e] hover:opacity-70 transition-opacity"
+                        style={{ fontFamily: 'Manrope, sans-serif' }}
+                      >
+                        {telefonoGenerale}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* ── PARTE LOCAZIONI: sezione separata, sfondo bianco fisso ── */}
+      {sedi.length > 0 && (
+        <section className="py-20 md:py-28 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+
+              {/* Header: titolo + linea + link */}
+              <div className="flex flex-col md:flex-row justify-between items-baseline mb-16 gap-4">
+                <h3
+                  className="text-4xl md:text-5xl text-[#1e1b14] mb-6 leading-tight"
+                  style={{ fontFamily: 'Playfair Display, serif', fontWeight: 600, lineHeight: 1.1 }}
+                >
+                  Locațiile Studio
+                </h3>
+                <div className="h-px flex-grow mx-8 bg-[#d0c5ba]/30 hidden md:block" />
+                {testoLink && (
+                  <a
+                    href={urlLink}
+                    className="text-[10px] tracking-[0.2em] uppercase text-[#7f756d] font-semibold hover:text-[#1e1b14] transition-colors shrink-0"
+                    style={{ fontFamily: 'Manrope, sans-serif' }}
+                  >
+                    {testoLink}
+                  </a>
+                )}
+              </div>
+
+              {/* Card sedi */}
+              <div className={`grid grid-cols-1 ${sedi.length === 1 ? 'max-w-xl' : 'md:grid-cols-2'} gap-6`}>
+                {sedi.map((sede, idx) => (
+                  <div key={idx} className="border border-[#d0c5ba]/30 p-10">
+                    {/* Nome + pin */}
+                    <div className="flex justify-between items-start mb-8">
+                      <h4
+                        className="text-3xl text-[#1e1b14]"
+                        style={{ fontFamily: 'Playfair Display, serif', fontWeight: 600 }}
+                      >
+                        {sede.nome}
+                      </h4>
+                      {sede.urlMappa ? (
+                        <a href={sede.urlMappa} target="_blank" rel="noopener noreferrer" className="text-[#7f756d] hover:text-[#1e1b14] transition-colors">
+                          <PinIcon />
+                        </a>
+                      ) : (
+                        <span className="text-[#7f756d]"><PinIcon /></span>
+                      )}
+                    </div>
+
+                    <div className="space-y-8">
+                      {/* Indirizzo */}
+                      {(sede.indirizzo || sede.citta) && (
+                        <div>
+                          <p className="text-[10px] tracking-[0.15em] uppercase text-[#7f756d] font-semibold mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                            ADRESĂ
+                          </p>
+                          <p className="text-[#4d453e] text-sm leading-relaxed" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                            {sede.indirizzo && <span>{sede.indirizzo}<br /></span>}
+                            {(sede.cap || sede.citta) && <span>{[sede.cap, sede.citta].filter(Boolean).join(', ')}</span>}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Telefono + Email */}
+                      {(sede.telefono || sede.email) && (
+                        <div className="grid grid-cols-2 gap-4">
+                          {sede.telefono && (
+                            <div>
+                              <p className="text-[10px] tracking-[0.15em] uppercase text-[#7f756d] font-semibold mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>TELEFON</p>
+                              <a href={`tel:${sede.telefono}`} className="text-[#4d453e] text-sm hover:underline" style={{ fontFamily: 'Manrope, sans-serif' }}>{sede.telefono}</a>
+                            </div>
+                          )}
+                          {sede.email && (
+                            <div>
+                              <p className="text-[10px] tracking-[0.15em] uppercase text-[#7f756d] font-semibold mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>EMAIL</p>
+                              <a href={`mailto:${sede.email}`} className="text-[#4d453e] text-sm hover:underline" style={{ fontFamily: 'Manrope, sans-serif' }}>{sede.email}</a>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Programma */}
+                      {sede.programma && sede.programma.length > 0 && (
+                        <div className="pt-8 border-t border-[#d0c5ba]/20">
+                          <p className="text-[10px] tracking-[0.15em] uppercase text-[#7f756d] font-semibold mb-4" style={{ fontFamily: 'Manrope, sans-serif' }}>PROGRAM</p>
+                          <div className="space-y-2">
+                            {sede.programma.map((riga, i) => (
+                              <div
+                                key={i}
+                                className={`flex justify-between text-sm ${riga.chiuso ? 'text-[#b0a89e]' : 'text-[#4d453e]'}`}
+                                style={{ fontFamily: 'Manrope, sans-serif' }}
+                              >
+                                <span>{riga.giorno}</span>
+                                <span>{riga.chiuso ? 'Închis' : riga.orario}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   );
 }

@@ -78,46 +78,8 @@ export default function ContattiPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              {impostazioni.logo ? (
-                <img 
-                  src={impostazioni.logo} 
-                  alt={impostazioni.logoAlt || impostazioni.nomeAzienda}
-                  className="h-10 md:h-12 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <svg className="w-8 h-8 md:w-10 md:h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                  <path d="M12 8v8M8 12h8"/>
-                </svg>
-              )}
-            </Link>
-
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-white/80 hover:text-white transition-colors font-medium">Home</Link>
-              <Link href="/contact" className="text-white/80 hover:text-white transition-colors font-medium">Contatti</Link>
-              <Link 
-                href="/booking"
-                className="px-6 py-3 bg-white text-black font-bold hover:bg-white/90 transition-all"
-              >
-                PRENOTA ORA
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <div className="bg-white text-black py-16 md:py-24 pt-32 md:pt-36">
+      {/* Page Header */}
+      <div className="bg-white text-black py-16 md:py-24 pt-20 md:pt-24">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
             CONTATTI

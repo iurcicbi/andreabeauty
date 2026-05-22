@@ -20,9 +20,12 @@ module.exports = {
           800: '#6a4a2a',
         },
         brand: {
-          dark: '#1a1a1a',
-          gold: '#c9a96e',
-          cream: '#faf7f2',
+          rose: '#E0B2B7',
+          roseDark: '#C49098',
+          roseLight: '#FBEEF2',
+          beige: '#C49A8C',
+          dark: '#4A3035',
+          cream: '#FDF6F8',
         },
       },
       // Breakpoint ottimizzati per mobile-first

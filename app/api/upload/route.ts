@@ -16,12 +16,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Validazione tipo file
-    const allowedTypes = {
-      logo: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
+    const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/avif'];
+    const allowedTypes: Record<string, string[]> = {
+      logo: allowedImageTypes,
+      hero: allowedImageTypes,
+      gallery: allowedImageTypes,
+      servizi: allowedImageTypes,
+      about: allowedImageTypes,
+      recenzii: allowedImageTypes,
       documento: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
     };
 
-    const tipoFile = tipo === 'logo' ? 'logo' : 'documento';
+    const tipoFile = allowedTypes[tipo] ? tipo : 'gallery';
     
     if (!allowedTypes[tipoFile].includes(file.type)) {
       return NextResponse.json(
@@ -49,7 +55,16 @@ export async function POST(request: NextRequest) {
     const fileName = `${timestamp}-${originalName}`;
 
     // Determina la cartella di destinazione
-    const folder = tipo === 'logo' ? 'uploads/logo' : 'uploads/documenti';
+    const folderMap: Record<string, string> = {
+      logo: 'uploads/logo',
+      hero: 'uploads/hero',
+      gallery: 'uploads/gallery',
+      servizi: 'uploads/servizi',
+      about: 'uploads/about',
+      recenzii: 'uploads/recenzii',
+      documento: 'uploads/documenti',
+    };
+    const folder = folderMap[tipo] || 'uploads/generale';
     const uploadDir = path.join(process.cwd(), 'public', folder);
 
     // Crea la cartella se non esiste

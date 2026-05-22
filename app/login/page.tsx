@@ -47,28 +47,29 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] relative overflow-hidden flex items-center justify-center px-4">
-      {/* Decorative top-right corner */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#e8dccc] rounded-full blur-3xl opacity-40" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#e8dccc] rounded-full blur-3xl opacity-30" />
-      <div className="absolute top-1/3 left-1/4 w-2 h-2 bg-[#c9a96e] rounded-full opacity-30" />
-      <div className="absolute top-1/4 right-1/3 w-1.5 h-1.5 bg-[#c9a96e] rounded-full opacity-20" />
-      <div className="absolute bottom-1/3 right-1/4 w-3 h-3 bg-[#c9a96e] rounded-full opacity-20" />
+    <div className="min-h-screen bg-[#FBEEF2] relative overflow-hidden flex items-center justify-center px-4">
+      {/* Decorative */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#E0B2B7] rounded-full blur-3xl opacity-30" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#E0B2B7] rounded-full blur-3xl opacity-20" />
+      <div className="absolute top-1/3 left-1/4 w-2 h-2 bg-[#C49098] rounded-full opacity-30" />
+      <div className="absolute top-1/4 right-1/3 w-1.5 h-1.5 bg-[#C49098] rounded-full opacity-20" />
+      <div className="absolute bottom-1/3 right-1/4 w-3 h-3 bg-[#C49098] rounded-full opacity-20" />
 
       <div className={`w-full max-w-md relative transition-all duration-700 ${animato ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         {/* Brand */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/80 backdrop-blur-sm rounded-full mb-6 shadow-sm border border-[#e8dccc]">
-            <svg className="w-9 h-9 text-[#c9a96e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/80 backdrop-blur-sm rounded-full mb-6 shadow-sm border border-[#E0B2B7]/40">
+            <svg className="w-9 h-9 text-[#C49098]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
               <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
               <path d="M12 8v8M8 12h8"/>
             </svg>
-          </div> 
-          <p className="text-[#8a8a7a] mt-2 text-sm tracking-wide">Acces în contul tău</p>
+          </div>
+          <h1 className="text-3xl font-light text-[#4A3035] tracking-[0.15em] uppercase mb-2">Beauty Salon</h1>
+          <p className="text-[#A07078] text-sm tracking-wide">Acces în contul tău</p>
         </div>
 
         {/* Login Card */}
-        <div className="relative bg-white/70 backdrop-blur-xl border border-[#e8dccc]/60 rounded-2xl p-8 shadow-lg shadow-[#c9a96e]/5">
+        <div className="relative bg-white/70 backdrop-blur-xl border border-[#E0B2B7]/30 rounded-2xl p-8 shadow-lg shadow-[#E0B2B7]/10">
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/60 to-transparent pointer-events-none" />
 
           {errore && (
@@ -85,7 +86,7 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-medium text-[#6a6a5a] mb-1.5 tracking-wide">Email</label>
               <div className="relative">
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#c9a96e]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C49098]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                   <polyline points="22,6 12,13 2,6"/>
                 </svg>
@@ -95,7 +96,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="nume@exemplu.com"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white/80 border border-[#e0d8c8] rounded-xl text-[#4a4a4a] placeholder-[#c9a96e]/40 focus:outline-none focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e]/20 transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-white/80 border border-[#E0B2B7]/30 rounded-xl text-[#4A3035] placeholder-[#C49098]/40 focus:outline-none focus:border-[#E0B2B7] focus:ring-1 focus:ring-[#E0B2B7]/20 transition-all text-sm"
                 />
               </div>
             </div>
@@ -103,7 +104,7 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-medium text-[#6a6a5a] mb-1.5 tracking-wide">Parolă</label>
               <div className="relative">
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#c9a96e]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C49098]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
                 <input
@@ -112,12 +113,12 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-10 pr-12 py-3 bg-white/80 border border-[#e0d8c8] rounded-xl text-[#4a4a4a] placeholder-[#c9a96e]/40 focus:outline-none focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e]/20 transition-all text-sm"
+                  className="w-full pl-10 pr-12 py-3 bg-white/80 border border-[#E0B2B7]/30 rounded-xl text-[#4A3035] placeholder-[#C49098]/40 focus:outline-none focus:border-[#E0B2B7] focus:ring-1 focus:ring-[#E0B2B7]/20 transition-all text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setMostraPassword(!mostraPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#c9a96e]/50 hover:text-[#c9a96e] transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#C49098]/50 hover:text-[#C49098] transition-colors"
                 >
                   {mostraPassword ? (
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -137,7 +138,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={caricamento}
-              className="w-full py-3.5 bg-[#c9a96e] text-white font-medium tracking-wider rounded-xl hover:bg-[#b8975a] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 shadow-sm"
+              className="w-full py-3.5 bg-[#E0B2B7] text-white font-medium tracking-wider rounded-xl hover:bg-[#C49098] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 shadow-sm"
             >
               {caricamento ? (
                 <>
@@ -154,9 +155,9 @@ export default function LoginPage() {
           </form>
 
           <div className="relative mt-8 text-center">
-            <p className="text-[#8a8a7a] text-sm">
+            <p className="text-[#A07078] text-sm">
               Nu ai cont?{' '}
-              <Link href="/register" className="text-[#c9a96e] hover:text-[#b8975a] font-medium transition-colors">
+              <Link href="/register" className="text-[#E0B2B7] hover:text-[#C49098] font-medium transition-colors">
                 Creează unul
               </Link>
             </p>
@@ -164,7 +165,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-[#8a8a7a] hover:text-[#c9a96e] transition-colors text-sm">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-[#A07078] hover:text-[#E0B2B7] transition-colors text-sm">
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
             </svg>

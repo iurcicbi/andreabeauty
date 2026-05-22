@@ -6,3 +6,4 @@ export { default as SezioneRecensioni } from './SezioneRecensioni';
 export { default as SezioneContatti } from './SezioneContatti';
 export { default as SezioneCtaFinale } from './SezioneCtaFinale';
 export { default as SezioneGalleria } from './SezioneGalleria';
+export { default as SezioneFilosofia } from './SezioneFilosofia';

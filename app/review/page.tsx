@@ -64,10 +64,10 @@ function ContenutoReview() {
 
   if (invalid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FBEEF2] p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Link invalid</h1>
-          <p className="text-gray-600 mb-6">Acest link de recenzie nu este valid sau a expirat.</p>
+          <h1 className="text-2xl font-bold text-[#4A3035] mb-4">Link invalid</h1>
+          <p className="text-[#A07078] mb-6">Acest link de recenzie nu este valid sau a expirat.</p>
           <Bottone onClick={() => router.push('/')}>Mergi la pagina principală</Bottone>
         </div>
       </div>
@@ -76,28 +76,28 @@ function ContenutoReview() {
 
   if (successo) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FBEEF2] p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">{successo}</h1>
-          <p className="text-gray-600">Veți fi redirecționat în scurt timp...</p>
+          <h1 className="text-2xl font-bold text-[#4A3035] mb-2">{successo}</h1>
+          <p className="text-[#A07078]">Veți fi redirecționat în scurt timp...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FBEEF2] p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Evaluați experiența dvs.</h1>
-          <p className="text-gray-600">Spuneți-ne cum a fost serviciul</p>
+          <h1 className="text-2xl font-bold text-[#4A3035] mb-2">Evaluați experiența dvs.</h1>
+          <p className="text-[#A07078]">Spuneți-ne cum a fost serviciul</p>
         </div>
 
         {errore && <Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} />}
 
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Evaluare</label>
+          <label className="block text-sm font-medium text-[#4A3035] mb-2">Evaluare</label>
           <div className="flex items-center gap-1 justify-center">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -121,7 +121,7 @@ function ContenutoReview() {
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Comentariu</label>
+          <label className="block text-sm font-medium text-[#4A3035] mb-2">Comentariu</label>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
@@ -130,7 +130,7 @@ function ContenutoReview() {
             rows={5}
             maxLength={1000}
           />
-          <p className="text-xs text-gray-400 mt-1">{comment.length}/1000</p>
+          <p className="text-xs text-[#A07078] mt-1">{comment.length}/1000</p>
         </div>
 
         <Bottone onClick={handleSubmit} disabled={salvando} className="w-full">
@@ -143,7 +143,7 @@ function ContenutoReview() {
 
 export default function ReviewPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-[#A07078]">Loading...</p></div>}>
       <ContenutoReview />
     </Suspense>
   );

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
 import Review from '@/utils/mongo/schemi/Review';
-import Appuntamento from '@/utils/mongo/schemi/Appuntamento';
 import crypto from 'crypto';
 
 export async function GET(req: NextRequest) {
@@ -11,32 +10,39 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const specialistId = searchParams.get('specialistId');
     const limit = parseInt(searchParams.get('limit') || '50');
+    const featured = searchParams.get('featured');
+    const serviceId = searchParams.get('serviceId');
 
-    let filtro: any = { status: 'approved' };
+    let filtro: any = {
+      status: { $in: ['approvata', 'approved'] }
+    };
+
     if (specialistId) filtro.specialist = specialistId;
+    if (featured === 'true') filtro.featured = true;
+    if (serviceId) filtro.service = serviceId;
 
     const reviews = await Review.find(filtro)
-      .populate('specialist', 'utente')
-      .populate({
-        path: 'specialist',
-        populate: { path: 'utente', select: 'nome cognome' }
-      })
       .populate('service', 'nome')
-      .sort({ created_at: -1 })
+      .sort({ featured: -1, ordine: 1, created_at: -1 })
       .limit(limit)
       .lean();
 
     const formatted = reviews.map((r: any) => ({
       _id: r._id,
-      customerName: r.customerName,
-      rating: r.rating,
-      comment: r.comment,
+      nomeCliente: r.customerName,
+      usernameInstagram: r.usernameInstagram,
+      avatar: r.avatar,
+      valutazione: r.rating,
+      descrizione: r.comment,
+      servizio: r.service?.nome || r.serviceName || '',
+      servizioId: r.service?._id || '',
       reply: r.reply,
       replyAt: r.replyAt,
-      specialistName: r.specialist?.utente
-        ? `${r.specialist.utente.nome} ${r.specialist.utente.cognome}`
-        : '',
-      serviceName: r.service?.nome || '',
+      source: r.source || 'Direct',
+      images: r.images || [],
+      verified: r.verified || false,
+      featured: r.featured || false,
+      reviewDate: r.reviewDate,
       createdAt: r.created_at,
     }));
 
@@ -71,6 +77,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const { default: Appuntamento } = await import('@/utils/mongo/schemi/Appuntamento');
     const appointment = await Appuntamento.findOne({ reviewToken: token });
     if (!appointment) {
       return NextResponse.json(
@@ -87,6 +94,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const lastReview = await Review.findOne().sort({ ordine: -1 }).lean();
+    const prossimoOrdine = (lastReview?.ordine ?? 0) + 1;
+
     const review = await Review.create({
       appointment: appointment._id,
       specialist: appointment.specialista,
@@ -95,8 +105,14 @@ export async function POST(req: NextRequest) {
       customerEmail: appointment.utente.email,
       rating,
       comment,
-      status: 'pending',
+      status: 'bozza',
       token: crypto.randomBytes(32).toString('hex'),
+      source: 'Direct',
+      images: [],
+      verified: false,
+      featured: false,
+      reviewDate: new Date(),
+      ordine: prossimoOrdine,
     });
 
     return NextResponse.json({

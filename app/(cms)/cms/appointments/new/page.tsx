@@ -204,7 +204,7 @@ export default function NuovoAppuntamentoPage() {
       setErrore('');
 
       if (!specialistaId) {
-        setErrore('Profilo specialista non trovato');
+        setErrore('Profilul specialistului nu a fost găsit');
         return;
       }
 
@@ -238,7 +238,7 @@ export default function NuovoAppuntamentoPage() {
       }, 2000);
 
     } catch (err: any) {
-      const messaggio = err.response?.data?.errore || 'Errore durante la creazione';
+      const messaggio = err.response?.data?.errore || 'Eroare în timpul creării';
       setErrore(messaggio);
     } finally {
       setCaricamento(false);
@@ -413,11 +413,11 @@ export default function NuovoAppuntamentoPage() {
             {servizioCorrente && oraSelezionata && (
               <div className="bg-primary-50 p-4 rounded-lg mb-6">
                 <h3 className="font-bold mb-2">Rezumat</h3>
-                <p><strong>Servizio:</strong> {servizioCorrente.nome}</p>
-                <p><strong>Durata:</strong> {servizioCorrente.durata} minuti</p>
-                <p><strong>Prezzo:</strong> {formattaPrezzo(servizioCorrente.prezzo)}</p>
-                <p><strong>Data:</strong> {new Date(data).toLocaleDateString('it-IT')}</p>
-                <p><strong>Orario:</strong> {oraSelezionata}</p>
+                <p><strong>Serviciu:</strong> {servizioCorrente.nome}</p>
+                <p><strong>Durată:</strong> {servizioCorrente.durata} minute</p>
+                <p><strong>Preț:</strong> {formattaPrezzo(servizioCorrente.prezzo)}</p>
+                <p><strong>Data:</strong> {new Date(data).toLocaleDateString('ro-RO')}</p>
+                <p><strong>Oră:</strong> {oraSelezionata}</p>
               </div>
             )}
 

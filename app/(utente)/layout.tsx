@@ -1,3 +1,4 @@
+import Header from '@/componenti/layout/Header';
 import Footer from '@/componenti/layout/Footer';
 
 export default function UtenteLayout({
@@ -7,6 +8,7 @@ export default function UtenteLayout({
 }) {
   return (
     <>
+      <Header />
       {children}
       <Footer />
     </>

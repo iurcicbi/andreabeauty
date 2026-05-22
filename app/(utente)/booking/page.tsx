@@ -6,11 +6,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import webservice from '@/utils/webservice';
 import Messaggio from '@/componenti/comuni/Messaggio';
 import Caricamento from '@/componenti/comuni/Caricamento';
 import { formattaPrezzo } from '@/utils/helpers';
+import FeaturedReviewsBlock from '@/componenti/homepage/FeaturedReviewsBlock';
 
 interface Servizio {
   _id: string;
@@ -82,11 +82,8 @@ export default function PrenotazionePage() {
   const [caricamentoSlot, setCaricamentoSlot] = useState(false);
   const [caricamentoSpecialisti, setCaricamentoSpecialisti] = useState(false);
   const [errore, setErrore] = useState('');
+  const [mostraPrezzi, setMostraPrezzi] = useState(true);
   
-  // Impostazioni frontend
-  const [logo, setLogo] = useState<string>('');
-  const [logoAlt, setLogoAlt] = useState<string>('');
-  const [nomeAzienda, setNomeAzienda] = useState<string>('');
   const [testiPrenotazione, setTestiPrenotazione] = useState({
     titoloPagina: 'BOOK APPOINTMENT',
     sottotitoloPagina: 'Simple, fast, professional',
@@ -109,27 +106,19 @@ export default function PrenotazionePage() {
 
   useEffect(() => {
     caricaDati();
-    caricaImpostazioniLogo();
+    caricaTestiPrenotazione();
   }, []);
 
-  const caricaImpostazioniLogo = async () => {
+  const caricaTestiPrenotazione = async () => {
     try {
       const risposta = await webservice.get('/api/settings');
-      if (risposta.dati?.logo) {
-        setLogo(risposta.dati.logo);
-      }
-      if (risposta.dati?.logoAlt) {
-        setLogoAlt(risposta.dati.logoAlt);
-      }
-      if (risposta.dati?.nomeAzienda) {
-        setNomeAzienda(risposta.dati.nomeAzienda);
-      }
       if (risposta.dati?.testiPrenotazione) {
         setTestiPrenotazione(prev => ({
           ...prev,
           ...risposta.dati.testiPrenotazione
         }));
       }
+      setMostraPrezzi(risposta.dati?.funzionalita?.mostraPrezziFrontend !== false);
     } catch (err) {
       console.log('Settings not available');
     }
@@ -438,40 +427,8 @@ export default function PrenotazionePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              {logo ? (
-                <img 
-                  src={logo} 
-                  alt={logoAlt || nomeAzienda || "Logo"}
-                  className="h-10 md:h-12 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <svg className="w-8 h-8 md:w-10 md:h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                  <path d="M12 8v8M8 12h8"/>
-                </svg>
-              )}
-            </Link>
-
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-white/80 hover:text-white transition-colors font-medium">Home</Link>
-              <Link href="/contact" className="text-white/80 hover:text-white transition-colors font-medium">Contacts</Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <div className="bg-white text-black py-6 md:py-16 pt-24 md:pt-36">
+      {/* Page Header */}
+      <div className="bg-white text-black py-6 md:py-16 pt-20 md:pt-24">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-2xl md:text-5xl font-bold mb-2 tracking-tight">
             {testiPrenotazione.titoloPagina}
@@ -659,9 +616,11 @@ export default function PrenotazionePage() {
                         </svg>
                         <span>{servizio.durata} min</span>
                       </div>
-                      <div className="text-lg md:text-2xl font-bold">
-                        {formattaPrezzo(servizio.prezzo)}
-                      </div>
+                      {mostraPrezzi && (
+                        <div className="text-lg md:text-2xl font-bold">
+                          {formattaPrezzo(servizio.prezzo)}
+                        </div>
+                      )}
                     </div>
                     <button className="w-full mt-3 md:mt-4 bg-white text-black py-2.5 md:py-3 font-bold hover:bg-white/90 transition-all text-xs md:text-base">
                       SELECT →
@@ -768,7 +727,7 @@ export default function PrenotazionePage() {
                   <span className="mx-2">•</span>
                   <span className="text-white/60">{servizioSelezionato.nome}</span>
                 </div>
-                <span className="font-bold">{formattaPrezzo(servizioSelezionato.prezzo)}</span>
+                {mostraPrezzi && <span className="font-bold">{formattaPrezzo(servizioSelezionato.prezzo)}</span>}
               </div>
             </div>
 
@@ -807,7 +766,7 @@ export default function PrenotazionePage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Price</span>
-                    <span className="font-bold text-xl">{formattaPrezzo(servizioSelezionato.prezzo)}</span>
+                    {mostraPrezzi && <span className="font-bold text-xl">{formattaPrezzo(servizioSelezionato.prezzo)}</span>}
                   </div>
                 </div>
               </div>
@@ -840,7 +799,7 @@ export default function PrenotazionePage() {
                   <span className="mx-1.5">•</span>
                   <span className="text-white/60">{dataSelezionata.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}</span>
                 </div>
-                <span className="font-bold">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>
+                {mostraPrezzi && <span className="font-bold">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>}
               </div>
             </div>
 
@@ -985,10 +944,12 @@ export default function PrenotazionePage() {
                       )}
                     </div>
                   )}
-                  <div className="flex justify-between pt-4 border-t border-white/10">
-                    <span className="text-white/60">Total</span>
-                    <span className="font-bold text-xl">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>
-                  </div>
+                  {mostraPrezzi && (
+                    <div className="flex justify-between pt-4 border-t border-white/10">
+                      <span className="text-white/60">Total</span>
+                      <span className="font-bold text-xl">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1108,18 +1069,20 @@ export default function PrenotazionePage() {
                       <span className="text-white/60">Duration</span>
                       <span className="font-bold">{servizioSelezionato?.durata} min</span>
                     </div>
-                    <div className="flex justify-between items-center pt-3 md:pt-4 border-t border-white/20">
-                      <span className="text-white/60 font-bold text-base md:text-lg">Total</span>
-                      <span className="font-bold text-2xl md:text-3xl">
-                        {voucherData && voucherData.type === 'free'
-                          ? 'FREE'
-                          : formattaPrezzo(
-                              servizioSelezionato?.prezzo || 0 -
-                              (voucherData?.type === 'fixed' ? voucherData.value : 0) -
-                              (voucherData?.type === 'percentage' ? (servizioSelezionato?.prezzo || 0) * voucherData.value / 100 : 0)
-                            )}
-                      </span>
-                    </div>
+                    {mostraPrezzi && (
+                      <div className="flex justify-between items-center pt-3 md:pt-4 border-t border-white/20">
+                        <span className="text-white/60 font-bold text-base md:text-lg">Total</span>
+                        <span className="font-bold text-2xl md:text-3xl">
+                          {voucherData && voucherData.type === 'free'
+                            ? 'FREE'
+                            : formattaPrezzo(
+                                servizioSelezionato?.prezzo || 0 -
+                                (voucherData?.type === 'fixed' ? voucherData.value : 0) -
+                                (voucherData?.type === 'percentage' ? (servizioSelezionato?.prezzo || 0) * voucherData.value / 100 : 0)
+                              )}
+                        </span>
+                      </div>
+                    )}
                     {voucherData && (
                       <div className="flex justify-between items-center text-sm pt-2">
                         <span className="text-green-400">
@@ -1192,6 +1155,10 @@ export default function PrenotazionePage() {
                       </>
                     )}
                   </button>
+                </div>
+
+                <div className="mt-8">
+                  <FeaturedReviewsBlock limit={2} />
                 </div>
               </div>
             </div>

@@ -45,7 +45,7 @@ export default function Footer() {
   if (!impostazioni) return null;
 
   return (
-    <footer className="bg-black text-white py-12 md:py-16 border-t border-white/10">
+    <footer className="bg-[#4A3035] text-white py-12 md:py-16 border-t border-[#E0B2B7]/20">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           
@@ -73,7 +73,7 @@ export default function Footer() {
                   href={impostazioni.social.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-all"
+                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-[#E0B2B7] hover:text-white transition-all"
                   aria-label="Facebook"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -86,7 +86,7 @@ export default function Footer() {
                   href={impostazioni.social.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-all"
+                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-[#E0B2B7] hover:text-white transition-all"
                   aria-label="Instagram"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -99,7 +99,7 @@ export default function Footer() {
                   href={`https://wa.me/${impostazioni.whatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-all"
+                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-[#E0B2B7] hover:text-white transition-all"
                   aria-label="WhatsApp"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -195,7 +195,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-white/10 text-center text-white/50 text-sm">
+        <div className="mt-12 pt-8 border-t border-[#E0B2B7]/20 text-center text-white/50 text-sm">
           <p>© {new Date().getFullYear()} {impostazioni.nomeAzienda}. Tutti i diritti riservati.</p>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Caricamento from '@/componenti/comuni/Caricamento';
+import Header from '@/componenti/layout/Header';
 import webservice from '@/utils/webservice';
 import {
   SezioneHero,
@@ -13,17 +14,30 @@ import {
   SezioneContatti,
   SezioneCtaFinale,
   SezioneGalleria,
+  SezioneFilosofia,
 } from '@/componenti/homepage';
+import FeaturedReviewsStrip from '@/componenti/homepage/FeaturedReviewsStrip';
 
 export default function HomePage() {
   const [impostazioni, setImpostazioni] = useState<any>(null);
   const [servizi, setServizi] = useState<any[]>([]);
   const [caricamento, setCaricamento] = useState(true);
-  const [menuAperto, setMenuAperto] = useState(false);
 
   useEffect(() => {
     caricaDati();
   }, []);
+
+  useEffect(() => {
+    if (!caricamento) {
+      const hash = window.location.hash;
+      if (hash) {
+        setTimeout(() => {
+          const el = document.querySelector(hash);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [caricamento]);
 
   const caricaDati = async () => {
     try {
@@ -43,7 +57,7 @@ export default function HomePage() {
 
   if (caricamento) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#FDF6F8] flex items-center justify-center">
         <Caricamento />
       </div>
     );
@@ -52,79 +66,44 @@ export default function HomePage() {
   const sez = impostazioni?.sezioniHomepage || {};
   const ordine = (tipo: string) => sez[tipo]?.ordine || 1;
   const attiva = (tipo: string) => sez[tipo]?.attiva !== false;
-  const config = (tipo: string) => sez[tipo] || {};
+  const config = (tipo: string) => ({
+    ...sez[tipo],
+    mostraPrezziFrontend: impostazioni?.funzionalita?.mostraPrezziFrontend !== false,
+    colorePrimario: sez[tipo]?.colorePrimario || sez.colorePrimario || '#FFF8F0',
+    coloreSecondario: sez[tipo]?.coloreSecondario || sez.coloreSecondario || '#F5EEE1',
+  });
+
+  const serviziFiltrati = (() => {
+    const cfgServizi = config('servizi');
+    const selezionati = cfgServizi?.serviziSelezionati;
+    if (selezionati && selezionati.length > 0) {
+      return servizi.filter((s: any) => selezionati.includes(s._id));
+    }
+    return servizi;
+  })();
 
   const sezioni = [
-    { tipo: 'hero', render: () => <SezioneHero key="hero" sezioneConfig={config('hero')} impostazioni={impostazioni} /> },
-    { tipo: 'servizi', render: () => <SezioneServizi key="servizi" servizi={servizi} config={config('servizi')} /> },
-    { tipo: 'about', render: () => <SezioneAbout key="about" config={config('about')} /> },
-    { tipo: 'orari', render: () => <SezioneOrari key="orari" config={config('orari')} orariApertura={impostazioni?.orariApertura} /> },
-    { tipo: 'recensioni', render: () => <SezioneRecensioni key="recensioni" config={config('recensioni')} /> },
-    { tipo: 'contatti', render: () => <SezioneContatti key="contatti" config={config('contatti')} impostazioni={impostazioni} /> },
-    { tipo: 'ctaFinale', render: () => <SezioneCtaFinale key="ctaFinale" config={config('ctaFinale')} /> },
-    { tipo: 'galleria', render: () => <SezioneGalleria key="galleria" config={config('galleria')} /> },
+    { tipo: 'hero', render: (index: number) => <SezioneHero key="hero" sezioneConfig={config('hero')} impostazioni={impostazioni} bgIndex={index} /> },
+    { tipo: 'servizi', render: (index: number) => <SezioneServizi key="servizi" servizi={serviziFiltrati} config={config('servizi')} bgIndex={index} /> },
+    { tipo: 'about', render: (index: number) => <SezioneAbout key="about" config={config('about')} bgIndex={index} /> },
+    { tipo: 'orari', render: (index: number) => <SezioneOrari key="orari" config={config('orari')} orariApertura={impostazioni?.orariApertura} bgIndex={index} /> },
+    { tipo: 'recensioni', render: (index: number) => <SezioneRecensioni key="recensioni" config={config('recensioni')} bgIndex={index} /> },
+    { tipo: 'contatti', render: (index: number) => <SezioneContatti key="contatti" config={config('contatti')} impostazioni={impostazioni} bgIndex={index} /> },
+    { tipo: 'ctaFinale', render: (index: number) => <SezioneCtaFinale key="ctaFinale" config={config('ctaFinale')} bgIndex={index} /> },
+    { tipo: 'galleria', render: (index: number) => <SezioneGalleria key="galleria" config={config('galleria')} bgIndex={index} /> },
+    { tipo: 'filosofia', render: (index: number) => <SezioneFilosofia key="filosofia" config={config('filosofia')} bgIndex={index} /> },
   ]
     .filter((s) => attiva(s.tipo))
     .sort((a, b) => ordine(a.tipo) - ordine(b.tipo));
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between h-30">
-            <div className="flex items-center gap-3">
-              {impostazioni?.logo ? (
-                <img src={impostazioni.logo} alt={impostazioni.logoAlt || impostazioni.nomeAzienda} className="h-[70px] md:h-[100px] object-contain" />
-              ) : (
-                <svg className="w-8 h-8 md:w-10 md:h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                  <path d="M12 8v8M8 12h8"/>
-                </svg>
-              )}
-            </div>
-
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#home" className="text-white/80 hover:text-white transition-colors font-medium">Home</a>
-              {attiva('servizi') && <a href="#services" className="text-white/80 hover:text-white transition-colors font-medium">Servizi</a>}
-              {attiva('about') && <a href="#about" className="text-white/80 hover:text-white transition-colors font-medium">Chi Siamo</a>}
-              {attiva('galleria') && <a href="#gallery" className="text-white/80 hover:text-white transition-colors font-medium">Galleria</a>}
-              {attiva('contatti') && <a href="#contact" className="text-white/80 hover:text-white transition-colors font-medium">Contatti</a>}
-              <Link href="/booking" className="px-6 py-3 bg-white text-black font-bold rounded-none hover:bg-white/90 transition-all border-2 border-white">
-                PRENOTA ORA
-              </Link>
-            </div>
-
-            <button onClick={() => setMenuAperto(!menuAperto)} className="md:hidden text-white p-2">
-              <div className="w-6 h-5 flex flex-col justify-between">
-                <span className={`w-full h-0.5 bg-white transition-all ${menuAperto ? 'rotate-45 translate-y-2' : ''}`}></span>
-                <span className={`w-full h-0.5 bg-white transition-all ${menuAperto ? 'opacity-0' : ''}`}></span>
-                <span className={`w-full h-0.5 bg-white transition-all ${menuAperto ? '-rotate-45 -translate-y-2' : ''}`}></span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {menuAperto && (
-          <div className="md:hidden bg-black border-t border-white/10">
-            <div className="container mx-auto px-4 py-6 space-y-4">
-              <a href="#home" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Home</a>
-              {attiva('servizi') && <a href="#services" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Servizi</a>}
-              {attiva('about') && <a href="#about" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Chi Siamo</a>}
-              {attiva('galleria') && <a href="#gallery" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Galleria</a>}
-              {attiva('contatti') && <a href="#contact" onClick={() => setMenuAperto(false)} className="block text-white/80 hover:text-white transition-colors py-2">Contatti</a>}
-              <Link href="/booking" className="block text-center px-6 py-3 bg-white text-black font-bold rounded-none hover:bg-white/90 transition-all border-2 border-white mt-4">
-                PRENOTA ORA
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {sezioni.map((s) => s.render())}
+    <div className="min-h-screen bg-[#FDF6F8] text-[#4A3035] overflow-hidden">
+      <Header />
+      <FeaturedReviewsStrip limit={3} />
+      {sezioni.map((s, index) => s.render(index))}
 
       {/* Footer */}
-      <footer className="bg-black text-white/60 py-8 border-t border-white/10">
+      <footer className="bg-[#4A3035] text-white/60 py-8 border-t border-[#E0B2B7]/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm">

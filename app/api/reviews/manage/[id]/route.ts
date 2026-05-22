@@ -12,8 +12,6 @@ export async function PUT(
     await connessioneMongoDB();
 
     const body = await req.json();
-    const { status, reply } = body;
-
     const review = await Review.findById(params.id);
     if (!review) {
       return NextResponse.json(
@@ -22,12 +20,30 @@ export async function PUT(
       );
     }
 
-    if (status && ['pending', 'approved', 'rejected'].includes(status)) {
-      review.status = status;
+    const fields = [
+      'customerName', 'customerEmail', 'usernameInstagram', 'avatar',
+      'rating', 'comment', 'reply', 'status',
+      'serviceName', 'source', 'images', 'verified', 'featured',
+      'reviewDate',
+    ];
+
+    for (const field of fields) {
+      if (body[field] !== undefined) {
+        (review as any)[field] = body[field];
+      }
     }
-    if (reply !== undefined) {
-      review.reply = reply;
+
+    if (body.serviceId) {
+      review.service = body.serviceId;
+    }
+
+    if (body.reply !== undefined) {
+      review.reply = body.reply;
       review.replyAt = new Date();
+    }
+
+    if (body.ordine !== undefined) {
+      review.ordine = body.ordine;
     }
 
     await review.save();
