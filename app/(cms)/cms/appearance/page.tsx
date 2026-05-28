@@ -15,7 +15,10 @@ import {
   Building,
   Clock,
   Smartphone,
-  Upload
+  Upload,
+  Search,
+  FileText,
+  ToggleLeft
 } from 'lucide-react';
 
 interface ImpostazioniFrontend {
@@ -57,6 +60,45 @@ interface ImpostazioniFrontend {
     sabato?: string;
     domenica?: string;
   };
+  seo?: {
+    titoloPagina?: string;
+    descrizioneMeta?: string;
+    keywords?: string;
+    ogImage?: string;
+  };
+  testiHomepage?: {
+    titoloHero?: string;
+    sottotitoloHero?: string;
+    badgeHero?: string;
+    testoCtaPrimario?: string;
+    testoCtaSecondario?: string;
+    titoloServizi?: string;
+    sottotitoloServizi?: string;
+    titoloOrari?: string;
+    sottotitoloOrari?: string;
+    titoloCtaFinale?: string;
+    sottotitoloCtaFinale?: string;
+  };
+  testiPrenotazione?: {
+    titoloPagina?: string;
+    sottotitoloPagina?: string;
+    stepLocatie?: string;
+    stepSpecialist?: string;
+    stepServizio?: string;
+    stepData?: string;
+    stepOrario?: string;
+    stepConferma?: string;
+  };
+  funzionalita?: {
+    mostraOrari?: boolean;
+    mostraServizi?: boolean;
+    mostraSocial?: boolean;
+    mostraContatti?: boolean;
+    abilitaPrenotazioni?: boolean;
+    mostraPrezziFrontend?: boolean;
+    richiestaConfermaEmail?: boolean;
+    oreAnticipo?: number;
+  };
 }
 
 export default function FrontendPage() {
@@ -68,6 +110,7 @@ export default function FrontendPage() {
   const [errore, setErrore] = useState('');
   const [successo, setSuccesso] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState<string | null>(null);
+  const [tabAttiva, setTabAttiva] = useState<string>('generale');
 
   useEffect(() => {
     caricaImpostazioni();
@@ -102,6 +145,20 @@ export default function FrontendPage() {
     } finally {
       setSalvando(false);
     }
+  };
+
+  const aggiorna = (campo: string, valore: any) => {
+    setImpostazioni(prev => {
+      const nuove = { ...prev };
+      const parti = campo.split('.');
+      let obj: any = nuove;
+      for (let i = 0; i < parti.length - 1; i++) {
+        if (!obj[parti[i]]) obj[parti[i]] = {};
+        obj = obj[parti[i]];
+      }
+      obj[parti[parti.length - 1]] = valore;
+      return nuove;
+    });
   };
 
   const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>, tipoLogo: 'logo' | 'logoCentrale' | 'logoCMS') => {
@@ -178,7 +235,35 @@ export default function FrontendPage() {
       {errore && <Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} />}
       {successo && <Messaggio tipo="successo" messaggio={successo} onChiudi={() => setSuccesso('')} />}
 
+      {/* TABS */}
+      <div className="border-b border-gray-200 mb-6 md:mb-8">
+        <div className="flex gap-2 md:gap-4 overflow-x-auto scrollbar-hide -mx-3 px-3 md:mx-0 md:px-0">
+          {[
+            { id: 'generale', label: 'General', icon: Building },
+            { id: 'orar', label: 'Orar', icon: Clock },
+            { id: 'testi', label: 'Texte', icon: FileText },
+            { id: 'seo', label: 'SEO', icon: Search },
+            { id: 'funzionalita', label: 'Funcționalități', icon: ToggleLeft },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setTabAttiva(tab.id)}
+              className={`px-3 md:px-4 py-2 md:py-3 text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
+                tabAttiva === tab.id
+                  ? 'border-primary-600 text-primary-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="space-y-6">
+        {/* GENERALE */}
+        {tabAttiva === 'generale' && <>
         {/* INFORMAZIONI AZIENDALI */}
         <Card>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -211,6 +296,19 @@ export default function FrontendPage() {
                 onChange={(e) => setImpostazioni({ ...impostazioni, tagline: e.target.value })}
                 className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none"
                 placeholder="Ex: Stilul tău, pasiunea noastră"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold mb-2">
+                Descriere
+              </label>
+              <textarea
+                value={impostazioni.descrizione || ''}
+                onChange={(e) => setImpostazioni({ ...impostazioni, descrizione: e.target.value })}
+                className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none"
+                rows={3}
+                placeholder="Scurtă descriere a salonului tău"
               />
             </div>
 
@@ -402,9 +500,10 @@ export default function FrontendPage() {
             )}
           </div>
         </Card>
+        </>}
 
-        {/* ORARI DI APERTURA */}
-        <Card>
+        {/* ORAR */}
+        {tabAttiva === 'orar' && <Card>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5" />
             Orar de Lucru
@@ -432,8 +531,10 @@ export default function FrontendPage() {
               </div>
             ))}
           </div>
-        </Card>
+        </Card>}
 
+        {/* GENERALE (continuare) */}
+        {tabAttiva === 'generale' && <>
         {/* LOGHI */}
         <Card>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -652,6 +753,35 @@ export default function FrontendPage() {
                 </div>
               )}
             </div>
+
+            {/* Favicon */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-bold mb-3">Favicon</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Pictograma care apare în fila browser-ului (recomandat: 32x32px)
+              </p>
+              <input
+                type="url"
+                value={impostazioni.favicon || ''}
+                onChange={(e) => setImpostazioni({ ...impostazioni, favicon: e.target.value })}
+                className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none"
+                placeholder="https://exemplu.com/favicon.ico"
+              />
+              {impostazioni.favicon && (
+                <div className="bg-gray-50 rounded-lg p-4 mt-3">
+                  <p className="text-sm font-bold mb-2">Previzualizare:</p>
+                  <img 
+                    src={impostazioni.favicon} 
+                    alt="Favicon" 
+                    className="h-10 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src = '';
+                      e.currentTarget.alt = 'Eroare încărcare favicon';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -794,6 +924,137 @@ export default function FrontendPage() {
             </p>
           </div>
         </Card>
+        </>}
+
+        {/* TESTI */}
+        {tabAttiva === 'testi' && <>
+        <Card>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Texte Pagina Principală
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold mb-2">Insignă Hero</label>
+              <input type="text" value={impostazioni.testiHomepage?.badgeHero || ''} onChange={(e) => aggiorna('testiHomepage.badgeHero', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Titlu Hero (lasă gol pentru a folosi numele companiei)</label>
+              <input type="text" value={impostazioni.testiHomepage?.titoloHero || ''} onChange={(e) => aggiorna('testiHomepage.titoloHero', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Subtitlu Hero (lasă gol pentru a folosi sloganul)</label>
+              <input type="text" value={impostazioni.testiHomepage?.sottotitoloHero || ''} onChange={(e) => aggiorna('testiHomepage.sottotitoloHero', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold mb-2">Text CTA Principal</label>
+                <input type="text" value={impostazioni.testiHomepage?.testoCtaPrimario || ''} onChange={(e) => aggiorna('testiHomepage.testoCtaPrimario', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-2">Text CTA Secundar</label>
+                <input type="text" value={impostazioni.testiHomepage?.testoCtaSecondario || ''} onChange={(e) => aggiorna('testiHomepage.testoCtaSecondario', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Texte Rezervare
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold mb-2">Titlu Pagină</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.titoloPagina || ''} onChange={(e) => aggiorna('testiPrenotazione.titoloPagina', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Subtitlu Pagină</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.sottotitoloPagina || ''} onChange={(e) => aggiorna('testiPrenotazione.sottotitoloPagina', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Step Locație</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.stepLocatie || ''} onChange={(e) => aggiorna('testiPrenotazione.stepLocatie', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Step Specialist</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.stepSpecialist || ''} onChange={(e) => aggiorna('testiPrenotazione.stepSpecialist', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Step Serviciu</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.stepServizio || ''} onChange={(e) => aggiorna('testiPrenotazione.stepServizio', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Step Dată</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.stepData || ''} onChange={(e) => aggiorna('testiPrenotazione.stepData', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Step Orar</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.stepOrario || ''} onChange={(e) => aggiorna('testiPrenotazione.stepOrario', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Step Confirmare</label>
+              <input type="text" value={impostazioni.testiPrenotazione?.stepConferma || ''} onChange={(e) => aggiorna('testiPrenotazione.stepConferma', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+          </div>
+        </Card>
+        </>}
+
+        {/* SEO */}
+        {tabAttiva === 'seo' && <Card>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            SEO și Metadate
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold mb-2">Titlu Pagină</label>
+              <input type="text" value={impostazioni.seo?.titoloPagina || ''} onChange={(e) => aggiorna('seo.titoloPagina', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Descriere Meta</label>
+              <textarea value={impostazioni.seo?.descrizioneMeta || ''} onChange={(e) => aggiorna('seo.descrizioneMeta', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" rows={3} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Cuvinte cheie (separate prin virgulă)</label>
+              <input type="text" value={impostazioni.seo?.keywords || ''} onChange={(e) => aggiorna('seo.keywords', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2">Imagine Open Graph</label>
+              <input type="url" value={impostazioni.seo?.ogImage || ''} onChange={(e) => aggiorna('seo.ogImage', e.target.value)} className="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary-500 focus:outline-none" placeholder="https://exemplu.com/og-image.jpg" />
+            </div>
+          </div>
+        </Card>}
+
+        {/* FUNCȚIONALITĂȚI */}
+        {tabAttiva === 'funzionalita' && <Card>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <ToggleLeft className="w-5 h-5" />
+            Funcționalități
+          </h2>
+          <div className="space-y-4">
+            {[
+              { key: 'mostraOrari', label: 'Afișează Orarul de Lucru' },
+              { key: 'mostraServizi', label: 'Afișează Secțiunea Servicii' },
+              { key: 'mostraSocial', label: 'Afișează Linkuri Social Media' },
+              { key: 'mostraContatti', label: 'Afișează Informațiile de Contact' },
+              { key: 'abilitaPrenotazioni', label: 'Activează Sistemul de Rezervări' },
+              { key: 'mostraPrezziFrontend', label: 'Afișează Prețurile în Frontend' },
+              { key: 'richiestaConfermaEmail', label: 'Solicită Confirmare Email' },
+            ].map(func => (
+              <label key={func.key} className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(impostazioni.funzionalita?.[func.key as keyof typeof impostazioni.funzionalita] ?? true)}
+                  onChange={(e) => aggiorna(`funzionalita.${func.key}`, e.target.checked)}
+                  className="w-5 h-5"
+                />
+                <span className="text-sm font-medium">{func.label}</span>
+              </label>
+            ))}
+          </div>
+        </Card>}
 
         {/* AZIONI - Desktop */}
         <div className="hidden sm:flex flex-row gap-3 justify-end">

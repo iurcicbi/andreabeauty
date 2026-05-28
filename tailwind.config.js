@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './componenti/**/*.{js,ts,jsx,tsx,mdx}',
@@ -7,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Palette calda beige/aurie pentru beauty salon
+        // Original palette (used by CMS)
         primary: {
           50: '#faf7f2',
           100: '#f0ebe2',
@@ -27,18 +28,90 @@ module.exports = {
           dark: '#4A3035',
           cream: '#FDF6F8',
         },
+
+        // Aura & Essence booking palette (flat Material Design tokens)
+        "on-surface-variant": "#4d453e",
+        "primary-fixed": "#f5dfc8",
+        "surface-container-highest": "#e9e2d5",
+        "on-tertiary-container": "#595451",
+        "outline": "#7f756d",
+        "inverse-primary": "#d8c3ad",
+        "secondary-fixed": "#e5e2de",
+        "surface-dim": "#e0d9cd",
+        "inverse-on-surface": "#f7f0e3",
+        "on-primary-container": "#625241",
+        "surface-container": "#f5ede1",
+        "on-secondary-fixed-variant": "#474744",
+        "surface-variant": "#e9e2d5",
+        "on-background": "#1e1b14",
+        "on-tertiary": "#ffffff",
+        "primary-container": "#dcc7b1",
+        "on-primary": "#ffffff",
+        "tertiary": "#635d5a",
+        "on-tertiary-fixed-variant": "#4b4642",
+        "on-error-container": "#93000a",
+        "surface-tint": "#6b5c4a",
+        "tertiary-fixed": "#e9e1dc",
+        "error": "#ba1a1a",
+        "on-tertiary-fixed": "#1e1b18",
+        "surface": "#fff8f0",
+        "secondary": "#5f5e5b",
+        "on-secondary": "#ffffff",
+        "surface-bright": "#fff8f0",
+        "surface-container-lowest": "#ffffff",
+        "inverse-surface": "#333028",
+        "secondary-container": "#e2dfdb",
+        "error-container": "#ffdad6",
+        "on-primary-fixed": "#241a0c",
+        "on-error": "#ffffff",
+        "background": "#fff8f0",
+        "primary-fixed-dim": "#d8c3ad",
+        "outline-variant": "#d0c5ba",
+        "tertiary-fixed-dim": "#cdc5c0",
+        "on-surface": "#1e1b14",
+        "secondary-fixed-dim": "#c8c6c2",
+        "on-secondary-fixed": "#1c1c1a",
+        "surface-container-low": "#faf3e6",
+        "on-primary-fixed-variant": "#534434",
+        "surface-container-high": "#efe7db",
+        "tertiary-container": "#d1c9c4",
+        "on-secondary-container": "#636260",
       },
-      // Breakpoint ottimizzati per mobile-first
+      borderRadius: {
+        DEFAULT: "0.125rem",
+        lg: "0.25rem",
+        xl: "0.5rem",
+        full: "0.75rem"
+      },
+      spacing: {
+        "container-padding-desktop": "80px",
+        "base": "8px",
+        "gutter": "24px",
+        "section-gap": "120px",
+        "container-padding-mobile": "20px"
+      },
+      fontFamily: {
+        "label-caps": ["Manrope"],
+        "label-md": ["Manrope"],
+        "headline-sm": ["Playfair Display"],
+        "body-md": ["Manrope"],
+        "headline-md": ["Playfair Display"],
+        "display-lg-mobile": ["Playfair Display"],
+        "display-lg": ["Playfair Display"],
+        "body-lg": ["Manrope"]
+      },
+      fontSize: {
+        "label-caps": ["12px", { lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "600" }],
+        "label-md": ["14px", { lineHeight: "1.2", fontWeight: "500" }],
+        "headline-sm": ["24px", { lineHeight: "1.4", fontWeight: "500" }],
+        "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+        "headline-md": ["32px", { lineHeight: "1.3", fontWeight: "500" }],
+        "display-lg-mobile": ["36px", { lineHeight: "1.2", fontWeight: "600" }],
+        "display-lg": ["48px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "600" }],
+        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }]
+      },
       screens: {
         'xs': '475px',
-        // sm: '640px' (default)
-        // md: '768px' (default)
-        // lg: '1024px' (default)
-        // xl: '1280px' (default)
-      },
-      // Spacing ottimizzato per touch targets
-      spacing: {
-        'touch': '44px', // Minimo touch target iOS/Android
       },
     },
   },

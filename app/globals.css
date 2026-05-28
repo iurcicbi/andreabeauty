@@ -2,24 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Stili globali per il barber shop - MOBILE FIRST */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
 :root {
-  --barber-dark: #1a1a1a;
-  --barber-gold: #d4af37;
-  --barber-cream: #f5f5dc;
+  --font-playfair: 'Playfair Display', serif;
+  --font-manrope: 'Manrope', sans-serif;
 }
 
 body {
   @apply bg-gray-50 text-gray-900;
-  /* Previene zoom su input focus in iOS */
   -webkit-text-size-adjust: 100%;
 }
 
-/* Stili personalizzati - MOBILE FIRST */
+/* Button styles for CMS */
 .btn-primary {
   @apply bg-primary-600 text-white px-3 py-2 text-sm rounded-lg hover:bg-primary-700 transition-colors;
   @apply md:px-4 md:py-2 md:text-base;
-  /* Touch target minimo 44x44px per mobile */
   min-height: 44px;
 }
 
@@ -37,9 +35,7 @@ body {
 .input-field {
   @apply w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500;
   @apply md:px-4 md:py-2;
-  /* Previene zoom su input in iOS (font-size minimo 16px) */
   font-size: 16px;
-  /* Touch target adeguato */
   min-height: 44px;
 }
 
@@ -48,23 +44,36 @@ body {
   @apply md:text-base;
 }
 
-/* Utility per nascondere scrollbar ma mantenere scroll */
+/* Booking-specific styles */
+.quiet-luxury-shadow {
+  box-shadow: 0 32px 64px -12px rgba(99, 93, 90, 0.06);
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* Utilities */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-/* Input mobile-friendly */
 .input-mobile {
   @apply w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-base focus:border-primary-500 focus:outline-none;
   min-height: 44px;
-  font-size: 16px; /* Previene zoom su iOS */
+  font-size: 16px;
 }
 
-/* Touch feedback per mobile */
 @media (hover: none) {
   button:active, a:active {
     opacity: 0.7;
@@ -72,7 +81,6 @@ body {
   }
 }
 
-/* Feedback immediato per menu items */
 .menu-item {
   transition: background-color 0.15s ease-out, color 0.15s ease-out;
 }
@@ -81,34 +89,26 @@ body {
   transform: scale(0.98);
 }
 
-/* Ottimizzazioni per navigazione veloce */
 @media (prefers-reduced-motion: no-preference) {
   .page-transition {
     view-transition-name: main-content;
   }
 }
 
-/* Preload e ottimizzazioni rendering */
 .layout-optimized {
   content-visibility: auto;
   contain-intrinsic-size: auto 500px;
 }
 
-/* Animazioni per transizioni fluide */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.15s ease-out;
 }
 
-/* Ottimizzazioni per performance */
 .will-change-transform {
   will-change: transform;
 }
@@ -117,17 +117,14 @@ body {
   will-change: opacity;
 }
 
-/* Preload delle transizioni */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Offset per anchor links con navbar fissa */
 section[id] {
   scroll-margin-top: 120px;
 }

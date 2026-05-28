@@ -20,6 +20,7 @@ export default function GestioneHomepage() {
   const [salvando, setSalvando] = useState(false);
   const [messaggio, setMessaggio] = useState<{ tipo: 'success' | 'error'; testo: string } | null>(null);
   const [serviziLista, setServiziLista] = useState<any[]>([]);
+  const [listaSedi, setListaSedi] = useState<any[]>([]);
 
   useEffect(() => {
     caricaDati();
@@ -31,6 +32,8 @@ export default function GestioneHomepage() {
       setImpostazioni(risposta.dati);
       const rispostaServizi = await webservice.get('/api/services');
       setServiziLista(rispostaServizi.dati || []);
+      const rispostaSedi = await webservice.get('/api/sedi');
+      setListaSedi(rispostaSedi.dati?.filter?.((s: any) => s.attivo !== false) || []);
     } catch (err) {
       console.error('Errore caricamento:', err);
       setMessaggio({ tipo: 'error', testo: 'Eroare la încărcarea setărilor' });
@@ -392,84 +395,147 @@ export default function GestioneHomepage() {
               <div className="mt-6 border-t pt-5">
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="font-semibold text-base">Locații <span className="text-gray-400 font-normal text-sm">(opțional)</span></h4>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const sediAttuali = sezione?.sedi || [];
-                      aggiornaSezione('contatti', 'sedi', [
-                        ...sediAttuali,
-                        {
-                          nome: '', indirizzo: '', cap: '', citta: '',
-                          telefono: '', email: '', urlMappa: '',
-                          programma: [
-                            { giorno: 'Luni - Vineri', orario: '09:00 - 20:00', chiuso: false },
-                            { giorno: 'Sâmbătă', orario: '10:00 - 18:00', chiuso: false },
-                            { giorno: 'Duminică', orario: '', chiuso: true },
-                          ],
-                        },
-                      ]);
-                    }}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                  >
-                    <Plus className="w-4 h-4" /> Adaugă Locație
-                  </button>
                 </div>
-                <p className="text-xs text-gray-400 mb-4">Dacă adaugi locații, acestea apar automat sub secțiunea de contact.</p>
 
-                {(sezione?.sedi || []).length === 0 && (
-                  <p className="text-sm text-gray-400 italic">Nicio locație adăugată.</p>
-                )}
+                {/* Toggle: Da collezione vs Manuale */}
+                <div className="flex gap-4 mb-4">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="modSedi"
+                      checked={!Array.isArray(sezione?.sediDaCollezione)}
+                      onChange={() => aggiornaSezione('contatti', 'sediDaCollezione', null)}
+                      className="w-4 h-4 text-primary-600"
+                    />
+                    Inserimento manuale
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="modSedi"
+                      checked={Array.isArray(sezione?.sediDaCollezione)}
+                      onChange={() => aggiornaSezione('contatti', 'sediDaCollezione', [])}
+                      className="w-4 h-4 text-primary-600"
+                    />
+                    Din colecția locații
+                  </label>
+                </div>
 
-                {(sezione?.sedi || []).map((sede: any, idx: number) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-medium text-sm text-gray-700">Locație {idx + 1}{sede.nome ? ` — ${sede.nome}` : ''}</span>
-                      <button type="button" onClick={() => { const nuove = (sezione?.sedi || []).filter((_: any, i: number) => i !== idx); aggiornaSezione('contatti', 'sedi', nuove); }} className="text-red-500 hover:text-red-700 p-1">
-                        <Trash2 className="w-4 h-4" />
+                {Array.isArray(sezione?.sediDaCollezione) ? (
+                  /* CHECKBOX SEDI DA COLLEZIONE */
+                  <div>
+                    <p className="text-xs text-gray-400 mb-3">Selectează locațiile care să apară în secțiunea de contact.</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                      {listaSedi.map((s: any) => {
+                        const selectate = sezione?.sediDaCollezione || [];
+                        const esteSelectata = selectate.includes(s._id);
+                        return (
+                          <label key={s._id} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={esteSelectata}
+                              onChange={() => {
+                                const attuali = [...(sezione?.sediDaCollezione || [])];
+                                const noi = esteSelectata
+                                  ? attuali.filter((id: string) => id !== s._id)
+                                  : [...attuali, s._id];
+                                aggiornaSezione('contatti', 'sediDaCollezione', noi);
+                              }}
+                              className="w-4 h-4 text-primary-600 border-gray-300 rounded"
+                            />
+                            <span>{s.nome}</span>
+                            {!s.attivo && <span className="text-xs text-gray-400">(inactiv)</span>}
+                            <span className="text-xs text-gray-400">— {s.citta}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">Datele (adresă, telefon, hartă) se preiau automat din colecția locații.</p>
+                  </div>
+                ) : (
+                  /* INSERIMENTO MANUALE (esistente) */
+                  <>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-gray-400">Dacă adaugi locații, acestea apar automat sub secțiunea de contact.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const sediAttuali = sezione?.sedi || [];
+                          aggiornaSezione('contatti', 'sedi', [
+                            ...sediAttuali,
+                            {
+                              nome: '', indirizzo: '', cap: '', citta: '',
+                              telefono: '', email: '', urlMappa: '',
+                              programma: [
+                                { giorno: 'Luni - Vineri', orario: '09:00 - 20:00', chiuso: false },
+                                { giorno: 'Sâmbătă', orario: '10:00 - 18:00', chiuso: false },
+                                { giorno: 'Duminică', orario: '', chiuso: true },
+                              ],
+                            },
+                          ]);
+                        }}
+                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                      >
+                        <Plus className="w-4 h-4" /> Adaugă Locație
                       </button>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-3">
-                      <InputField label="Nume locație" value={sede.nome || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], nome: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="București" />
-                      <InputField label="Adresă" value={sede.indirizzo || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], indirizzo: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="Strada Aviatorilor 42, Sector 1" />
-                      <InputField label="Cod Poștal" value={sede.cap || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], cap: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="011862" />
-                      <InputField label="Oraș" value={sede.citta || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], citta: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="București" />
-                      <InputField label="Telefon" value={sede.telefono || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], telefono: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="+40 722 123 456" />
-                      <InputField label="Email" value={sede.email || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], email: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="bucuresti@studio.ro" />
-                      <div className="md:col-span-2">
-                        <InputField label="URL Hartă Google" value={sede.urlMappa || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], urlMappa: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="https://maps.google.com/..." />
-                      </div>
-                    </div>
-                    {/* Programma */}
-                    <div className="mt-4 border-t pt-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm font-medium text-gray-700">Program</p>
-                        <button type="button" onClick={() => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], programma: [...(s[idx].programma || []), { giorno: '', orario: '', chiuso: false }] }; aggiornaSezione('contatti', 'sedi', s); }} className="text-xs text-primary-600 hover:underline flex items-center gap-1">
-                          <Plus className="w-3 h-3" /> Adaugă rând
-                        </button>
-                      </div>
-                      {(sede.programma || []).map((riga: any, rigaIdx: number) => (
-                        <div key={rigaIdx} className="flex gap-2 items-center mb-2">
-                          <input type="text" value={riga.giorno || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], giorno: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="Luni - Vineri" className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm" />
-                          <input type="text" value={riga.orario || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], orario: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="09:00 - 20:00" className="w-32 px-2 py-1.5 border border-gray-300 rounded text-sm" disabled={riga.chiuso} />
-                          <label className="flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap">
-                            <input type="checkbox" checked={riga.chiuso || false} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], chiuso: e.target.checked }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} className="w-3.5 h-3.5" />
-                            Închis
-                          </label>
-                          <button type="button" onClick={() => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], programma: (s[idx].programma || []).filter((_: any, ri: number) => ri !== rigaIdx) }; aggiornaSezione('contatti', 'sedi', s); }} className="text-red-400 hover:text-red-600">
-                            <Trash2 className="w-3.5 h-3.5" />
+
+                    {(sezione?.sedi || []).length === 0 && (
+                      <p className="text-sm text-gray-400 italic">Nicio locație adăugată.</p>
+                    )}
+
+                    {(sezione?.sedi || []).map((sede: any, idx: number) => (
+                      <div key={idx} className="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium text-sm text-gray-700">Locație {idx + 1}{sede.nome ? ` — ${sede.nome}` : ''}</span>
+                          <button type="button" onClick={() => { const nuove = (sezione?.sedi || []).filter((_: any, i: number) => i !== idx); aggiornaSezione('contatti', 'sedi', nuove); }} className="text-red-500 hover:text-red-700 p-1">
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <InputField label="Nume locație" value={sede.nome || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], nome: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="București" />
+                          <InputField label="Adresă" value={sede.indirizzo || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], indirizzo: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="Strada Aviatorilor 42, Sector 1" />
+                          <InputField label="Cod Poștal" value={sede.cap || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], cap: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="011862" />
+                          <InputField label="Oraș" value={sede.citta || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], citta: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="București" />
+                          <InputField label="Telefon" value={sede.telefono || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], telefono: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="+40 722 123 456" />
+                          <InputField label="Email" value={sede.email || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], email: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="bucuresti@studio.ro" />
+                          <div className="md:col-span-2">
+                            <InputField label="URL Hartă Google" value={sede.urlMappa || ''} onChange={(v) => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], urlMappa: v }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="https://maps.google.com/..." />
+                          </div>
+                        </div>
+                        {/* Programma */}
+                        <div className="mt-4 border-t pt-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm font-medium text-gray-700">Program</p>
+                            <button type="button" onClick={() => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], programma: [...(s[idx].programma || []), { giorno: '', orario: '', chiuso: false }] }; aggiornaSezione('contatti', 'sedi', s); }} className="text-xs text-primary-600 hover:underline flex items-center gap-1">
+                              <Plus className="w-3 h-3" /> Adaugă rând
+                            </button>
+                          </div>
+                          {(sede.programma || []).map((riga: any, rigaIdx: number) => (
+                            <div key={rigaIdx} className="flex gap-2 items-center mb-2">
+                              <input type="text" value={riga.giorno || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], giorno: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="Luni - Vineri" className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm" />
+                              <input type="text" value={riga.orario || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], orario: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="09:00 - 20:00" className="w-32 px-2 py-1.5 border border-gray-300 rounded text-sm" disabled={riga.chiuso} />
+                              <label className="flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap">
+                                <input type="checkbox" checked={riga.chiuso || false} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], chiuso: e.target.checked }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} className="w-3.5 h-3.5" />
+                                Închis
+                              </label>
+                              <button type="button" onClick={() => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], programma: (s[idx].programma || []).filter((_: any, ri: number) => ri !== rigaIdx) }; aggiornaSezione('contatti', 'sedi', s); }} className="text-red-400 hover:text-red-600">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
 
-                {/* Link "Explore the spaces" — visibile solo se ci sono sedi */}
-                {(sezione?.sedi || []).length > 0 && (
-                  <div className="grid md:grid-cols-2 gap-4 mt-2">
-                    <InputField label="Text link locații (dreapta titlu)" value={sezione?.testoLink || ''} onChange={(v) => aggiornaSezione('contatti', 'testoLink', v)} placeholder="EXPLORE THE SPACES" />
-                    <InputField label="URL link locații" value={sezione?.urlLink || ''} onChange={(v) => aggiornaSezione('contatti', 'urlLink', v)} placeholder="/locatii" />
-                  </div>
+                    {/* Link "Explore the spaces" */}
+                    {(sezione?.sedi || []).length > 0 && (
+                      <div className="grid md:grid-cols-2 gap-4 mt-2">
+                        <InputField label="Text link locații (dreapta titlu)" value={sezione?.testoLink || ''} onChange={(v) => aggiornaSezione('contatti', 'testoLink', v)} placeholder="EXPLORE THE SPACES" />
+                        <InputField label="URL link locații" value={sezione?.urlLink || ''} onChange={(v) => aggiornaSezione('contatti', 'urlLink', v)} placeholder="/locatii" />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <div className="border-t pt-3 mt-4">

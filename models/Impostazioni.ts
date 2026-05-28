@@ -169,6 +169,7 @@ export interface IImpostazioni extends Document {
       mostraSocial: boolean;
       coloreSfondo: string;
       mostraLocazioni: boolean;
+      sediDaCollezione: string[];
       sedi: {
         nome: string;
         indirizzo: string;
@@ -250,6 +251,7 @@ export interface IImpostazioni extends Document {
   testiPrenotazione: {
     titoloPagina: string;
     sottotitoloPagina: string;
+    stepLocatie: string;
     stepSpecialist: string;
     stepServizio: string;
     stepData: string;
@@ -510,6 +512,7 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
       urlLink: { type: String, default: '' },
       mostraLocazioni: { type: Boolean, default: false },
       coloreSfondo: { type: String, default: '' },
+      sediDaCollezione: { type: [String], default: [] },
       sedi: [{
         nome: { type: String, default: '' },
         indirizzo: { type: String, default: '' },
@@ -599,8 +602,9 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   testiPrenotazione: {
     titoloPagina: { type: String, default: 'PRENOTA APPUNTAMENTO' },
     sottotitoloPagina: { type: String, default: 'Semplice, veloce, professionale' },
-    stepSpecialist: { type: String,     default: 'CHOOSE YOUR SPECIALIST' },
-    stepServizio: { type: String, default: 'SCEGLI IL SERVIZIO' },
+    stepLocatie: { type: String, default: 'Alege Locația' },
+    stepSpecialist: { type: String, default: 'CHOOSE YOUR SPECIALIST' },
+    stepServizio: { type: String, default: 'Alege Serviciul' },
     stepData: { type: String, default: 'SCEGLI LA DATA' },
     stepOrario: { type: String, default: 'SCEGLI L\'ORARIO' },
     stepConferma: { type: String, default: 'CONFERMA PRENOTAZIONE' }

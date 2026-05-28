@@ -8,6 +8,7 @@ type Sede = {
   telefono?: string;
   email?: string;
   urlMappa?: string;
+  coordinate?: { lat: number; lng: number } | null;
   programma?: { giorno: string; orario: string; chiuso?: boolean }[];
 };
 
@@ -27,7 +28,7 @@ export default function SezioneContatti({
   const telefonoGenerale = config.telefonoGenerale || impostazioni?.telefono || '';
   const testoLink = config.testoLink || '';
   const urlLink = config.urlLink || '#';
-  const sedi: Sede[] = config.sedi || [];
+  const sedi: Sede[] = config.sediResolved || config.sedi || [];
 
   const colorePrimario = config.colorePrimario || '#FFF8F0';
   const coloreSecondario = config.coloreSecondario || '#F5EEE1';
@@ -162,6 +163,19 @@ export default function SezioneContatti({
                             {sede.indirizzo && <span>{sede.indirizzo}<br /></span>}
                             {(sede.cap || sede.citta) && <span>{[sede.cap, sede.citta].filter(Boolean).join(', ')}</span>}
                           </p>
+                        </div>
+                      )}
+
+                      {/* Mappa embed */}
+                      {sede.coordinate?.lat && sede.coordinate?.lng && (
+                        <div className="aspect-[16/6] overflow-hidden relative border border-[#d0c5ba]/20">
+                          <iframe
+                            src={`https://www.google.com/maps?q=${sede.coordinate.lat},${sede.coordinate.lng}&z=15&output=embed`}
+                            className="w-full h-full pointer-events-none"
+                            style={{ filter: 'grayscale(0.3) sepia(0.1)' }}
+                            loading="lazy"
+                            title={sede.nome}
+                          />
                         </div>
                       )}
 

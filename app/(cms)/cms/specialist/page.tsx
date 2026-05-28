@@ -205,8 +205,8 @@ export default function SpecialistListPage() {
         </Bottone>
       </div>
 
-      {errore && <Messaggio tipo="eroare" messaggio={errore} onChiudi={() => setErrore('')} />}
-      {successo && <Messaggio tipo="succes" messaggio={successo} onChiudi={() => setSuccesso('')} />}
+      {errore && <Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} />}
+      {successo && <Messaggio tipo="successo" messaggio={successo} onChiudi={() => setSuccesso('')} />}
 
       {activeSpecialists.length > 0 && (
         <div className="mb-6 md:mb-8">

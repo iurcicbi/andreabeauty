@@ -19,7 +19,7 @@
  * }
  */
 
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
 if (!process.env.JWT_SECRET) {
@@ -136,7 +136,7 @@ export function generaToken(
   payload: Omit<TokenPayload, 'iat' | 'exp'>,
   expiresIn: string = '7d'
 ): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn } as SignOptions);
 }
 
 /**

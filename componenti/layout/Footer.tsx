@@ -4,201 +4,252 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import webservice from '@/utils/webservice';
 
-interface ImpostazioniFrontend {
-  logo?: string;
-  logoAlt?: string;
-  nomeAzienda: string;
-  tagline?: string;
-  email?: string;
-  telefono?: string;
-  whatsapp?: string;
-  indirizzo?: string;
-  citta?: string;
-  cap?: string;
-  provincia?: string;
-  social?: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-    linkedin?: string;
-    tiktok?: string;
-    youtube?: string;
-  };
-}
-
 export default function Footer() {
-  const [impostazioni, setImpostazioni] = useState<ImpostazioniFrontend | null>(null);
+  const [impostazioni, setImpostazioni] = useState<any>({});
 
   useEffect(() => {
-    caricaImpostazioni();
+    webservice.get('/api/settings')
+      .then((r) => setImpostazioni(r.dati ?? {}))
+      .catch(() => {});
   }, []);
 
-  const caricaImpostazioni = async () => {
-    try {
-      const risposta = await webservice.get('/api/settings');
-      setImpostazioni(risposta.dati);
-    } catch (err) {
-      console.log('Nessuna impostazione trovata');
-    }
-  };
+  const sez = impostazioni?.sezioniHomepage || {};
+  const attiva = (tipo: string) => sez[tipo]?.attiva !== false;
 
-  if (!impostazioni) return null;
+  const sezioniMenu: { tipo: string; href: string }[] = [
+    { tipo: 'servizi',    href: '/#services'  },
+    { tipo: 'about',      href: '/#about'     },
+    { tipo: 'orari',      href: '/#hours'     },
+    { tipo: 'recensioni', href: '/#reviews'   },
+    { tipo: 'contatti',   href: '/#contact'   },
+    { tipo: 'galleria',   href: '/#gallery'   },
+    { tipo: 'filosofia',  href: '/#filosofia' },
+  ].filter((s) => attiva(s.tipo) && sez[s.tipo]?.mostraNelMenu !== false);
+
+  const labelMenu = (tipo: string) =>
+    sez[tipo]?.nomeMenu ||
+    ({
+      servizi:    'Servizi',
+      about:      'Chi Siamo',
+      orari:      'Orari',
+      recensioni: 'Recensioni',
+      contatti:   'Contatti',
+      galleria:   'Galleria',
+      filosofia:  'Filosofia',
+    } as Record<string, string>)[tipo] || tipo;
+
+  const anno = new Date().getFullYear();
+  const nome = impostazioni?.nomeAzienda || '';
+  const bgColor = sez.colorePrimario || '#F5EEE1';
+
+  // Logo o nome — riusato in entrambi i layout
+  const logoEl = impostazioni?.logo ? (
+    <img src={impostazioni.logo} alt={impostazioni?.logoAlt || nome} className="h-32 object-contain" />
+  ) : (
+    <span
+      className="text-2xl text-[#1e1b14]"
+      style={{ fontFamily: 'Playfair Display, serif', fontWeight: 600, letterSpacing: '0.06em' }}
+    >
+      {nome.toUpperCase()}
+    </span>
+  );
+
+  // Icone social — riusate in entrambi i layout
+  const socialIcons = (size: string) => (
+    <div className={`flex items-center gap-5`}>
+      {/* <a href={impostazioni?.social?.facebook || '#'}
+        target={impostazioni?.social?.facebook ? '_blank' : undefined}
+        rel="noopener noreferrer" aria-label="Facebook"
+        className="text-[#4d453e] hover:text-[#1e1b14] transition-colors">
+        <svg className={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+        </svg>
+      </a> */}
+      <a href={impostazioni?.social?.instagram || '#'}
+        target={impostazioni?.social?.instagram ? '_blank' : undefined}
+        rel="noopener noreferrer" aria-label="Instagram"
+        className="text-[#4d453e] hover:text-[#1e1b14] transition-colors">
+        <svg className={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+        </svg>
+      </a>
+      {/* <a href={impostazioni?.email ? `mailto:${impostazioni.email}` : '#'}
+        aria-label="Email"
+        className="text-[#4d453e] hover:text-[#1e1b14] transition-colors">
+        <svg className={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+        </svg>
+      </a> */}
+    </div>
+  );
 
   return (
-    <footer className="bg-[#4A3035] text-white py-12 md:py-16 border-t border-[#E0B2B7]/20">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          
-          {/* Info Azienda */}
-          <div>
-            {impostazioni.logo && (
-              <img 
-                src={impostazioni.logo} 
-                alt={impostazioni.logoAlt || impostazioni.nomeAzienda}
-                className="h-12 mb-4 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            )}
-            <h3 className="text-2xl font-bold mb-2 tracking-tight">{impostazioni.nomeAzienda}</h3>
-            {impostazioni.tagline && (
-              <p className="text-white/60 mb-6">{impostazioni.tagline}</p>
-            )}
-            
-            {/* Social Media */}
-            <div className="flex gap-3">
-              {impostazioni.social?.facebook && (
-                <a
-                  href={impostazioni.social.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-[#E0B2B7] hover:text-white transition-all"
-                  aria-label="Facebook"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </a>
-              )}
-              {impostazioni.social?.instagram && (
-                <a
-                  href={impostazioni.social.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-[#E0B2B7] hover:text-white transition-all"
-                  aria-label="Instagram"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                </a>
-              )}
-              {impostazioni.whatsapp && (
-                <a
-                  href={`https://wa.me/${impostazioni.whatsapp.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 border-2 border-white/20 flex items-center justify-center hover:bg-[#E0B2B7] hover:text-white transition-all"
-                  aria-label="WhatsApp"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                  </svg>
-                </a>
-              )}
-            </div>
-          </div>
+    <footer className="w-full border-t" style={{ backgroundColor: bgColor, borderColor: 'rgba(107,92,74,0.15)' }}>
 
-          {/* Contatti */}
-          <div>
-            <h4 className="text-lg font-bold mb-6 tracking-wide uppercase">Contatti</h4>
-            <div className="space-y-3 text-white/70">
-              {impostazioni.indirizzo && (
-                <p className="flex items-start gap-3 hover:text-white transition-colors">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  <span>
-                    {impostazioni.indirizzo}<br/>
-                    {impostazioni.cap} {impostazioni.citta} {impostazioni.provincia && `(${impostazioni.provincia})`}
-                  </span>
-                </p>
-              )}
-              {impostazioni.telefono && (
-                <p className="flex items-center gap-3">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                  </svg>
-                  <a href={`tel:${impostazioni.telefono}`} className="hover:text-white transition-colors">
-                    {impostazioni.telefono}
-                  </a>
-                </p>
-              )}
-              {impostazioni.email && (
-                <p className="flex items-center gap-3">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                  </svg>
-                  <a href={`mailto:${impostazioni.email}`} className="hover:text-white transition-colors">
-                    {impostazioni.email}
-                  </a>
-                </p>
-              )}
-            </div>
-          </div>
+      {/* ══════════════ MOBILE ══════════════ */}
+      <div className="md:hidden flex flex-col items-center text-center px-6 py-16 gap-10">
+        {logoEl}
 
-          {/* Link Utili */}
-          <div>
-            <h4 className="text-lg font-bold mb-6 tracking-wide uppercase">Link Utili</h4>
-            <div className="space-y-3">
-              <Link href="/booking" className="block text-white/70 hover:text-white transition-colors">
-                → Prenota Appuntamento
-              </Link>
-              <Link href="/contact" className="block text-white/70 hover:text-white transition-colors">
-                → Dove Siamo
-              </Link>
-              {impostazioni.linkPrivacyPolicy && (
-                <a 
-                  href={impostazioni.linkPrivacyPolicy} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block text-white/70 hover:text-white transition-colors"
-                >
-                  → Privacy Policy
-                </a>
-              )}
-              {impostazioni.linkCookiePolicy && (
-                <a 
-                  href={impostazioni.linkCookiePolicy} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block text-white/70 hover:text-white transition-colors"
-                >
-                  → Cookie Policy
-                </a>
-              )}
-              {impostazioni.linkTerminiCondizioni && (
-                <a 
-                  href={impostazioni.linkTerminiCondizioni} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block text-white/70 hover:text-white transition-colors"
-                >
-                  → Termini e Condizioni
-                </a>
-              )}
-            </div>
-          </div>
+        {/* Social mobile — icone più grandi, Instagram + Twitter */}
+        <div className="flex items-center justify-center gap-8">
+          <a href={impostazioni?.social?.instagram || '#'}
+            target={impostazioni?.social?.instagram ? '_blank' : undefined}
+            rel="noopener noreferrer" aria-label="Instagram"
+            className="text-[#1e1b14] hover:opacity-60 transition-opacity">
+            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+            </svg>
+          </a>
+          {/* <a href={impostazioni?.social?.twitter || impostazioni?.social?.facebook || '#'}
+            target="_blank" rel="noopener noreferrer" aria-label="Twitter"
+            className="text-[#1e1b14] hover:opacity-60 transition-opacity">
+            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a> */}
         </div>
 
-        {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-[#E0B2B7]/20 text-center text-white/50 text-sm">
-          <p>© {new Date().getFullYear()} {impostazioni.nomeAzienda}. Tutti i diritti riservati.</p>
+        {/* Link legal */}
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
+          {impostazioni?.linkPrivacyPolicy ? (
+            <a href={impostazioni.linkPrivacyPolicy} target="_blank" rel="noopener noreferrer"
+              className="text-xs tracking-[0.12em] uppercase text-[#4d453e] hover:text-[#1e1b14] transition-colors"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>Confidențialitate</a>
+          ) : (
+            <span className="text-xs tracking-[0.12em] uppercase text-[#4d453e]"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>Confidențialitate</span>
+          )}
+          {impostazioni?.linkTerminiCondizioni ? (
+            <a href={impostazioni.linkTerminiCondizioni} target="_blank" rel="noopener noreferrer"
+              className="text-xs tracking-[0.12em] uppercase text-[#4d453e] hover:text-[#1e1b14] transition-colors"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>Termeni</a>
+          ) : (
+            <span className="text-xs tracking-[0.12em] uppercase text-[#4d453e]"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>Termeni</span>
+          )}
+        </div>
+
+        <p className="text-[11px] tracking-[0.08em] uppercase text-[#7f756d] leading-relaxed"
+          style={{ fontFamily: 'Manrope, sans-serif' }}>
+          © {anno} {nome.toUpperCase()}.
+        </p>
+      </div>
+
+      {/* ══════════════ DESKTOP ══════════════ */}
+      <div className="hidden md:block container mx-auto px-4 md:px-6 py-16 md:py-20">
+        <div className="grid grid-cols-12 gap-6">
+
+          {/* Col 1-3: Logo + tagline + social */}
+          <div className="col-span-3">
+            {logoEl}
+            {impostazioni?.tagline && (
+              <p className="text-sm text-[#4d453e] max-w-[200px] mb-6 leading-relaxed"
+                style={{ fontFamily: 'Manrope, sans-serif' }}>
+                {impostazioni.tagline}
+              </p>
+            )}
+            <div className="mt-6">
+              {socialIcons('w-5 h-5')}
+            </div>
+          </div>
+
+          {/* Col 5-8: Navigare in griglia 2 colonne */}
+          <div className="col-span-4 col-start-5">
+            <h4 className="text-[10px] tracking-[0.15em] uppercase text-[#7f756d] font-semibold mb-6"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>
+              Navigare
+            </h4>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+              <a href="/" className="text-sm text-[#4d453e] hover:text-[#1e1b14] transition-colors hover:underline underline-offset-4"
+                style={{ fontFamily: 'Manrope, sans-serif' }}>Home</a>
+              {sezioniMenu.map((s) => (
+                <a key={s.tipo} href={s.href}
+                  className="text-sm text-[#4d453e] hover:text-[#1e1b14] transition-colors hover:underline underline-offset-4"
+                  style={{ fontFamily: 'Manrope, sans-serif' }}>
+                  {labelMenu(s.tipo)}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Col 9-10: Legal */}
+          <div className="col-span-2 col-start-9">
+            <h4 className="text-[10px] tracking-[0.15em] uppercase text-[#7f756d] font-semibold mb-6"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>
+              Legal
+            </h4>
+            <ul className="space-y-4">
+              <li>
+                {impostazioni?.linkPrivacyPolicy ? (
+                  <a href={impostazioni.linkPrivacyPolicy} target="_blank" rel="noopener noreferrer"
+                    className="text-sm text-[#4d453e] hover:text-[#1e1b14] transition-colors hover:underline underline-offset-4"
+                    style={{ fontFamily: 'Manrope, sans-serif' }}>
+                    Politică de Confidențialitate
+                  </a>
+                ) : (
+                  <span className="text-sm text-[#4d453e]" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                    Politică de Confidențialitate
+                  </span>
+                )}
+              </li>
+              <li>
+                {impostazioni?.linkTerminiCondizioni ? (
+                  <a href={impostazioni.linkTerminiCondizioni} target="_blank" rel="noopener noreferrer"
+                    className="text-sm text-[#4d453e] hover:text-[#1e1b14] transition-colors hover:underline underline-offset-4"
+                    style={{ fontFamily: 'Manrope, sans-serif' }}>
+                    Termeni și Condiții
+                  </a>
+                ) : (
+                  <span className="text-sm text-[#4d453e]" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                    Termeni și Condiții
+                  </span>
+                )}
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 11-12: Prenota */}
+          {/* <div className="col-span-2 col-start-11 flex flex-col items-end">
+            <h4 className="text-[10px] tracking-[0.15em] uppercase text-[#7f756d] font-semibold mb-6"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>
+              Prenota
+            </h4>
+            <Link href="/booking" className="flex flex-col items-center gap-1.5 group" aria-label="Prenota appuntamento">
+              <div className="w-16 h-16 border-2 border-[#C49A8C] text-[#C49A8C] group-hover:bg-[#C49A8C] group-hover:text-white transition-all flex items-center justify-center">
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                  <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+                </svg>
+              </div>
+              <span className="text-[10px] uppercase tracking-widest text-[#C49A8C] font-medium group-hover:text-[#a07860] transition-colors"
+                style={{ fontFamily: 'Manrope, sans-serif' }}>
+                Prenota
+              </span>
+            </Link>
+          </div> */}
+
+          {/* Copyright bar */}
+          <div className="col-span-12 border-t pt-8 mt-4 flex flex-col md:flex-row justify-between items-center gap-3"
+            style={{ borderColor: 'rgba(107,92,74,0.15)' }}>
+            <span className="text-[11px] tracking-[0.1em] uppercase text-[#7f756d]"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>
+              © {anno} {nome.toUpperCase()}. 
+            </span>
+            {/* <span className="text-[11px] tracking-[0.1em] uppercase text-[#7f756d]"
+              style={{ fontFamily: 'Manrope, sans-serif' }}>
+              DESIGNED IN PURSUIT OF RADIANCE
+            </span> */}
+          </div>
+
         </div>
       </div>
+
     </footer>
   );
 }

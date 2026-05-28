@@ -1,4 +1,4 @@
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 
 export type TReviewStatus = 'bozza' | 'approvata' | 'nascosta' | 'pending' | 'approved' | 'rejected';
 export type TReviewSource = 'Instagram' | 'WhatsApp' | 'Direct' | 'Google' | 'Facebook';
@@ -88,7 +88,7 @@ SchemaMongoose.index({ ordine: 1 });
 if (process.env.NODE_ENV === 'development' && models.reviews) {
   delete models.reviews;
 }
-const ReviewSchema = models.reviews || model('reviews', SchemaMongoose);
+const ReviewSchema: Model<TSchemaReview> = (models.reviews as Model<TSchemaReview> | undefined) ?? model<TSchemaReview>('reviews', SchemaMongoose);
 
 // Drop leftover unique indexes from older schema versions
 ReviewSchema.collection?.dropIndex('appointment_1').catch(() => {});

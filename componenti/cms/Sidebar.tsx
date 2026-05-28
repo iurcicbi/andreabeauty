@@ -35,7 +35,6 @@ import {
   Users, 
   Clock, 
   Palette, 
-  Settings, 
   User,
   MessageSquare,
   Gift,
@@ -76,7 +75,6 @@ const menuItems = [
   { href: '/cms/vouchers', label: 'Vouchere', icon: Gift },
   { href: '/cms/hours', label: 'Orar', icon: Clock },
   { href: '/cms/appearance', label: 'Aspect', icon: Palette },
-  { href: '/cms/settings', label: 'Setări', icon: Settings },
   { href: '/cms/profile', label: 'Profil', icon: User },
 ];
 

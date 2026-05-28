@@ -49,8 +49,6 @@ export async function memoryMonitor(): Promise<void> {
 }
 
 export async function queueMonitor(req: Request, res: Response): Promise<void> {
-  const { getQueueMetrics } = await import('../queues/setup');
-
   const queues = ['reminders', 'whatsapp', 'emails', 'cleanup'];
   const metrics: Record<string, unknown> = {};
 

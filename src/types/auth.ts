@@ -33,7 +33,7 @@ export type Permission =
   | 'system:monitor';
 
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  super_admin: ['*'] as Permission[],
+  super_admin: ['*'] as unknown as Permission[],
 
   admin: [
     'appointments:read', 'appointments:create', 'appointments:update', 'appointments:delete', 'appointments:confirm',

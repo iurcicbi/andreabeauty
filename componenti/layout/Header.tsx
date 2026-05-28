@@ -82,7 +82,7 @@ export default function Header() {
                   <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
                 </svg>
               </div>
-              <span className="hidden md:block text-[10px] uppercase tracking-widest text-[#C49A8C] font-medium">Prenota</span>
+              <span className="block text-[10px] uppercase tracking-widest text-[#C49A8C] font-medium">Programare</span>
             </Link>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default function Header() {
             {sezioniMenu.map((s) => (
               <a key={s.tipo} href={s.href} onClick={() => setMenuAperto(false)} className="block text-[#5F5D5C] hover:text-[#4A3035] transition-colors py-2 uppercase tracking-wide text-sm">{labelMenu(s.tipo)}</a>
             ))}
-            <Link href="/booking" className="block text-center mt-4" onClick={() => setMenuAperto(false)}>
+            {/* <Link href="/booking" className="block text-center mt-4" onClick={() => setMenuAperto(false)}>
               <span className="flex items-center justify-center gap-3 px-6 py-3 border-2 border-[#C49A8C] text-[#C49A8C] hover:bg-[#C49A8C] hover:text-white transition-all font-bold tracking-wider text-sm uppercase">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -103,9 +103,9 @@ export default function Header() {
                   <line x1="3" y1="10" x2="21" y2="10"/>
                   <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
                 </svg>
-                PRENOTA
+                Programeaza-te 
               </span>
-            </Link>
+            </Link> */}
           </div>
         </div>
       )}

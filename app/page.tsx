@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Caricamento from '@/componenti/comuni/Caricamento';
 import Header from '@/componenti/layout/Header';
+import Footer from '@/componenti/layout/Footer';
 import webservice from '@/utils/webservice';
 import {
   SezioneHero,
@@ -97,27 +98,11 @@ export default function HomePage() {
     .sort((a, b) => ordine(a.tipo) - ordine(b.tipo));
 
   return (
-    <div className="min-h-screen bg-[#FDF6F8] text-[#4A3035] overflow-hidden">
+    <div className="min-h-screen bg-[#FDF6F8] text-[#4A3035]  overflow-hidden">
       <Header />
       <FeaturedReviewsStrip limit={3} />
       {sezioni.map((s, index) => s.render(index))}
-
-      {/* Footer */}
-      <footer className="bg-[#4A3035] text-white/60 py-8 border-t border-[#E0B2B7]/20">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-sm">
-              © {new Date().getFullYear()} {impostazioni?.nomeAzienda || 'Beauty Salon'}. Tutti i diritti riservati.
-            </div>
-            <div className="flex gap-6 text-sm">
-              <a href="#home" className="hover:text-white transition-colors">Home</a>
-              {attiva('servizi') && <a href="#services" className="hover:text-white transition-colors">Servizi</a>}
-              {attiva('about') && <a href="#about" className="hover:text-white transition-colors">Chi Siamo</a>}
-              {attiva('contatti') && <a href="#contact" className="hover:text-white transition-colors">Contatti</a>}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

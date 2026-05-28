@@ -2,7 +2,7 @@
  * SCHEMA APPUNTAMENTO
  */
 
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaAppuntamento = {
@@ -96,6 +96,6 @@ const SchemaMongoose = new Schema<TSchemaAppuntamento, ISettings>({
 if (process.env.NODE_ENV === 'development' && models.appointments) {
   delete models.appointments;
 }
-const AppuntamentoSchema = models.appointments || model('appointments', SchemaMongoose);
+const AppuntamentoSchema: Model<TSchemaAppuntamento> = (models.appointments as Model<TSchemaAppuntamento> | undefined) ?? model<TSchemaAppuntamento>('appointments', SchemaMongoose);
 
 export default AppuntamentoSchema;

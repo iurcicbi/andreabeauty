@@ -1,4 +1,4 @@
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaVoucher = {
@@ -61,6 +61,6 @@ SchemaMongoose.index({ status: 1 });
 if (process.env.NODE_ENV === 'development' && models.vouchers) {
   delete models.vouchers;
 }
-const VoucherSchema = models.vouchers || model('vouchers', SchemaMongoose);
+const VoucherSchema: Model<TSchemaVoucher> = (models.vouchers as Model<TSchemaVoucher> | undefined) ?? model<TSchemaVoucher>('vouchers', SchemaMongoose);
 
 export default VoucherSchema;

@@ -1,4 +1,4 @@
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TPostazione = {
@@ -62,6 +62,6 @@ const SchemaMongoose = new Schema<TSchemaSede, ISettings>({
 if (process.env.NODE_ENV === 'development' && models.sedi) {
   delete models.sedi;
 }
-const Sede = models.sedi || model<TSchemaSede, ISettings>('sedi', SchemaMongoose);
+const Sede: Model<TSchemaSede> = (models.sedi as Model<TSchemaSede> | undefined) ?? model<TSchemaSede>('sedi', SchemaMongoose);
 
 export default Sede;

@@ -1,4 +1,4 @@
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaSpecialistService = {
@@ -46,6 +46,6 @@ SchemaMongoose.index({ service: 1 });
 if (process.env.NODE_ENV === 'development' && models.specialist_services) {
   delete models.specialist_services;
 }
-const SpecialistServiceSchema = models.specialist_services || model('specialist_services', SchemaMongoose);
+const SpecialistServiceSchema: Model<TSchemaSpecialistService> = (models.specialist_services as Model<TSchemaSpecialistService> | undefined) ?? model<TSchemaSpecialistService>('specialist_services', SchemaMongoose);
 
 export default SpecialistServiceSchema;

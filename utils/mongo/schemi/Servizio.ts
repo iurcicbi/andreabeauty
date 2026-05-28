@@ -2,7 +2,7 @@
  * SCHEMA SERVIZIO
  */
 
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaServizio = {
@@ -37,6 +37,6 @@ const SchemaMongoose = new Schema<TSchemaServizio, ISettings>({
 if (process.env.NODE_ENV === 'development' && models.services) {
   delete models.services;
 }
-const ServizioSchema = models.services || model('services', SchemaMongoose);
+const ServizioSchema: Model<TSchemaServizio> = (models.services as Model<TSchemaServizio> | undefined) ?? model<TSchemaServizio>('services', SchemaMongoose);
 
 export default ServizioSchema;

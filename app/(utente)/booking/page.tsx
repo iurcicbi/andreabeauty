@@ -1,7 +1,3 @@
-/**
- * PAGINA PRENOTAZIONE - DESIGN NERO/BIANCO MODERNO
- */
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -44,10 +40,20 @@ interface GiornoChiusura {
 
 type Step = 'locatie' | 'servizio' | 'specialist' | 'data' | 'ora' | 'conferma';
 
+const STEP_ORDINE: Step[] = ['locatie', 'servizio', 'specialist', 'data', 'ora', 'conferma'];
+
+const LABEL_STEP: Record<Step, string> = {
+  locatie: 'Locație',
+  servizio: 'Serviciu',
+  specialist: 'Specialist',
+  data: 'Dată & Oră',
+  ora: 'Dată & Oră',
+  conferma: 'Confirmare',
+};
+
 export default function PrenotazionePage() {
   const router = useRouter();
-  
-  // Stati principali
+
   const [step, setStep] = useState<Step>('locatie');
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [servizi, setServizi] = useState<Servizio[]>([]);
@@ -59,43 +65,41 @@ export default function PrenotazionePage() {
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherData, setVoucherData] = useState<any>(null);
   const [voucherError, setVoucherError] = useState('');
-  
-  // Dati cliente
+
   const [nomeCliente, setNomeCliente] = useState('');
   const [cognomeCliente, setCognomeCliente] = useState('');
   const [telefonoCliente, setTelefonoCliente] = useState('');
-  
-  // Stati calendario
+  const [emailCliente, setEmailCliente] = useState('');
+
   const [mese, setMese] = useState(new Date().getMonth());
   const [anno, setAnno] = useState(new Date().getFullYear());
   const [slotOrari, setSlotOrari] = useState<SlotOrario[]>([]);
   const [specialistClosures, setSpecialistClosures] = useState<GiornoChiusura[]>([]);
 
-  // Stati sede e postazione
   const [sediPubbliche, setSediPubbliche] = useState<any[]>([]);
   const [sediDisponibili, setSediDisponibili] = useState<any[]>([]);
   const [sedeSelezionata, setSedeSelezionata] = useState<any>(null);
   const [postazioneSelezionata, setPostazioneSelezionata] = useState<string>('');
-  
-  // Stati UI
+
   const [caricamento, setCaricamento] = useState(true);
   const [caricamentoSlot, setCaricamentoSlot] = useState(false);
   const [caricamentoSpecialisti, setCaricamentoSpecialisti] = useState(false);
   const [errore, setErrore] = useState('');
   const [mostraPrezzi, setMostraPrezzi] = useState(true);
-  
+
   const [testiPrenotazione, setTestiPrenotazione] = useState({
-    titoloPagina: 'BOOK APPOINTMENT',
-    sottotitoloPagina: 'Simple, fast, professional',
-    stepServizio: 'CHOOSE YOUR SERVICE',
-    stepSpecialist: 'CHOOSE YOUR SPECIALIST',
-    stepData: 'CHOOSE THE DATE',
-    stepOrario: 'CHOOSE THE TIME',
-    stepConferma: 'CONFIRM BOOKING'
+    titoloPagina: 'Programare Online',
+    sottotitoloPagina: 'Rezervă-ți momentul de răsfăț în universul nostru dedicat frumuseții autentice. Urmează pașii de mai jos pentru a selecta experiența dorită.',
+    stepLocatie: 'Alege Locația',
+    stepServizio: 'Selectează Serviciul',
+    stepSpecialist: 'Alege Specialistul',
+    stepData: 'Selectează Data',
+    stepOrario: 'Alege Ora',
+    stepConferma: 'Confirmare Programare'
   });
 
-  const nomiMesi = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
+  const nomiMesi = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie',
+    'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
 
   const dateToLocalString = (data: Date): string => {
     const anno = data.getFullYear();
@@ -113,15 +117,10 @@ export default function PrenotazionePage() {
     try {
       const risposta = await webservice.get('/api/settings');
       if (risposta.dati?.testiPrenotazione) {
-        setTestiPrenotazione(prev => ({
-          ...prev,
-          ...risposta.dati.testiPrenotazione
-        }));
+        setTestiPrenotazione(prev => ({ ...prev, ...risposta.dati.testiPrenotazione }));
       }
       setMostraPrezzi(risposta.dati?.funzionalita?.mostraPrezziFrontend !== false);
-    } catch (err) {
-      console.log('Settings not available');
-    }
+    } catch { }
   };
 
   const caricaDati = async () => {
@@ -134,8 +133,8 @@ export default function PrenotazionePage() {
       const serviziAttivi = servRes.dati.filter((s: Servizio) => s.attivo !== false);
       setServizi(serviziAttivi);
       setSediPubbliche(sediRes.dati || []);
-    } catch (err: any) {
-      setErrore('Error loading data');
+    } catch {
+      setErrore('Eroare la încărcarea datelor');
     } finally {
       setCaricamento(false);
     }
@@ -144,11 +143,12 @@ export default function PrenotazionePage() {
   const caricaSpecialistiPerServizio = async (serviceId: string) => {
     try {
       setCaricamentoSpecialisti(true);
+      webservice.clearCache();
       const params: any = {};
       if (sedeSelezionata?._id) params.sedeId = sedeSelezionata._id;
       const risposta = await webservice.get(`/api/services/${serviceId}/specialists`, { params });
       setSpecialists(risposta.dati || []);
-    } catch (err) {
+    } catch {
       setSpecialists([]);
     } finally {
       setCaricamentoSpecialisti(false);
@@ -157,7 +157,9 @@ export default function PrenotazionePage() {
 
   const caricaSlotOrari = async (data: Date) => {
     if (!selectedSpecialist || !servizioSelezionato) return;
-
+    const specialistId = selectedSpecialist._id;
+    const durata = servizioSelezionato.durata;
+    const sedeId = sedeSelezionata?._id;
     try {
       setCaricamentoSlot(true);
       setSediDisponibili([]);
@@ -165,24 +167,19 @@ export default function PrenotazionePage() {
       setPostazioneSelezionata('');
       const dataStr = dateToLocalString(data);
       const paramsAva: any = {
-        specialistId: selectedSpecialist._id,
+        specialistId,
         data: dataStr,
-        durata: servizioSelezionato.durata,
+        durata,
       };
-      if (sedeSelezionata?._id) paramsAva.sedeId = sedeSelezionata._id;
+      if (sedeId) paramsAva.sedeId = sedeId;
       const risposta = await webservice.get('/api/appointments/availability', { params: paramsAva });
       setSlotOrari(risposta.dati.slot || []);
       setSediDisponibili(risposta.dati.sediDisponibili || []);
-
-      if (sedeSelezionata && risposta.dati.sediDisponibili) {
-        const sedeAgg = risposta.dati.sediDisponibili.find(
-          (s: any) => s._id === sedeSelezionata._id
-        );
-        if (sedeAgg) {
-          setSedeSelezionata(sedeAgg);
-        }
+      if (sedeId && risposta.dati.sediDisponibili) {
+        const sedeAgg = risposta.dati.sediDisponibili.find((s: any) => s._id === sedeId);
+        if (sedeAgg) setSedeSelezionata(sedeAgg);
       }
-    } catch (err) {
+    } catch {
       setSlotOrari([]);
       setSediDisponibili([]);
     } finally {
@@ -193,11 +190,7 @@ export default function PrenotazionePage() {
   const loadSpecialistClosures = async (specialistId: string) => {
     try {
       const risposta = await webservice.get(`/api/specialist/${specialistId}`);
-      if (risposta.dati?.giorniChiusura) {
-        setSpecialistClosures(risposta.dati.giorniChiusura);
-      } else {
-        setSpecialistClosures([]);
-      }
+      setSpecialistClosures(risposta.dati?.giorniChiusura || []);
     } catch {
       setSpecialistClosures([]);
     }
@@ -210,11 +203,7 @@ export default function PrenotazionePage() {
         const offset = 100;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - offset;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       }
     }, 100);
   };
@@ -226,6 +215,11 @@ export default function PrenotazionePage() {
         ? sede.postazioni.find((p: any) => p.attivo)?.nome || ''
         : ''
     );
+    setServizioSelezionato(null);
+    setSelectedSpecialist(null);
+    setDataSelezionata(null);
+    setOraSelezionata('');
+    setSpecialists([]);
     setStep('servizio');
     scrollToSection('step-servizio');
   };
@@ -261,48 +255,29 @@ export default function PrenotazionePage() {
     scrollToSection('step-conferma');
   };
 
-  // Funzione per normalizzare il numero di telefono in formato internazionale
   const normalizzaTelefono = (telefono: string): string => {
     let numeroPulito = telefono.replace(/[\s\-\(\)\.]/g, '');
-    
-    if (numeroPulito.startsWith('+39')) {
-      return numeroPulito;
-    }
-    
-    if (numeroPulito.startsWith('39') && numeroPulito.length >= 12) {
-      return '+' + numeroPulito;
-    }
-    
-    if (numeroPulito.startsWith('3') && numeroPulito.length >= 10) {
-      return '+39' + numeroPulito;
-    }
-    
-    if (numeroPulito.startsWith('0') && numeroPulito.length >= 10) {
-      return '+39' + numeroPulito.substring(1);
-    }
-    
+    if (numeroPulito.startsWith('+39')) return numeroPulito;
+    if (numeroPulito.startsWith('39') && numeroPulito.length >= 12) return '+' + numeroPulito;
+    if (numeroPulito.startsWith('3') && numeroPulito.length >= 10) return '+39' + numeroPulito;
+    if (numeroPulito.startsWith('0') && numeroPulito.length >= 10) return '+39' + numeroPulito.substring(1);
     return '+39' + numeroPulito;
   };
 
   const handleConferma = async () => {
     if (!selectedSpecialist || !servizioSelezionato || !dataSelezionata || !oraSelezionata) {
-      setErrore('Missing data for booking');
+      setErrore('Date lipsă pentru programare');
       return;
     }
-
-    if (!nomeCliente.trim() || !cognomeCliente.trim() || !telefonoCliente.trim()) {
-      setErrore('Name, surname and phone are required');
+    if (!nomeCliente.trim() || !cognomeCliente.trim() || !telefonoCliente.trim() || !emailCliente.trim()) {
+      setErrore('Numele, prenumele, telefonul și emailul sunt obligatorii');
       return;
     }
-
     try {
       setCaricamento(true);
       setErrore('');
-
       const dataStr = dateToLocalString(dataSelezionata);
-
       const telefonoNormalizzato = normalizzaTelefono(telefonoCliente.trim());
-
       const payload: any = {
         specialistaId: selectedSpecialist._id,
         servizioId: servizioSelezionato._id,
@@ -312,18 +287,11 @@ export default function PrenotazionePage() {
         clienteNome: nomeCliente.trim(),
         clienteCognome: cognomeCliente.trim(),
         clienteTelefono: telefonoNormalizzato,
+        clienteEmail: emailCliente.trim(),
       };
-
-      if (voucherData) {
-        payload.voucherCode = voucherCode;
-      }
-
-      if (sedeSelezionata) {
-        payload.sedeId = sedeSelezionata._id;
-      }
-      if (postazioneSelezionata) {
-        payload.postazione = postazioneSelezionata;
-      }
+      if (voucherData) payload.voucherCode = voucherCode;
+      if (sedeSelezionata) payload.sedeId = sedeSelezionata._id;
+      if (postazioneSelezionata) payload.postazione = postazioneSelezionata;
 
       await webservice.post('/api/appointments', payload);
 
@@ -334,17 +302,12 @@ export default function PrenotazionePage() {
         ora: oraSelezionata,
         prezzo: `€${servizioSelezionato.prezzo.toFixed(2)}`,
       });
-
-      if (sedeSelezionata) {
-        params.set('sede', sedeSelezionata.nome);
-      }
-      if (postazioneSelezionata) {
-        params.set('postazione', postazioneSelezionata);
-      }
+      if (sedeSelezionata) params.set('sede', sedeSelezionata.nome);
+      if (postazioneSelezionata) params.set('postazione', postazioneSelezionata);
 
       router.push(`/booking/success?${params.toString()}`);
     } catch (err: any) {
-      const messaggio = err.response?.data?.errore || 'Error during booking';
+      const messaggio = err.response?.data?.errore || 'Eroare la programare';
       const params = new URLSearchParams({ errore: messaggio });
       router.push(`/booking/error?${params.toString()}`);
     } finally {
@@ -353,21 +316,11 @@ export default function PrenotazionePage() {
   };
 
   const valideazaVoucher = async () => {
-    if (!voucherCode.trim()) {
-      setVoucherError('');
-      setVoucherData(null);
-      return;
-    }
-    if (!servizioSelezionato) {
-      setVoucherError('Selectează mai întâi un serviciu');
-      return;
-    }
+    if (!voucherCode.trim()) { setVoucherError(''); setVoucherData(null); return; }
+    if (!servizioSelezionato) { setVoucherError('Selectează mai întâi un serviciu'); return; }
     try {
       setVoucherError('');
-      const res = await webservice.post('/api/vouchers', {
-        code: voucherCode,
-        serviceId: servizioSelezionato._id,
-      });
+      const res = await webservice.post('/api/vouchers', { code: voucherCode, serviceId: servizioSelezionato._id });
       setVoucherData(res.dati);
     } catch (err: any) {
       setVoucherData(null);
@@ -375,811 +328,992 @@ export default function PrenotazionePage() {
     }
   };
 
-  // Re-validate voucher when service changes
   useEffect(() => {
-    if (voucherCode.trim() && voucherData) {
-      setVoucherData(null);
-      setVoucherError('');
-    }
+    if (voucherCode.trim() && voucherData) { setVoucherData(null); setVoucherError(''); }
   }, [servizioSelezionato?._id]);
 
   const isDisponibile = (data: Date): { disponibile: boolean; motivo?: string } => {
     const oggi = new Date();
     oggi.setHours(0, 0, 0, 0);
-    
-    if (data < oggi) {
-      return { disponibile: false, motivo: 'Past date' };
-    }
-    
+    if (data < oggi) return { disponibile: false, motivo: 'Trecut' };
     const giornoSettimana = data.getDay();
-    if (giornoSettimana === 0) {
-      return { disponibile: false, motivo: 'Closed' };
-    }
-    
+    if (giornoSettimana === 0) return { disponibile: false, motivo: 'Închis' };
     const dataStr = dateToLocalString(data);
-    
     const chiusura = specialistClosures.find((c) => {
-      let dataChiusura: string;
-      
-      if (typeof c.data === 'string') {
-        dataChiusura = c.data.split('T')[0];
-      } else {
-        dataChiusura = dateToLocalString(new Date(c.data));
-      }
-      
+      const dataChiusura = typeof c.data === 'string' ? c.data.split('T')[0] : dateToLocalString(new Date(c.data));
       return dataChiusura === dataStr;
     });
-    
-    if (chiusura) {
-      return { disponibile: false, motivo: chiusura.motivo };
-    }
-    
+    if (chiusura) return { disponibile: false, motivo: chiusura.motivo };
     return { disponibile: true };
   };
 
+  const calcProgres = () => Math.round((STEP_ORDINE.indexOf(step) / (STEP_ORDINE.length - 1)) * 100);
+
   if (caricamento && servizi.length === 0) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <Caricamento />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-surface pt-12 text-on-surface">
       {/* Page Header */}
-      <div className="bg-white text-black py-6 md:py-16 pt-20 md:pt-24">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-2xl md:text-5xl font-bold mb-2 tracking-tight">
+      <header className="pt-20 pb-2 md:pb-4 px-container-padding-mobile md:px-container-padding-desktop max-w-[1440px] mx-auto">
+        <div className="text-center mb-3 md:mb-6">
+          <h1 className="font-headline-md text-headline-md mb-2 text-on-surface">
             {testiPrenotazione.titoloPagina}
           </h1>
-          <p className="text-sm md:text-xl text-black/60">{testiPrenotazione.sottotitoloPagina}</p>
+          <p className="hidden md:block font-body-md text-on-surface-variant max-w-xl mx-auto">
+            {testiPrenotazione.sottotitoloPagina}
+          </p>
+        </div>
+      </header>
+
+      {/* Sticky Progress Bar */}
+      <div className="sticky top-0 z-20 bg-surface border-b border-outline-variant/20 shadow-sm">
+        <div className="px-container-padding-mobile md:px-container-padding-desktop max-w-[1440px] mx-auto py-2 md:py-3">
+          {/* Mobile View - Show only current step */}
+          <div className="md:hidden">
+            <div className="flex justify-between items-center mb-2">
+              <div>
+                <div className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/60 mb-1">
+                  PASUL {STEP_ORDINE.indexOf(step) + 1} DIN {STEP_ORDINE.length}
+                </div>
+                <div className="font-label-caps text-[13px] uppercase tracking-wider text-on-surface font-semibold">
+                  {LABEL_STEP[step]}
+                </div>
+              </div>
+            </div>
+            {/* Progress bar for mobile */}
+            <div className="h-1 bg-outline-variant/15 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-700 ease-out rounded-full"
+                style={{ width: `${calcProgres()}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Desktop View - Show all steps */}
+          <div className="hidden md:block">
+            <div className="flex flex-row justify-between items-center max-w-6xl mx-auto">
+              {STEP_ORDINE.map((s, i) => {
+                const stepIdx = STEP_ORDINE.indexOf(step);
+                const isActive = s === step;
+                const isCompleted = stepIdx > i;
+                return (
+                  <div
+                    key={s}
+                    className={`flex items-center gap-3 py-1 px-3 transition-all duration-500 ${
+                      isActive
+                        ? 'text-primary'
+                        : isCompleted
+                        ? 'text-on-surface-variant/50'
+                        : 'text-on-surface-variant/30'
+                    }`}
+                  >
+                    <span className={`flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold font-label-caps transition-all ${
+                      isActive
+                        ? 'bg-primary text-on-primary'
+                        : isCompleted
+                        ? 'bg-on-surface-variant/20 text-on-surface-variant'
+                        : 'bg-outline-variant/20 text-on-surface-variant/40'
+                    }`}>
+                      {isCompleted ? (
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      ) : (
+                        i + 1
+                      )}
+                    </span>
+                    <span className={`font-label-caps text-[11px] uppercase tracking-widest transition-all ${
+                      isActive ? 'font-semibold' : ''
+                    }`}>
+                      {LABEL_STEP[s]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Progress fill bar */}
+            <div className="max-w-6xl mx-auto mt-2 h-1 bg-outline-variant/15 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-700 ease-out rounded-full"
+                style={{ width: `${calcProgres()}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-3 md:px-4 py-6 md:py-16 max-w-7xl">
-        {/* Progress Bar */}
-        <div className="max-w-4xl mx-auto mb-6 md:mb-12">
-          <div className="flex items-center justify-between mb-2 md:mb-4">
-            {[
-              { key: 'locatie', label: 'Location', icon: (
-                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-              )},
-              { key: 'servizio', label: 'Service', icon: (
-                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                </svg>
-              )},
-              { key: 'specialist', label: 'Specialist', icon: (
-                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              )},
-              { key: 'data', label: 'Date', icon: (
-                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              )},
-              { key: 'ora', label: 'Time', icon: (
-                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-              )},
-              { key: 'conferma', label: 'Confirm', icon: (
-                <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              )},
-            ].map((s, index) => (
-              <div key={s.key} className="flex flex-col items-center flex-1">
-                <div className={`w-8 h-8 md:w-12 md:h-12 border-2 flex items-center justify-center font-bold transition-all ${
-                  step === s.key 
-                    ? 'bg-white text-black border-white scale-110' 
-                    : ['locatie', 'servizio', 'specialist', 'data', 'ora', 'conferma'].indexOf(step) > index
-                    ? 'bg-white/20 text-white border-white/20'
-                    : 'bg-transparent text-white/40 border-white/20'
-                }`}>
-                  {s.icon}
-                </div>
-                <span className={`text-[10px] md:text-sm mt-1 md:mt-2 font-medium ${
-                  step === s.key ? 'text-white' : 'text-white/40'
-                }`}>
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="relative h-1 bg-white/10">
-            <div 
-              className="absolute h-full bg-white transition-all duration-500"
-              style={{ 
-                width: `${(['locatie', 'servizio', 'specialist', 'data', 'ora', 'conferma'].indexOf(step) + 1) * 16.67}%` 
-              }}
-            />
-          </div>
+      {errore && (
+        <div className="max-w-4xl mx-auto mt-4 mb-2 px-container-padding-mobile md:px-container-padding-desktop">
+          <Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} />
         </div>
+      )}
 
-        {errore && <div className="max-w-4xl mx-auto mb-6"><Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} /></div>}
-
-        {/* STEP 1: LOCATION */}
-        {step === 'locatie' && (
-          <div id="step-locatie" className="max-w-4xl mx-auto">
-            <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-8 text-center tracking-tight">
-              CHOOSE YOUR LOCATION
-            </h2>
-
-            {sediPubbliche.length === 0 ? (
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 text-center">
-                <svg className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <p className="text-lg md:text-xl text-white/60">No locations available</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                {sediPubbliche.map((sede: any) => (
-                  <div
-                    key={sede._id}
-                    onClick={() => handleSelezionaSede(sede)}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 p-5 md:p-8 hover:bg-white/10 transition-all cursor-pointer group"
-                  >
-                    <svg className="w-10 h-10 md:w-14 md:h-14 mx-auto mb-3 md:mb-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                      <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    <h3 className="text-lg md:text-xl font-bold mb-1 text-center">{sede.nome}</h3>
-                    <p className="text-sm text-white/60 text-center">{sede.indirizzo}</p>
-                    {sede.citta && <p className="text-sm text-white/60 text-center">{sede.citta}</p>}
-                    <div className="mt-3 text-center">
-                      <span className="text-xs text-white/40">
-                        {sede.postazioni?.filter((p: any) => p.attivo).length || 0} stations
+      {/* STEP 1: LOCATION */}
+      {step === 'locatie' && (
+        <section id="step-1" className="px-container-padding-mobile md:px-container-padding-desktop py-4 md:py-gutter bg-surface-bright">
+          <div className="max-w-6xl mx-auto">
+          <div className="mb-6 hidden md:block">
+            <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
+              PASUL 01 — {testiPrenotazione.stepLocatie || 'Locație'}
+            </span>
+          </div>
+          <div className="flex justify-between items-start mb-4 md:mb-12">
+            <div className="flex-1">
+              <p className="hidden md:block font-label-caps text-label-caps text-primary mb-2 uppercase">Selectează locația</p>
+              <h2 className=" font-display-lg text-display-lg-mobile md:text-display-lg mb-6">
+                {testiPrenotazione.stepLocatie || 'Alege Locația'}
+              </h2>
+              <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                Alege locația preferată pentru programarea ta.
+              </p>
+            </div>
+          </div>
+          {sediPubbliche.length === 0 ? (
+            <div className="max-w-md mx-auto text-center py-16">
+              <svg className="w-12 h-12 text-outline-variant mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
+              <p className="font-body-md text-on-surface-variant">Nu există locații disponibile</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-gutter">
+              {sediPubbliche.map((sede: any) => (
+                <div
+                  key={sede._id}
+                  onClick={() => handleSelezionaSede(sede)}
+                  className="location-card group cursor-pointer border border-outline-variant/50 transition-all duration-500 bg-surface-container-lowest hover:border-primary/60"
+                >
+                  {(sede.coordinate?.lat && sede.coordinate?.lng) ? (
+                    <div className="aspect-[16/9] overflow-hidden relative bg-surface-variant">
+                      <iframe
+                        src={`https://www.google.com/maps?q=${sede.coordinate.lat},${sede.coordinate.lng}&z=15&output=embed`}
+                        className="w-full h-full pointer-events-none"
+                        style={{ filter: 'grayscale(0.3) sepia(0.1)' }}
+                        loading="lazy"
+                        title={sede.nome}
+                      />
+                      {sede.eticheta && (
+                        <div className="absolute top-4 right-4 bg-surface/90 px-3 py-1 text-[10px] font-label-caps uppercase tracking-widest text-primary border border-outline-variant">
+                          {sede.eticheta}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="pt-4 md:pt-8 px-4 md:px-6">
+                      {sede.eticheta && (
+                        <span className="inline-block mb-4 bg-surface-variant px-3 py-1 text-[10px] font-label-caps uppercase tracking-widest text-primary">
+                          {sede.eticheta}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div className={(sede.coordinate?.lat && sede.coordinate?.lng) ? 'px-4 md:px-6 pb-4 md:pb-6' : 'px-4 md:px-6 pb-4 md:pb-8'}>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">{sede.nome}</h3>
+                    {sede.descriere && (
+                      <p className="hidden md:block font-body-md text-on-surface-variant mb-4">{sede.descriere}</p>
+                    )}
+                    <div className="flex items-center gap-2 text-on-surface-variant mb-2">
+                      <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <span className="text-label-md font-label-md">
+                        {sede.indirizzo}{sede.citta ? `, ${sede.citta}` : ''}
                       </span>
                     </div>
-                    <button className="w-full mt-3 md:mt-4 bg-white text-black py-2.5 md:py-3 font-bold hover:bg-white/90 transition-all text-xs md:text-base">
-                      SELECT →
-                    </button>
+                    {sede.orar && (
+                      <div className="flex items-center gap-2 text-on-surface-variant">
+                        <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span className="text-label-md font-label-md">{sede.orar}</span>
+                      </div>
+                    )}
+                    <div className="mt-3 md:mt-5 pt-3 md:pt-4 border-t border-outline-variant/20">
+                      <span className="text-[10px] font-label-caps uppercase tracking-widest text-primary/70 group-hover:text-primary transition-colors">
+                        Selectează
+                      </span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
 
-        {/* STEP 2: SERVIZIO */}
-        {step === 'servizio' && (
-          <div id="step-servizio" className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-4 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-bold tracking-tight">
-                {testiPrenotazione.stepServizio}
-              </h2>
+          {/* Next button disabled - user must select */}
+          <div className="mt-6 md:mt-12 flex justify-center">
+            <button
+              disabled
+              className="group flex items-center gap-4 bg-primary text-on-primary px-10 py-4 font-label-caps text-label-caps uppercase tracking-widest transition-all duration-300 hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Pasul următor
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          </div>
+        </section>
+      )}
+
+      {/* STEP 2: SERVICE */}
+      {step === 'servizio' && (
+        <section id="step-servizio" className="px-container-padding-mobile md:px-container-padding-desktop py-4 md:py-gutter bg-surface-bright">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-6 hidden md:block">
+              <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
+                PASUL 02 — {LABEL_STEP.servizio}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-start mb-4 md:mb-12">
+              <div className="flex-1">
+                <span className="hidden md:block font-label-caps text-label-caps text-primary uppercase tracking-[0.2em] mb-4">
+                  {sedeSelezionata?.nome || 'Personalized Beauty'}
+                </span>
+                <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-4">
+                  {testiPrenotazione.stepServizio}
+                </h2>
+                <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                  Selectează experiența de înfrumusețare dorită pentru sesiunea ta personalizată.
+                </p>
+              </div>
               <button
                 onClick={() => { setStep('locatie'); scrollToSection('step-locatie'); }}
-                className="text-white/70 hover:text-white font-medium text-xs md:text-base"
+                className="hidden md:flex items-center gap-2 font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors shrink-0 ml-8"
               >
-                ← Back
+                <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Înapoi
               </button>
             </div>
-            
+
+            {/* Selected location badge */}
             {sedeSelezionata && (
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 md:p-4 mb-4 md:mb-8">
-                <p className="text-center text-sm md:text-base">
-                  <span className="text-white/60">Location:</span>{' '}
-                  <span className="font-bold">{sedeSelezionata.nome}</span>
-                  {sedeSelezionata.indirizzo && (
-                    <span className="text-white/40 ml-2">· {sedeSelezionata.indirizzo}, {sedeSelezionata.citta}</span>
-                  )}
-                </p>
+              <div className="hidden md:flex items-center gap-2 mb-8 text-label-md font-label-md text-on-surface-variant">
+                <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>{sedeSelezionata.nome} · {sedeSelezionata.indirizzo}</span>
+                <button
+                  onClick={() => { setStep('locatie'); scrollToSection('step-locatie'); }}
+                  className="text-primary underline ml-2"
+                >
+                  Schimbă
+                </button>
               </div>
             )}
 
             {servizi.length === 0 ? (
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 text-center">
-                <svg className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="8" y1="15" x2="16" y2="15"/>
-                  <line x1="9" y1="9" x2="9.01" y2="9"/>
-                  <line x1="15" y1="9" x2="15.01" y2="9"/>
-                </svg>
-                <p className="text-lg md:text-xl text-white/60">No services available</p>
+              <div className="text-center py-16">
+                <svg className="w-12 h-12 text-outline-variant mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22c3.314 0 6-2.686 6-6 0-3.314-2.686-6-6-6-3.314 0-6 2.686-6 6 0 3.314 2.686 6 6 6z"/><path d="M12 10V2"/><path d="M8 6h8"/></svg>
+                <p className="font-body-md text-on-surface-variant">Nu există servicii disponibile</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-                {servizi.map((servizio) => (
-                  <div
-                    key={servizio._id}
-                    onClick={() => handleSelezionaServizio(servizio)}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 p-4 md:p-6 hover:bg-white/10 transition-all cursor-pointer flex flex-col"
-                  >
-                    <div className="flex items-start justify-between mb-3 md:mb-4">
-                      <h3 className="text-base md:text-xl font-bold flex-1 leading-tight">{servizio.nome}</h3>
-                      <svg className="w-5 h-5 md:w-8 md:h-8 flex-shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                      </svg>
-                    </div>
-                    {servizio.descrizione && (
-                      <p className="text-xs md:text-sm text-white/60 mb-3 md:mb-4 line-clamp-2 flex-grow">{servizio.descrizione}</p>
-                    )}
-                    <div className="flex items-center justify-between pt-3 md:pt-4 border-t border-white/10">
-                      <div className="flex items-center gap-1 md:gap-2 text-white/60 text-xs md:text-sm">
-                        <svg className="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span>{servizio.durata} min</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-gutter">
+                {servizi.map((servizio) => {
+                  const isHighlighted = servizio.prezzo >= 500;
+                  return (
+                    <div
+                      key={servizio._id}
+                      onClick={() => handleSelezionaServizio(servizio)}
+                      className={`group relative border p-4 md:p-8 flex flex-col justify-between transition-all duration-500 cursor-pointer ${
+                        isHighlighted
+                          ? 'bg-surface-container-high border-outline/20 hover:border-primary'
+                          : 'bg-surface-container-low border-outline/20 hover:border-primary'
+                      }`}
+                    >
+                      <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                       </div>
-                      {mostraPrezzi && (
-                        <div className="text-lg md:text-2xl font-bold">
-                          {formattaPrezzo(servizio.prezzo)}
+                      {isHighlighted && (
+                        <div className="absolute top-0 right-0 p-4">
+                          <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         </div>
                       )}
+                      <div>
+                        <div className="flex justify-between items-start mb-4 md:mb-6">
+                          <span className={`px-3 py-1 font-label-caps text-[10px] uppercase tracking-tighter ${
+                            isHighlighted
+                              ? 'bg-primary text-on-primary'
+                              : 'bg-surface-container-highest text-on-tertiary-container'
+                          }`}>
+                            {servizio.categoria || (isHighlighted ? 'Premium' : 'Artistry')}
+                          </span>
+                          <span className="font-label-md text-label-md text-on-surface-variant italic">{servizio.durata} min</span>
+                        </div>
+                        <h3 className="font-headline-md text-headline-md text-on-surface mb-2">{servizio.nome}</h3>
+                        {servizio.descrizione && (
+                          <p className="hidden md:block font-body-md text-body-md text-on-surface-variant mb-8 line-clamp-2">{servizio.descrizione}</p>
+                        )}
+                      </div>
+                      <div className="flex justify-between items-center pt-4 md:pt-6 border-t border-outline/10">
+                        <span className="font-label-md text-label-md font-bold text-on-surface">
+                          {mostraPrezzi ? formattaPrezzo(servizio.prezzo) : ''}
+                        </span>
+                        <span className="font-label-caps text-label-caps text-primary border-b border-primary/40 group-hover:border-primary transition-all uppercase cursor-pointer">
+                          Selectează
+                        </span>
+                      </div>
                     </div>
-                    <button className="w-full mt-3 md:mt-4 bg-white text-black py-2.5 md:py-3 font-bold hover:bg-white/90 transition-all text-xs md:text-base">
-                      SELECT →
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+            )}
+
+            {servizioSelezionato && (
+              <div className="mt-12 flex justify-end">
+                <button
+                  onClick={async () => {
+                    await caricaSpecialistiPerServizio(servizioSelezionato._id);
+                    setStep('specialist');
+                    scrollToSection('step-specialist');
+                  }}
+                  className="bg-inverse-surface text-inverse-on-surface px-12 py-3 font-label-caps text-label-caps uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-on-surface/5"
+                >
+                  Continuă
+                </button>
               </div>
             )}
           </div>
-        )}
+        </section>
+      )}
 
-        {/* STEP 2: SPECIALIST */}
-        {step === 'specialist' && servizioSelezionato && (
-          <div id="step-specialist" className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-4 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-bold tracking-tight">{testiPrenotazione.stepSpecialist}</h2>
-              <button
-                onClick={() => {
-                  setStep('servizio');
-                  scrollToSection('step-servizio');
-                }}
-                className="text-white/70 hover:text-white font-medium text-xs md:text-base"
-              >
-                ← Back
-              </button>
-            </div>
-            
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 md:p-4 mb-4 md:mb-8">
-              <p className="text-center text-sm md:text-base">
-                <span className="text-white/60">Location:</span>{' '}
-                <span className="font-bold">{sedeSelezionata?.nome}</span>
-                <span className="mx-2 text-white/20">·</span>
-                <span className="text-white/60">Service:</span>{' '}
-                <span className="font-bold">{servizioSelezionato.nome}</span>
+      {/* STEP 3: SPECIALIST */}
+      {step === 'specialist' && servizioSelezionato && (
+        <section id="step-specialist" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+          <div className="max-w-6xl mx-auto">
+          <div className="mb-6 hidden md:block">
+            <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
+              PASUL 03 — {LABEL_STEP.specialist}
+            </span>
+          </div>
+          <div className="flex justify-between items-start mb-8 md:mb-12">
+            <div className="flex-1">
+              <p className="hidden md:block font-label-caps text-label-caps text-primary mb-2 uppercase">Găsește expertul potrivit</p>
+              <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg mb-6">{testiPrenotazione.stepSpecialist}</h2>
+              <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                Fiecare specialist din echipa noastră aduce un amestec unic de rigoare tehnică și viziune artistică.
+                Selectați persoana care rezonează cel mai bine cu aspirațiile dumneavoastră estetice.
               </p>
+              {/* Selected service badge */}
+              <div className="hidden md:flex items-center gap-2 mt-4 text-label-md font-label-md text-on-surface-variant">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22c3.314 0 6-2.686 6-6 0-3.314-2.686-6-6-6-3.314 0-6 2.686-6 6 0 3.314 2.686 6 6 6z"/><path d="M12 10V2"/><path d="M8 6h8"/></svg>
+                <span>{servizioSelezionato.nome}</span>
+              </div>
             </div>
+            <button
+              onClick={() => { setStep('servizio'); scrollToSection('step-servizio'); }}
+              className="hidden md:flex items-center gap-2 font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors shrink-0 ml-8"
+            >
+              <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Înapoi
+            </button>
+          </div>
 
-            {caricamentoSpecialisti ? (
-              <div className="text-center py-8 md:py-12">
-                <Caricamento />
-                <p className="text-white/60 mt-4 text-sm md:text-base">Loading specialists...</p>
-              </div>
-            ) : specialists.length === 0 ? (
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 text-center">
-                <svg className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="8" y1="15" x2="16" y2="15"/>
-                  <line x1="9" y1="9" x2="9.01" y2="9"/>
-                  <line x1="15" y1="9" x2="15.01" y2="9"/>
-                </svg>
-                <p className="text-lg md:text-xl text-white/60">No specialists available</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+          {caricamentoSpecialisti ? (
+            <div className="text-center py-16">
+              <Caricamento />
+              <p className="font-body-md text-on-surface-variant mt-4">Se încarcă specialiștii...</p>
+            </div>
+          ) : specialists.length === 0 ? (
+            <div className="text-center py-16">
+              <svg className="w-14 h-14 text-outline-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+              <p className="font-body-md text-on-surface-variant">Nu există specialiști disponibili</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
                 {specialists.map((specialist) => (
                   <div
                     key={specialist._id}
-                    onClick={() => handleSelectSpecialist(specialist)}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 p-5 md:p-8 hover:bg-white/10 transition-all cursor-pointer group"
+                    className="specialist-card group bg-surface-container-low border border-outline/20 p-8 flex flex-col md:flex-row gap-8 items-start"
                   >
-                    <svg className="w-14 h-14 md:w-20 md:h-20 mx-auto mb-3 md:mb-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    <h3 className="text-lg md:text-xl font-bold mb-1 text-center tracking-tight">
-                      {specialist.nome} {specialist.cognome}
-                    </h3>
-                    {specialist.giorniSede && specialist.giorniSede.length > 0 && (
-                      <p className="text-xs text-white/50 text-center mb-3">
-                        Disponibil: {specialist.giorniSede.join(', ')}
-                      </p>
-                    )}
-                    <button className="w-full bg-white text-black py-2.5 md:py-3 font-bold hover:bg-white/90 transition-all text-sm md:text-base">
-                      SELECT →
-                    </button>
+                    <div className="relative w-full md:w-48 aspect-[3/4] overflow-hidden bg-surface-variant">
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-16 h-16 text-outline-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
+                      </div>
+                      <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <div className="flex-1">
+                      <span className="font-label-caps text-label-caps text-primary bg-primary-container/30 px-3 py-1 rounded-full">Specialist</span>
+                      <h4 className="font-headline-sm text-headline-sm mt-4 mb-2">
+                        {specialist.nome} {specialist.cognome}
+                      </h4>
+                      {specialist.giorniSede && specialist.giorniSede.length > 0 && (
+                        <p className="hidden md:block font-body-md text-body-md text-on-surface-variant mb-4">
+                          Disponibil: {specialist.giorniSede.join(', ')}
+                        </p>
+                      )}
+                      <button
+                        onClick={() => handleSelectSpecialist(specialist)}
+                        className="w-full md:w-auto bg-[#6b5c4a] text-white px-8 py-3 font-label-caps text-label-caps hover:bg-[#333028] transition-colors mt-4"
+                      >
+                        Selectează Specialistul
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
 
-        {/* STEP 3: DATA */}
-        {step === 'data' && servizioSelezionato && (
-          <div id="step-data" className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-4 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-bold tracking-tight">{testiPrenotazione.stepData}</h2>
-              <button
-                onClick={() => {
-                  setStep('specialist');
-                  scrollToSection('step-specialist');
-                }}
-                className="text-white/70 hover:text-white font-medium text-xs md:text-base"
-              >
-                ← Back
-              </button>
-            </div>
-
-            {/* Riepilogo compatto su mobile - sopra il calendario */}
-            <div className="lg:hidden bg-white/5 backdrop-blur-sm border border-white/10 p-3 mb-4">
-              <div className="flex items-center justify-between text-sm">
-                <div>
-                  <span className="text-white/60">{selectedSpecialist?.nome}</span>
-                  <span className="mx-2">•</span>
-                  <span className="text-white/60">{servizioSelezionato.nome}</span>
+              {/* All specialists option */}
+              {/* <div className="mt-gutter specialist-card bg-surface-container-high border-dashed border-2 border-outline/30 p-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-full border border-primary flex items-center justify-center">
+                    <svg className="w-10 h-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l1.09 4.23L17 4l-2.09 3.91L19 10l-4.09 1.09L17 15l-3.91-2.09L12 17l-1.09-4.23L7 15l2.09-3.91L5 10l4.09-1.09L7 5l3.91 2.09L12 2z"/></svg>
+                  </div>
+                  <div>
+                    <h5 className="font-headline-sm text-[20px]">Oricare Specialist Disponibil</h5>
+                    <p className="font-body-md text-body-md text-on-surface-variant">
+                      Vom găsi cel mai bun slot orar pentru tine cu primul artist disponibil.
+                    </p>
+                  </div>
                 </div>
-                {mostraPrezzi && <span className="font-bold">{formattaPrezzo(servizioSelezionato.prezzo)}</span>}
+                {specialists.length > 0 && (
+                  <button
+                    onClick={() => handleSelectSpecialist(specialists[0])}
+                    className="bg-secondary text-on-secondary px-8 py-3 font-label-caps text-label-caps hover:bg-primary transition-colors"
+                  >
+                    Sunt Flexibil(ă)
+                  </button>
+                )}
+              </div> */}
+            </>
+          )}
+
+          <div className="pb-gutter"></div>
+          </div>
+        </section>
+      )}
+
+      {/* STEP 4: DATE */}
+      {step === 'data' && servizioSelezionato && (
+        <section id="step-data" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+          <div className="max-w-6xl mx-auto">
+
+          <div className="mb-6 hidden md:block">
+            <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
+              PASUL 04 — {LABEL_STEP.data}
+            </span>
+          </div>
+          <div className="flex justify-between items-start mb-8 md:mb-section-gap/2">
+            <header className="max-w-2xl">
+              <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-base">
+                {testiPrenotazione.stepData}
+              </h2>
+              <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant">
+                Alege momentul perfect pentru ritualul tău. Te rugăm să selectezi o zi disponibilă din calendar.
+              </p>
+            </header>
+            <button
+              onClick={() => { setStep('specialist'); scrollToSection('step-specialist'); }}
+              className="hidden md:flex items-center gap-2 font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors shrink-0 ml-8"
+            >
+              <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Înapoi
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+            {/* Calendar Column */}
+            <div className="lg:col-span-7 bg-surface-container-low p-base md:p-gutter">
+              <div className="flex items-center justify-between mb-gutter">
+                <h3 className="font-headline-sm text-headline-sm text-primary">
+                  {nomiMesi[mese]} {anno}
+                </h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { if (mese === 0) { setMese(11); setAnno(anno - 1); } else { setMese(mese - 1); } }}
+                    className="p-2 hover:bg-surface-variant rounded-full transition-colors"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                  </button>
+                  <button
+                    onClick={() => { if (mese === 11) { setMese(0); setAnno(anno + 1); } else { setMese(mese + 1); } }}
+                    className="p-2 hover:bg-surface-variant rounded-full transition-colors"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </div>
               </div>
+
+              <CalendarioPrenotazione
+                mese={mese}
+                anno={anno}
+                onSelezionaData={handleSelezionaData}
+                isDisponibile={isDisponibile}
+                nomiMesi={nomiMesi}
+              />
+
+              {/* <div className="flex items-center gap-4 mt-gutter border-t border-outline/10 pt-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-primary"></div>
+                  <span className="font-label-md text-label-md text-on-surface-variant">Selectat</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-surface-container-highest"></div>
+                  <span className="font-label-md text-label-md text-on-surface-variant">Disponibil</span>
+                </div>
+              </div> */}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-              <div className="lg:col-span-2">
-                <CalendarioPrenotazione
-                  mese={mese}
-                  anno={anno}
-                  onMesePrecedente={() => {
-                    if (mese === 0) { setMese(11); setAnno(anno - 1); } else { setMese(mese - 1); }
-                  }}
-                  onMeseSuccessivo={() => {
-                    if (mese === 11) { setMese(0); setAnno(anno + 1); } else { setMese(mese + 1); }
-                  }}
-                  onSelezionaData={handleSelezionaData}
-                  isDisponibile={isDisponibile}
-                  nomiMesi={nomiMesi}
-                />
-              </div>
-
-              {/* Riepilogo desktop */}
-              <div className="hidden lg:block bg-white/5 backdrop-blur-sm border border-white/10 p-6 lg:sticky lg:top-4 h-fit">
-                <h3 className="text-xl font-bold mb-6 tracking-tight">SUMMARY</h3>
+            {/* Desktop Summary */}
+            <div className="hidden lg:block lg:col-span-5">
+              <div className="bg-surface p-base md:p-gutter border border-outline/20 sticky top-4">
+                <h4 className="font-headline-sm text-headline-sm mb-gutter">Rezumat</h4>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-white/60 mb-1">Specialist</p>
-                    <p className="font-bold">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Specialist</p>
+                    <p className="font-body-md text-body-md font-bold">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-white/60 mb-1">Service</p>
-                    <p className="font-bold">{servizioSelezionato.nome}</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Serviciu</p>
+                    <p className="font-body-md text-body-md font-bold">{servizioSelezionato.nome}</p>
                   </div>
-                  <div className="flex justify-between pt-4 border-t border-white/10">
-                    <span className="text-white/60">Duration</span>
-                    <span className="font-bold">{servizioSelezionato.durata} min</span>
+                  {sedeSelezionata && (
+                    <div>
+                      <p className="font-label-md text-label-md text-on-surface-variant">Locație</p>
+                      <p className="font-body-md text-body-md font-bold">{sedeSelezionata.nome}</p>
+                    </div>
+                  )}
+                  <div className="flex justify-between pt-4 border-t border-outline/10">
+                    <span className="font-label-md text-label-md text-on-surface-variant">Durată</span>
+                    <span className="font-body-md text-body-md font-bold">{servizioSelezionato.durata} min</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Price</span>
-                    {mostraPrezzi && <span className="font-bold text-xl">{formattaPrezzo(servizioSelezionato.prezzo)}</span>}
-                  </div>
+                  {mostraPrezzi && (
+                    <div className="flex justify-between">
+                      <span className="font-label-md text-label-md text-on-surface-variant">Preț</span>
+                      <span className="font-headline-sm text-headline-sm">{formattaPrezzo(servizioSelezionato.prezzo)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* STEP 4: ORA */}
-        {step === 'ora' && dataSelezionata && (
-          <div id="step-ora" className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-4 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-bold tracking-tight">{testiPrenotazione.stepOrario}</h2>
-              <button
-                onClick={() => {
-                  setStep('data');
-                  setDataSelezionata(null);
-                  scrollToSection('step-data');
-                }}
-                className="text-white/70 hover:text-white font-medium text-xs md:text-base"
-              >
-                ← Back
-              </button>
-            </div>
+          <div className="pb-gutter"></div>
+          </div>
+        </section>
+      )}
 
-            {/* Riepilogo compatto su mobile */}
-            <div className="lg:hidden bg-white/5 backdrop-blur-sm border border-white/10 p-3 mb-4">
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-white/60">{servizioSelezionato?.nome}</span>
-                  <span className="mx-1.5">•</span>
-                  <span className="text-white/60">{dataSelezionata.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}</span>
+      {/* STEP 4b: TIME */}
+      {step === 'ora' && dataSelezionata && (
+        <section id="step-ora" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+          <div className="max-w-6xl mx-auto">
+          <div className="mb-6 hidden md:block">
+            <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
+              PASUL 05 — {LABEL_STEP.ora}
+            </span>
+          </div>
+          <div className="flex justify-between items-start mb-8 md:mb-section-gap/2">
+            <header className="max-w-2xl">
+              <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-base">
+                {testiPrenotazione.stepOrario}
+              </h2>
+              <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant">
+                Alege momentul perfect pentru ritualul tău de înfrumusețare.
+              </p>
+            </header>
+            <button
+              onClick={() => { setStep('data'); scrollToSection('step-data'); }}
+              className="hidden md:flex items-center gap-2 font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors shrink-0 ml-8"
+            >
+              <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Înapoi
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+            <div className="lg:col-span-7">
+              {/* Date badge */}
+              <div className="bg-surface-container-low p-gutter mb-gutter">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span className="font-body-md text-body-md">
+                    {dataSelezionata.toLocaleDateString('ro-RO', {
+                      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                    })}
+                  </span>
+                  <button
+                    onClick={() => { setStep('data'); scrollToSection('step-data'); }}
+                    className="font-label-caps text-label-caps text-primary underline ml-auto"
+                  >
+                    Schimbă
+                  </button>
                 </div>
-                {mostraPrezzi && <span className="font-bold">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>}
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-              <div className="lg:col-span-2 bg-white/5 backdrop-blur-sm border border-white/10 p-4 md:p-8">
-                <div className="bg-white/10 p-3 md:p-4 mb-4 md:mb-6">
-                  <p className="text-center font-medium flex items-center justify-center gap-2 text-sm md:text-base">
-                    <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                    <span className="hidden sm:inline">
-                      {dataSelezionata.toLocaleDateString('it-IT', {
-                        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-                      })}
-                    </span>
-                    <span className="sm:hidden">
-                      {dataSelezionata.toLocaleDateString('it-IT', {
-                        day: 'numeric', month: 'long'
-                      })}
-                    </span>
-                  </p>
-                </div>
-
-                {/* Location info */}
-                {sedeSelezionata && (
-                  <div className="mb-4 md:mb-6 bg-white/10 p-3 md:p-4">
-                    <div className="flex items-center gap-2 text-sm md:text-base">
-                      <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                      </svg>
-                      <span className="text-white/60">Location:</span>
-                      <span className="font-bold">{sedeSelezionata.nome}</span>
-                      <span className="text-white/40 ml-2 text-xs">{sedeSelezionata.indirizzo}</span>
-                    </div>
+              {/* Location info */}
+              {sedeSelezionata && (
+                <div className="bg-surface-container-low p-gutter mb-gutter">
+                  <div className="flex items-center gap-3">
+<svg className="w-[18px] h-[18px] text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span className="font-body-md text-body-md">{sedeSelezionata.nome} · {sedeSelezionata.indirizzo}</span>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Station selection */}
-                {sedeSelezionata?.postazioni?.length > 0 && (
-                  <div className="mb-4 md:mb-6">
-                    <h3 className="text-sm md:text-base font-bold mb-2 md:mb-3 tracking-tight">STATION</h3>
-                    <div className="flex flex-wrap gap-2 md:gap-3">
-                      {sedeSelezionata.postazioni
-                        .filter((p: any) => p.attivo !== false)
-                        .map((p: any) => (
+              {/* Station selection */}
+              {sedeSelezionata?.postazioni?.length > 0 && (
+                <div className="mb-gutter">
+                  <h3 className="font-label-caps text-label-caps text-primary mb-3">POSTAȚIE</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {sedeSelezionata.postazioni
+                      .filter((p: any) => p.attivo !== false)
+                      .map((p: any) => (
                         <button
                           key={p.nome}
                           onClick={() => !p.occupato && setPostazioneSelezionata(p.nome)}
                           disabled={p.occupato}
-                          className={`px-3 py-2 md:px-4 md:py-3 font-bold text-xs md:text-sm transition-all ${
+                          className={`px-4 py-3 font-label-md text-label-md transition-all ${
                             postazioneSelezionata === p.nome
-                              ? 'bg-white text-black'
+                              ? 'bg-primary text-on-primary'
                               : p.occupato
-                              ? 'bg-white/10 text-white/30 cursor-not-allowed line-through'
-                              : 'bg-white/5 text-white/80 border border-white/20 hover:bg-white/10'
+                              ? 'bg-surface-container-highest text-on-surface-variant/30 cursor-not-allowed line-through'
+                              : 'bg-surface-container-low border border-outline/20 hover:border-primary text-on-surface'
                           }`}
                         >
                           {p.nome}
                         </button>
                       ))}
-                    </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {caricamentoSlot ? (
-                  <div className="text-center py-8 md:py-12">
-                    <Caricamento />
-                    <p className="text-white/60 mt-4 text-sm md:text-base">Loading times...</p>
+              {/* Time slots */}
+              {caricamentoSlot ? (
+                <div className="text-center py-12">
+                  <Caricamento />
+                  <p className="font-body-md text-on-surface-variant mt-4">Se încarcă orele...</p>
+                </div>
+              ) : slotOrari.length > 0 ? (
+                <div>
+                  {(sediDisponibili.length > 0 || (sedeSelezionata && sedeSelezionata.postazioni?.length > 0)) && (
+                    <div className="border-t border-outline/10 my-gutter"></div>
+                  )}
+                  <h3 className="font-label-caps text-label-caps text-primary mb-3">ORĂ</h3>
+                  <div className="space-y-gutter">
+                    {/* Group by time of day */}
+                    {(() => {
+                      const morning = slotOrari.filter(s => parseInt(s.ora) < 12);
+                      const afternoon = slotOrari.filter(s => parseInt(s.ora) >= 12 && parseInt(s.ora) < 17);
+                      const evening = slotOrari.filter(s => parseInt(s.ora) >= 17);
+                      const groups: [string, SlotOrario[]][] = [];
+                      if (morning.length) groups.push(['Dimineață', morning]);
+                      if (afternoon.length) groups.push(['După-amiază', afternoon]);
+                      if (evening.length) groups.push(['Seară', evening]);
+                      return groups.map(([label, slots]) => (
+                        <div key={label}>
+                          <span className="font-label-md text-label-md text-on-surface-variant opacity-60 mb-2 block">{label}</span>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                            {slots.map((slot) => (
+                              <button
+                                key={slot.ora}
+                                onClick={() => slot.disponibile && handleSelezionaOra(slot.ora)}
+                                disabled={!slot.disponibile}
+                                className={`py-3 font-label-md text-label-md transition-all ${
+                                  slot.disponibile
+                                    ? 'bg-surface-container-low border border-outline/20 hover:border-primary text-on-surface cursor-pointer'
+                                    : 'bg-surface-container-highest text-on-surface-variant/30 cursor-not-allowed'
+                                }`}
+                              >
+                                {slot.ora}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
                   </div>
-                ) : slotOrari.length > 0 ? (
-                  <>
-                    {/* Show separator if sede/postazione section was shown */}
-                    {(sediDisponibili.length > 0 || (sedeSelezionata && sedeSelezionata.postazioni?.length > 0)) && (
-                      <div className="border-t border-white/10 my-4 md:my-6"></div>
-                    )}
-                    <h3 className="text-sm md:text-base font-bold mb-2 md:mb-3 tracking-tight">TIME</h3>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 md:gap-3">
-                      {slotOrari.map((slot) => (
-                        <button
-                          key={slot.ora}
-                          onClick={() => slot.disponibile && handleSelezionaOra(slot.ora)}
-                          disabled={!slot.disponibile}
-                          className={`py-3 md:py-4 px-1 md:px-2 font-bold text-sm md:text-lg transition-all ${
-                            slot.disponibile
-                              ? 'bg-white text-black hover:bg-white/90 cursor-pointer'
-                              : 'bg-white/10 text-white/40 cursor-not-allowed'
-                          }`}
-                        >
-                          {slot.ora}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-8 md:py-12">
-                    <svg className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="8" y1="15" x2="16" y2="15"/>
-                      <line x1="9" y1="9" x2="9.01" y2="9"/>
-                      <line x1="15" y1="9" x2="15.01" y2="9"/>
-                    </svg>
-                    <p className="text-lg md:text-xl text-white/60 mb-4 md:mb-6">No times available</p>
-                    <button
-                      onClick={() => {
-                        setStep('data');
-                        scrollToSection('step-data');
-                      }}
-                      className="px-4 md:px-6 py-2.5 md:py-3 bg-white text-black font-bold hover:bg-white/90 text-sm md:text-base"
-                    >
-                      Choose another date
-                    </button>
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-surface-container-low">
+                  <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-4">Nu există ore disponibile</p>
+                  <button
+                    onClick={() => { setStep('data'); scrollToSection('step-data'); }}
+                    className="px-6 py-3 bg-primary text-on-primary font-label-caps text-label-caps"
+                  >
+                    Alege altă dată
+                  </button>
+                </div>
+              )}
+            </div>
 
-              {/* Riepilogo desktop */}
-              <div className="hidden lg:block bg-white/5 backdrop-blur-sm border border-white/10 p-6 lg:sticky lg:top-4 h-fit">
-                <h3 className="text-xl font-bold mb-6 tracking-tight">SUMMARY</h3>
+            {/* Desktop Summary */}
+            <div className="hidden lg:block lg:col-span-5">
+              <div className="bg-surface p-base md:p-gutter border border-outline/20 sticky top-4">
+                <h4 className="font-headline-sm text-headline-sm mb-gutter">Rezumat</h4>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-white/60 mb-1">Specialist</p>
-                    <p className="font-bold">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Specialist</p>
+                    <p className="font-body-md text-body-md font-bold">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-white/60 mb-1">Service</p>
-                    <p className="font-bold">{servizioSelezionato?.nome}</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Serviciu</p>
+                    <p className="font-body-md text-body-md font-bold">{servizioSelezionato?.nome}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-white/60 mb-1">Date</p>
-                    <p className="font-bold">{dataSelezionata.toLocaleDateString('it-IT')}</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Data</p>
+                    <p className="font-body-md text-body-md font-bold">
+                      {dataSelezionata.toLocaleDateString('ro-RO')}
+                    </p>
                   </div>
                   {sedeSelezionata && (
                     <div>
-                      <p className="text-sm text-white/60 mb-1">Location</p>
-                      <p className="font-bold">{sedeSelezionata.nome}</p>
+                      <p className="font-label-md text-label-md text-on-surface-variant">Locație</p>
+                      <p className="font-body-md text-body-md font-bold">{sedeSelezionata.nome}</p>
                       {postazioneSelezionata && (
-                        <p className="text-sm text-white/60">Station: {postazioneSelezionata}</p>
+                        <p className="font-label-md text-label-md text-on-surface-variant mt-1">Postație: {postazioneSelezionata}</p>
                       )}
                     </div>
                   )}
                   {mostraPrezzi && (
-                    <div className="flex justify-between pt-4 border-t border-white/10">
-                      <span className="text-white/60">Total</span>
-                      <span className="font-bold text-xl">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>
+                    <div className="flex justify-between pt-4 border-t border-outline/10">
+                      <span className="font-label-md text-label-md text-on-surface-variant">Total</span>
+                      <span className="font-headline-sm text-headline-sm">{formattaPrezzo(servizioSelezionato?.prezzo || 0)}</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* STEP 5: CONFERMA */}
-        {step === 'conferma' && (
-          <div id="step-conferma" className="max-w-3xl mx-auto">
-            <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-8 text-center tracking-tight">
-              {testiPrenotazione.stepConferma}
-            </h2>
+          <div className="pb-gutter"></div>
+          </div>
+        </section>
+      )}
 
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 overflow-hidden">
-              <div className="bg-white text-black p-5 md:p-8 text-center">
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-black text-white mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <svg className="w-10 h-10 md:w-12 md:h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
+      {/* STEP 5: CONFIRM */}
+      {step === 'conferma' && (
+        <section id="step-conferma" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex justify-between items-start mb-8 md:mb-12">
+              <div className="flex-1">
+                <h1 className="hidden md:block font-display-lg text-display-lg mb-4 text-on-surface">
+                  {testiPrenotazione.stepConferma || 'Finalizare Programare'}
+                </h1>
+                <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                  Te rugăm să verifici detaliile de mai jos și să completezi informațiile de contact pentru a confirma locul tău în atelierul nostru.
+                </p>
+              </div>
+              <button
+                onClick={() => { setStep('ora'); scrollToSection('step-ora'); }}
+                className="hidden md:flex items-center gap-2 font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors shrink-0 ml-8"
+              >
+                <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Înapoi
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-start">
+              {/* Booking Summary Card */}
+              <div className="md:col-span-5 flex flex-col gap-gutter">
+                <div className="bg-surface-container-low p-8 border border-outline/10">
+                  <h3 className="font-label-caps text-label-caps mb-6 text-primary">Rezumat Rezervare</h3>
+                  <ul className="flex flex-col gap-6">
+                    <li className="flex items-start gap-4">
+                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <div>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">LOCAȚIE</p>
+                        <p className="font-body-md text-body-md font-medium">{sedeSelezionata?.nume || sedeSelezionata?.nome || '—'}{sedeSelezionata?.indirizzo ? `, ${sedeSelezionata.indirizzo}` : ''}</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                      <div>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">SERVICIU</p>
+                        <p className="font-body-md text-body-md font-medium">{servizioSelezionato?.nome || '—'}</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      <div>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">SPECIALIST</p>
+                        <p className="font-body-md text-body-md font-medium">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      <div>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">DATA ȘI ORA</p>
+                        <p className="font-body-md text-body-md font-medium">
+                          {dataSelezionata?.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' })} la ora {oraSelezionata}
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+                  {mostraPrezzi && (
+                    <div className="mt-8 pt-8 border-t border-outline/20 flex justify-between items-end">
+                      <div>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">TOTAL DE PLATĂ</p>
+                        <p className="font-headline-sm text-headline-sm text-primary">
+                          {voucherData && voucherData.type === 'free' ? 'GRATUIT' : formattaPrezzo(servizioSelezionato?.prezzo || 0)}
+                        </p>
+                      </div>
+                      <div className="text-[10px] text-on-surface-variant font-label-caps opacity-50">TVA INCLUS</div>
+                    </div>
+                  )}
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">ALMOST DONE!</h3>
-                <p className="text-sm md:text-lg text-black/60">Enter your details to complete</p>
+
+                {/* Aesthetic Image */}
+                <div className="h-48 bg-surface-container overflow-hidden group">
+                  <img
+                    alt="Beauty Detail"
+                    className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjuMQQkVPhSkbble2vR1RD1JMzyxXIJNyVG9Frq6O2sn6pPM8ZKfD1CWeNO26zW5Oqt9bSgEVlLXyQUTwPOJ1u6u8jvPkyQmJ0Jh7c3uMwJMjxcRDIRH7yhNU0Zi2nI-dweF_RcGRiMH4CGyR135oTJ4DDKMr1cU7kNy2BJq-IsSbpL_WJyRRhknA87VjYhYUdnTs92WIuQvZ6ogPVJUCZqJXinoRk1DQLLp5wwpKDatA6SIR0hNS3VY4ZPId0qf4J2IcY7Ri0QxHD"
+                  />
+                </div>
               </div>
 
-              <div className="p-4 md:p-8">
-                <div className="mb-5 md:mb-8">
-                  <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 tracking-tight">YOUR DETAILS</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    <div>
-                      <label className="block text-xs md:text-sm font-bold mb-1.5 md:mb-2">
-                        Name <span className="text-red-500">*</span>
+              {/* Contact Form */}
+              <div className="md:col-span-7">
+                <div className="flex flex-col gap-10">
+                  <div>
+                    <h3 className="font-headline-sm text-headline-sm mb-2">Date Contact</h3>
+                    <p className="font-body-md text-body-md text-on-surface-variant opacity-70">
+                      Te vom contacta prin email pentru confirmarea finală și instrucțiuni suplimentare.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-8">
+                    {/* Name Input */}
+                    <div className="group">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-name">
+                        Nume Complet <span className="text-error">*</span>
                       </label>
                       <input
+                        id="booking-name"
                         type="text"
-                        value={nomeCliente}
-                        onChange={(e) => setNomeCliente(e.target.value)}
-                        placeholder="Your name"
-                        className="w-full bg-white/10 border border-white/20 px-3 md:px-4 py-2.5 md:py-3 focus:border-white focus:outline-none text-white text-sm md:text-base"
+                        value={`${nomeCliente}${nomeCliente && cognomeCliente ? ' ' : ''}${cognomeCliente}`}
+                        onChange={(e) => {
+                          const parts = e.target.value.split(' ');
+                          setNomeCliente(parts[0] || '');
+                          setCognomeCliente(parts.slice(1).join(' ') || '');
+                        }}
+                        placeholder="Ex: Maria Ionescu"
+                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-lg font-body-lg placeholder:text-outline/40 transition-all outline-none"
                         required
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs md:text-sm font-bold mb-1.5 md:mb-2">
-                        Surname <span className="text-red-500">*</span>
+
+                    {/* Phone Input */}
+                    <div className="group">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-phone">
+                        Număr de Telefon <span className="text-error">*</span>
                       </label>
                       <input
-                        type="text"
-                        value={cognomeCliente}
-                        onChange={(e) => setCognomeCliente(e.target.value)}
-                        placeholder="Your surname"
-                        className="w-full bg-white/10 border border-white/20 px-3 md:px-4 py-2.5 md:py-3 focus:border-white focus:outline-none text-white text-sm md:text-base"
-                        required
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-xs md:text-sm font-bold mb-1.5 md:mb-2">
-                        Phone <span className="text-red-500">*</span>
-                      </label>
-                      <input
+                        id="booking-phone"
                         type="tel"
                         value={telefonoCliente}
                         onChange={(e) => setTelefonoCliente(e.target.value)}
-                        placeholder="333-1234567 or +39-333-1234567"
-                        className="w-full bg-white/10 border border-white/20 px-3 md:px-4 py-2.5 md:py-3 focus:border-white focus:outline-none text-white text-sm md:text-base"
+                        placeholder="+40 7xx xxx xxx"
+                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-lg font-body-lg placeholder:text-outline/40 transition-all outline-none"
                         required
                       />
-                      <p className="text-[10px] md:text-xs text-white/60 mt-1">
-                        Enter your phone number (will be automatically converted to international format +39)
-                      </p>
+                    </div>
+
+                    {/* Email Input */}
+                    <div className="group">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-email">
+                        Adresă de Email <span className="text-error">*</span>
+                      </label>
+                      <input
+                        id="booking-email"
+                        type="email"
+                        value={emailCliente}
+                        onChange={(e) => setEmailCliente(e.target.value)}
+                        placeholder="nume@exemplu.ro"
+                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-lg font-body-lg placeholder:text-outline/40 transition-all outline-none"
+                        required
+                      />
+                    </div>
+
+                    {/* Message Optional */}
+                    <div className="group">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-notes">
+                        Note adiționale (Opțional)
+                      </label>
+                      <textarea
+                        id="booking-notes"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Mențiuni speciale pentru specialist..."
+                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-md font-body-md placeholder:text-outline/40 transition-all resize-none outline-none"
+                        rows={2}
+                      />
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-white/10 p-4 md:p-6 mb-4 md:mb-6">
-                  <h3 className="text-base md:text-xl font-bold mb-3 md:mb-4 tracking-tight">SUMMARY</h3>
-                  <div className="space-y-2.5 md:space-y-4">
-                    <div className="flex justify-between items-center text-sm md:text-base">
-                      <span className="text-white/60">Specialist</span>
-                      <span className="font-bold text-right">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</span>
+                  {/* Voucher */}
+                  <div>
+                    <h3 className="font-headline-sm text-headline-sm mb-4">Cod Voucher</h3>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={voucherCode}
+                        onChange={(e) => { setVoucherCode(e.target.value.toUpperCase()); setVoucherData(null); setVoucherError(''); }}
+                        placeholder="Introdu codul voucherului"
+                        className="flex-1 bg-transparent border-b border-outline-variant focus:border-primary px-0 py-3 text-body-md font-body-md placeholder:text-outline/40 transition-all outline-none"
+                      />
+                      <button
+                        onClick={valideazaVoucher}
+                        className="px-6 py-3 bg-primary text-on-primary font-label-caps text-label-caps hover:opacity-90 transition-all"
+                      >
+                        Aplică
+                      </button>
                     </div>
-                    <div className="flex justify-between items-center text-sm md:text-base">
-                      <span className="text-white/60">Service</span>
-                      <span className="font-bold text-right">{servizioSelezionato?.nome}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm md:text-base">
-                      <span className="text-white/60">Date</span>
-                      <span className="font-bold text-right">
-                        <span className="hidden sm:inline">
-                          {dataSelezionata?.toLocaleDateString('it-IT', {
-                            weekday: 'long', day: 'numeric', month: 'long'
-                          })}
-                        </span>
-                        <span className="sm:hidden">
-                          {dataSelezionata?.toLocaleDateString('it-IT', {
-                            day: 'numeric', month: 'short'
-                          })}
-                        </span>
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm md:text-base">
-                      <span className="text-white/60">Time</span>
-                      <span className="font-bold">{oraSelezionata}</span>
-                    </div>
-                    {sedeSelezionata && (
-                      <div className="flex justify-between items-center text-sm md:text-base">
-                        <span className="text-white/60">Location</span>
-                        <span className="font-bold text-right">{sedeSelezionata.nome}</span>
-                      </div>
-                    )}
-                    {postazioneSelezionata && (
-                      <div className="flex justify-between items-center text-sm md:text-base">
-                        <span className="text-white/60">Station</span>
-                        <span className="font-bold">{postazioneSelezionata}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between items-center text-sm md:text-base">
-                      <span className="text-white/60">Duration</span>
-                      <span className="font-bold">{servizioSelezionato?.durata} min</span>
-                    </div>
-                    {mostraPrezzi && (
-                      <div className="flex justify-between items-center pt-3 md:pt-4 border-t border-white/20">
-                        <span className="text-white/60 font-bold text-base md:text-lg">Total</span>
-                        <span className="font-bold text-2xl md:text-3xl">
-                          {voucherData && voucherData.type === 'free'
-                            ? 'FREE'
-                            : formattaPrezzo(
-                                servizioSelezionato?.prezzo || 0 -
-                                (voucherData?.type === 'fixed' ? voucherData.value : 0) -
-                                (voucherData?.type === 'percentage' ? (servizioSelezionato?.prezzo || 0) * voucherData.value / 100 : 0)
-                              )}
-                        </span>
-                      </div>
-                    )}
+                    {voucherError && <p className="text-error font-label-md text-label-md mt-2">{voucherError}</p>}
                     {voucherData && (
-                      <div className="flex justify-between items-center text-sm pt-2">
-                        <span className="text-green-400">
-                          {voucherData.type === 'percentage' ? `-${voucherData.value}%` :
-                           voucherData.type === 'fixed' ? `-€${voucherData.value}` : 'FREE'}
-                        </span>
-                        <span className="text-green-400">
-                          {voucherData.customerName}{voucherData.customerSurname ? ` ${voucherData.customerSurname}` : ''}
-                        </span>
-                      </div>
+                      <p className="text-primary font-label-md text-label-md mt-2">
+                        Voucher aplicat: {voucherData.type === 'percentage' ? `${voucherData.value}% reducere` : voucherData.type === 'fixed' ? `€${voucherData.value} reducere` : 'GRATUIT'}
+                      </p>
                     )}
                   </div>
-                </div>
 
-                <div className="mb-4">
-                  <label className="block text-xs md:text-sm font-bold mb-1.5">Voucher code</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={voucherCode}
-                      onChange={(e) => { setVoucherCode(e.target.value.toUpperCase()); setVoucherData(null); setVoucherError(''); }}
-                      placeholder="Enter voucher code"
-                      className="flex-1 bg-white/10 border border-white/20 px-3 md:px-4 py-2.5 focus:border-white focus:outline-none text-white text-sm"
-                    />
+                  {/* Submit */}
+                  <div className="flex flex-col gap-4 mt-4">
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="mt-1 border-outline text-primary focus:ring-primary rounded-sm transition-all"
+                        required
+                      />
+                      <span className="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface">
+                        Accept <a className="underline" href="#">Termenii și Condițiile</a> și Politica de Confidențialitate a salonului.
+                      </span>
+                    </label>
                     <button
-                      onClick={valideazaVoucher}
-                      className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-bold text-sm"
+                      onClick={handleConferma}
+                      disabled={caricamento || !nomeCliente.trim() || !telefonoCliente.trim() || !emailCliente.trim()}
+                      className="mt-4 w-full bg-[#6b5c4a] text-white py-6 font-label-caps text-label-caps tracking-[0.2em] hover:bg-[#333028] transition-all duration-500 quiet-luxury-shadow active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Apply
+                      {caricamento ? 'PROGRAMARE...' : 'Confirmă Programarea'}
                     </button>
                   </div>
-                  {voucherError && <p className="text-red-400 text-xs mt-1">{voucherError}</p>}
-                  {voucherData && <p className="text-green-400 text-xs mt-1">Voucher applied: {voucherData.type === 'percentage' ? `${voucherData.value}% off` : voucherData.type === 'fixed' ? `€${voucherData.value} off` : 'FREE'}</p>}
-                </div>
-
-                <div className="mb-4 md:mb-6">
-                  <label className="block text-xs md:text-sm font-bold mb-1.5 md:mb-2">Notes (optional)</label>
-                  <textarea
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Any special requests..."
-                    className="w-full bg-white/10 border border-white/20 px-3 md:px-4 py-2.5 md:py-3 focus:border-white focus:outline-none text-white text-sm md:text-base"
-                    rows={2}
-                  />
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                  <button
-                    onClick={() => {
-                      setStep('ora');
-                      scrollToSection('step-ora');
-                    }}
-                    className="flex-1 px-4 md:px-6 py-3 md:py-4 border-2 border-white/20 hover:bg-white/10 font-bold text-sm md:text-lg"
-                  >
-                    ← BACK
-                  </button>
-                  <button
-                    onClick={handleConferma}
-                    disabled={caricamento || !nomeCliente.trim() || !cognomeCliente.trim() || !telefonoCliente.trim()}
-                    className="flex-1 px-4 md:px-6 py-3 md:py-4 bg-white text-black font-bold text-sm md:text-lg hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {caricamento ? (
-                      'BOOKING...'
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        CONFIRM
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <div className="mt-8">
-                  <FeaturedReviewsBlock limit={2} />
                 </div>
               </div>
             </div>
+
+            {/* <div className="mt-16">
+              <FeaturedReviewsBlock limit={2} />
+            </div> */}
           </div>
-        )}
+        </section>
+      )}
+
+      {/* Atmospheric decorative elements */}
+      <div className="fixed bottom-0 left-0 w-64 h-64 opacity-5 pointer-events-none hidden lg:block">
+        <div className="w-full h-full bg-gradient-to-tr from-primary/30 to-transparent blur-3xl"></div>
       </div>
     </div>
   );
 }
 
 // ============================================================================
-// COMPONENTE CALENDARIO
+// CALENDAR COMPONENT
 // ============================================================================
-function CalendarioPrenotazione({ mese, anno, onMesePrecedente, onMeseSuccessivo, onSelezionaData, isDisponibile, nomiMesi }: any) {
-  const giorniSettimana = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const giorniSettimanaBrevi = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+function CalendarioPrenotazione({ mese, anno, onSelezionaData, isDisponibile, nomiMesi }: any) {
+  const giorniSettimana = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
 
   const generaCalendario = () => {
     const primoGiorno = new Date(anno, mese, 1);
     const ultimoGiorno = new Date(anno, mese + 1, 0);
-    const giorni = [];
+    const giorni: (Date | null)[] = [];
 
     let primoGiornoSettimana = primoGiorno.getDay();
     primoGiornoSettimana = primoGiornoSettimana === 0 ? 6 : primoGiornoSettimana - 1;
@@ -1196,79 +1330,48 @@ function CalendarioPrenotazione({ mese, anno, onMesePrecedente, onMeseSuccessivo
   };
 
   const giorni = generaCalendario();
-  const oggi = new Date();
-  oggi.setHours(0, 0, 0, 0);
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-4 md:p-8">
-      <div className="flex items-center justify-between mb-4 md:mb-6">
-        <button
-          onClick={onMesePrecedente}
-          className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold text-lg md:text-xl"
-        >
-          ←
-        </button>
-        <h3 className="text-lg md:text-2xl font-bold tracking-tight">
-          {nomiMesi[mese]} {anno}
-        </h3>
-        <button
-          onClick={onMeseSuccessivo}
-          className="w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold text-lg md:text-xl"
-        >
-          →
-        </button>
-      </div>
-
-      <div className="grid grid-cols-7 gap-1 md:gap-2 mb-1 md:mb-2">
-        {giorniSettimana.map((giorno, index) => (
-          <div key={giorno} className="text-center font-bold py-1 md:py-2 text-white/60">
-            <span className="hidden sm:inline text-xs md:text-sm">{giorno}</span>
-            <span className="sm:hidden text-[10px]">{giorniSettimanaBrevi[index]}</span>
+    <>
+      {/* Day headers */}
+      <div className="grid grid-cols-7 mb-2">
+        {giorniSettimana.map((giorno) => (
+          <div key={giorno} className="text-center font-label-caps text-label-caps text-on-surface-variant pb-4">
+            {giorno}
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1 md:gap-2">
+      {/* Day cells */}
+      <div className="grid grid-cols-7">
         {giorni.map((data, index) => {
           if (!data) {
-            return <div key={`empty-${index}`} className="aspect-square" />;
+            return <div key={`empty-${index}`} className="text-center py-4" />;
           }
 
           const risultato = isDisponibile(data);
           const disponibile = risultato.disponibile;
           const isToday = data.getTime() === oggi.getTime();
+          const isSelected = false; // We track selected differently
 
           return (
-            <div key={index} className="relative group">
-              <button
-                onClick={() => disponibile && onSelezionaData(data)}
-                disabled={!disponibile}
-                className={`w-full aspect-square font-bold text-sm md:text-lg transition-all ${
-                  isToday ? 'ring-1 md:ring-2 ring-white/50' : ''
-                } ${
-                  disponibile
-                    ? 'bg-white text-black hover:bg-white/90 cursor-pointer'
-                    : 'bg-white/10 text-white/40 cursor-not-allowed'
-                }`}
-              >
-                {data.getDate()}
-              </button>
-            </div>
+            <button
+              key={index}
+              onClick={() => disponibile && onSelezionaData(data)}
+              disabled={!disponibile}
+              className={`text-center py-4 font-body-md text-body-md transition-all ${
+                isToday ? 'ring-1 ring-primary' : ''
+              } ${
+                disponibile
+                  ? 'text-on-surface-variant cursor-pointer hover:bg-surface-variant'
+                  : 'text-on-surface-variant/30 cursor-not-allowed'
+              }`}
+            >
+              {data.getDate()}
+            </button>
           );
         })}
       </div>
-
-      <div className="mt-4 md:mt-6 bg-white/10 p-3 md:p-4">
-        <p className="text-xs md:text-sm text-center text-white/70 flex items-center justify-center gap-1.5 md:gap-2">
-          <svg className="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="16" x2="12" y2="12"/>
-            <line x1="12" y1="8" x2="12.01" y2="8"/>
-          </svg>
-          <span className="hidden sm:inline">Click on an available day to see times</span>
-          <span className="sm:hidden">Select an available day</span>
-        </p>
-      </div>
-    </div>
+    </>
   );
 }

@@ -4,14 +4,29 @@ import Specialist from '@/utils/mongo/schemi/Specialist';
 import Servizio from '@/utils/mongo/schemi/Servizio';
 import Utente from '@/utils/mongo/schemi/Utente';
 
+function normalizzaId(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val.toString === 'function') return val.toString();
+  return String(val);
+}
+
+function haSedeInGiorno(g: any, sedeId: string): boolean {
+  if (!g || typeof g !== 'object') return false;
+  if (normalizzaId(g.sede) === sedeId) return true;
+  if (normalizzaId(g.sedeMattina) === sedeId) return true;
+  if (normalizzaId(g.sedePomeriggio) === sedeId) return true;
+  return false;
+}
+
 function specialistLavoraInSede(orariSettimanali: any, sedeId: string): boolean {
-  if (!orariSettimanali) return false;
-  for (const zi of Object.keys(orariSettimanali)) {
+  if (!orariSettimanali || typeof orariSettimanali !== 'object') return false;
+  const giorni = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'];
+  for (const zi of giorni) {
     const g = orariSettimanali[zi];
+    if (!g || typeof g !== 'object') continue;
     if (!g.aperto) continue;
-    if (g.sede?.toString() === sedeId) return true;
-    if (g.sedeMattina?.toString() === sedeId) return true;
-    if (g.sedePomeriggio?.toString() === sedeId) return true;
+    if (haSedeInGiorno(g, sedeId)) return true;
   }
   return false;
 }
@@ -22,11 +37,13 @@ function getGiorniInSede(orariSettimanali: any, sedeId: string): string[] {
     giovedi: 'Joi', venerdi: 'Vineri', sabato: 'Sâmbătă', domenica: 'Duminică',
   };
   const giorni: string[] = [];
-  if (!orariSettimanali) return giorni;
-  for (const zi of Object.keys(orariSettimanali)) {
+  if (!orariSettimanali || typeof orariSettimanali !== 'object') return giorni;
+  const chiavi = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'];
+  for (const zi of chiavi) {
     const g = orariSettimanali[zi];
+    if (!g || typeof g !== 'object') continue;
     if (!g.aperto) continue;
-    if (g.sede?.toString() === sedeId || g.sedeMattina?.toString() === sedeId || g.sedePomeriggio?.toString() === sedeId) {
+    if (haSedeInGiorno(g, sedeId)) {
       giorni.push(nomi[zi] || zi);
     }
   }

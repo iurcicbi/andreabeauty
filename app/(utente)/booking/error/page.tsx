@@ -1,12 +1,3 @@
-/**
- * ============================================================================
- * PAGINA: ERRORE PRENOTAZIONE
- * ============================================================================
- * 
- * Mostra messaggio di errore quando la prenotazione fallisce
- * ============================================================================
- */
-
 'use client';
 
 import { Suspense } from 'react';
@@ -15,119 +6,106 @@ import Link from 'next/link';
 
 function ContenutoErrore() {
   const searchParams = useSearchParams();
-  const errore = searchParams.get('errore') || 'Si è verificato un errore durante la prenotazione';
+  const errore = searchParams.get('errore') || 'S-a produs o eroare în timpul programării';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-surface flex items-center justify-center py-12 px-4">
       <div className="max-w-2xl w-full">
-        
-        {/* Icona Errore */}
+        {/* Error icon */}
         <div className="text-center mb-8">
-          <div className="inline-block w-32 h-32 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-2xl">
-            <svg className="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <div className="inline-block w-24 h-24 bg-error rounded-full flex items-center justify-center shadow-lg">
+            <svg className="w-14 h-14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </div>
         </div>
 
-        {/* Card Principale */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          
+        {/* Main Card */}
+        <div className="bg-surface-container-low border border-outline/20 overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-red-500 to-red-600 p-8 text-center">
-            <h1 className="text-4xl font-bold text-white mb-2">
-              ❌ Prenotazione Non Riuscita
+          <div className="bg-error p-8 text-center">
+            <h1 className="font-headline-md text-headline-md text-on-error mb-2">
+              Programare nereușită
             </h1>
-            <p className="text-red-100 text-lg">
-              Si è verificato un problema durante la prenotazione
+            <p className="font-body-md text-body-md text-on-error/80">
+              S-a produs o problemă în timpul programării
             </p>
           </div>
 
-          {/* Contenuto */}
+          {/* Content */}
           <div className="p-8">
-            
-            {/* Messaggio Errore */}
-            <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl mb-6">
-              <h3 className="font-bold text-red-900 mb-2 flex items-center gap-2">
-                <span>⚠️</span>
-                <span>Dettagli Errore</span>
+            {/* Error details */}
+            <div className="bg-error-container/30 border-l-4 border-error p-4 mb-6">
+              <h3 className="font-headline-sm text-[18px] text-on-error-container mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Detalii Eroare
               </h3>
-              <p className="text-red-800">{errore}</p>
+              <p className="font-body-md text-body-md text-on-error-container">{errore}</p>
             </div>
 
-            {/* Possibili Cause */}
-            <div className="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-r-xl mb-6">
-              <h3 className="font-bold text-amber-900 mb-3 flex items-center gap-2">
-                <span>💡</span>
-                <span>Possibili Cause</span>
+            {/* Possible causes */}
+            <div className="bg-tertiary-container/20 border-l-4 border-tertiary p-4 mb-6">
+              <h3 className="font-headline-sm text-[18px] text-on-tertiary-container mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+                Cauze Posibile
               </h3>
-              <ul className="text-sm text-amber-800 space-y-2">
+              <ul className="font-body-md text-body-md text-on-tertiary-container space-y-2">
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-600 mt-0.5">•</span>
-                  <span>Lo slot orario selezionato potrebbe essere stato prenotato da un altro utente</span>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="6"/></svg>
+                  <span>Este posibil ca intervalul orar selectat să fi fost deja rezervat</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-600 mt-0.5">•</span>
-                  <span>The specialist may have changed their availability</span>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="6"/></svg>
+                  <span>Specialistul poate să-și fi modificat disponibilitatea</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-600 mt-0.5">•</span>
-                  <span>Potrebbe esserci un problema temporaneo di connessione</span>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="6"/></svg>
+                  <span>Ar putea exista o problemă temporară de conexiune</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-600 mt-0.5">•</span>
-                  <span>La data selezionata potrebbe essere stata chiusa per ferie</span>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="6"/></svg>
+                  <span>Data selectată ar putea fi închisă pentru concediu</span>
                 </li>
               </ul>
             </div>
 
-            {/* Cosa Fare */}
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-xl mb-6">
-              <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
-                <span>🔧</span>
-                <span>Cosa Puoi Fare</span>
+            {/* What to do */}
+            <div className="bg-primary-container/20 border-l-4 border-primary p-4 mb-6">
+              <h3 className="font-headline-sm text-[18px] text-on-primary-container mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                Ce Poți Face
               </h3>
-              <ul className="text-sm text-blue-800 space-y-2">
+              <ul className="font-body-md text-body-md text-on-primary-container space-y-2">
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">1.</span>
-                  <span>Riprova a prenotare selezionando un altro orario disponibile</span>
+                  <span className="font-bold text-primary">1.</span>
+                  <span>Încearcă din nou selectând un alt interval orar disponibil</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">2.</span>
-                  <span>Verifica la tua connessione internet e riprova</span>
+                  <span className="font-bold text-primary">2.</span>
+                  <span>Verifică conexiunea la internet și încearcă din nou</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">3.</span>
-                  <span>Contact the specialist directly for assistance</span>
+                  <span className="font-bold text-primary">3.</span>
+                  <span>Contactează salonul pentru asistență directă</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">4.</span>
-                  <span>Se il problema persiste, contatta il supporto tecnico</span>
+                  <span className="font-bold text-primary">4.</span>
+                  <span>Dacă problema persistă, contactează suportul tehnic</span>
                 </li>
               </ul>
             </div>
 
-            {/* Azioni */}
+            {/* Actions */}
             <div className="space-y-3">
               <Link
                 href="/booking"
-                className="block w-full bg-gradient-to-r from-primary-600 to-purple-600 text-white text-center py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all transform hover:scale-105"
+                className="block w-full bg-primary text-on-primary text-center py-4 font-label-caps text-label-caps uppercase tracking-widest hover:opacity-90 transition-all"
               >
-                🔄 Riprova a Prenotare
+                Încearcă din Nou
               </Link>
-
               <Link
                 href="/"
-                className="block w-full bg-white border-2 border-gray-300 text-gray-700 text-center py-4 rounded-xl font-bold text-lg hover:bg-gray-50 transition-all"
+                className="block w-full bg-surface border-2 border-outline/30 text-on-surface text-center py-4 font-label-caps text-label-caps uppercase tracking-widest hover:bg-surface-container-highest transition-all"
               >
-                🏠 Torna alla Home
-              </Link>
-
-              <Link
-                href="/"
-                className="block w-full text-center py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-              >
-                🏠 Torna alla Home
+                Înapoi la Acasă
               </Link>
             </div>
           </div>
@@ -135,11 +113,11 @@ function ContenutoErrore() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-gray-600">
-            Ci scusiamo per l&apos;inconveniente 🙏
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Ne cerem scuze pentru neplăceri
           </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Il nostro team è sempre disponibile per aiutarti
+          <p className="font-label-md text-label-md text-on-surface-variant opacity-70 mt-2">
+            Echipa noastră este întotdeauna disponibilă pentru a te ajuta
           </p>
         </div>
       </div>
@@ -149,7 +127,11 @@ function ContenutoErrore() {
 
 export default function PrenotazioneErrorePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <p className="font-body-md text-on-surface-variant">Se încarcă...</p>
+      </div>
+    }>
       <ContenutoErrore />
     </Suspense>
   );

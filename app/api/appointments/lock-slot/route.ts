@@ -14,9 +14,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import PrenotazioneTemporanea from '@/utils/mongo/schemi/PrenotazioneTemporanea';
-import Appuntamento from '@/utils/mongo/schemi/Appuntamento';
+import PrenotazioneTemporaneaModel from '@/utils/mongo/schemi/PrenotazioneTemporanea';
+import AppuntamentoModel from '@/utils/mongo/schemi/Appuntamento';
 import { verificaToken } from '@/utils/middleware/autenticazione';
+
+// Cast per risolvere problemi di tipo Mongoose
+const PrenotazioneTemporanea = PrenotazioneTemporaneaModel as any;
+const Appuntamento = AppuntamentoModel as any;
 
 const DURATA_BLOCCO_MINUTI = 10;
 

@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         code: voucher.code,
         type: voucher.type,
         value: voucher.value,
-        service: voucher.service,
+        services: voucher.services,
         customerName: voucher.customerName,
       },
     });

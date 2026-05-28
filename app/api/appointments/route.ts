@@ -18,16 +18,24 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import Appuntamento from '@/utils/mongo/schemi/Appuntamento';
-import Servizio from '@/utils/mongo/schemi/Servizio';
-import Utente from '@/utils/mongo/schemi/Utente';
-import Specialist from '@/utils/mongo/schemi/Specialist';
+import AppuntamentoModel from '@/utils/mongo/schemi/Appuntamento';
+import ServizioModel from '@/utils/mongo/schemi/Servizio';
+import UtenteModel from '@/utils/mongo/schemi/Utente';
+import SpecialistModel from '@/utils/mongo/schemi/Specialist';
 import { verificaToken } from '@/utils/middleware/autenticazione';
 import { calcolaOraFine } from '@/utils/helpers';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import Voucher from '@/utils/mongo/schemi/Voucher';
-import Sede from '@/utils/mongo/schemi/Sede';
+import VoucherModel from '@/utils/mongo/schemi/Voucher';
+import SedeModel from '@/utils/mongo/schemi/Sede';
+
+// Cast per risolvere problemi di tipo Mongoose
+const Appuntamento = AppuntamentoModel as any;
+const Servizio = ServizioModel as any;
+const Utente = UtenteModel as any;
+const Specialist = SpecialistModel as any;
+const Voucher = VoucherModel as any;
+const Sede = SedeModel as any;
 
 /**
  * GET - Recupera appuntamenti
@@ -139,7 +147,7 @@ export async function GET(req: NextRequest) {
 
     const result = appuntamenti.map(a => {
       const obj: any = a.toObject();
-      const v = a.voucherCode ? voucherMap.get(a.voucherCode) : null;
+      const v: any = a.voucherCode ? voucherMap.get(a.voucherCode) : null;
       if (v) {
         obj.voucher = { type: v.type, value: v.value };
         if (v.type === 'free') {
@@ -319,8 +327,6 @@ export async function POST(req: NextRequest) {
     // VERIFICA ASSOCIAZIONE SPECIALISTA-SERVIZIO (solo se specialistaId)
     // ========================================================================
     if (specialistaId) {
-      const Specialist = (await import('@/utils/mongo/schemi/Specialist')).default;
-      
       const specialista = await Specialist.findById(specialistaId);
       
       if (!specialista) {

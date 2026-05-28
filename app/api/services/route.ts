@@ -7,8 +7,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import Servizio from '@/utils/mongo/schemi/Servizio';
+import ServizioModel from '@/utils/mongo/schemi/Servizio';
 import { verificaToken, richiedeRuolo } from '@/utils/middleware/autenticazione';
+
+// Cast per risolvere problemi di tipo Mongoose
+const Servizio = ServizioModel as any;
 
 /**
  * GET - Recupera tutti i servizi attivi

@@ -1,4 +1,4 @@
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TGiornoLavorativo = {
@@ -163,6 +163,6 @@ const SchemaMongoose = new Schema<TSchemaSpecialist, ISettings>({
 if (process.env.NODE_ENV === 'development' && models.specialists) {
   delete models.specialists;
 }
-const SpecialistSchema = models.specialists || model('specialists', SchemaMongoose);
+const SpecialistSchema: Model<TSchemaSpecialist> = (models.specialists as Model<TSchemaSpecialist> | undefined) ?? model<TSchemaSpecialist>('specialists', SchemaMongoose);
 
 export default SpecialistSchema;

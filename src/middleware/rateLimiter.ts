@@ -34,12 +34,12 @@ export function rateLimit(type: LimitType) {
     const { max, windowMs } = LIMITS[type];
 
     try {
-      const current = await redisClient.incr(key);
+      const current = Number(await redisClient.incr(key));
       if (current === 1) {
         await redisClient.pExpire(key, windowMs);
       }
 
-      const ttl = await redisClient.pTtl(key);
+      const ttl = Number(await redisClient.pTtl(key));
 
       if (current > max) {
         logger.warn({

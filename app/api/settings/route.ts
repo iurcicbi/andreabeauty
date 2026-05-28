@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/utils/mongodb';
 import ImpostazioniModel from '@/models/Impostazioni';
+import Sede from '@/utils/mongo/schemi/Sede';
 import { verificaToken } from '@/utils/middleware/autenticazione';
 
 const Impostazioni = ImpostazioniModel as any;
@@ -15,7 +16,31 @@ const Impostazioni = ImpostazioniModel as any;
 export async function GET() {
   try {
     await dbConnect();
-    const impostazioni = await Impostazioni.getImpostazioni();
+    const doc = await Impostazioni.getImpostazioni();
+    const impostazioni = doc.toObject();
+
+    const contatti = impostazioni?.sezioniHomepage?.contatti;
+    const sediIds = (contatti?.sediDaCollezione || []).filter((id: string) => id && id.length === 24);
+    if (sediIds.length > 0) {
+      const sediDocs = await Sede.find({
+        _id: { $in: sediIds },
+        attivo: true,
+      }).lean();
+
+      contatti.sediResolved = sediDocs.map((s: any) => ({
+        nome: s.nome,
+        indirizzo: s.indirizzo,
+        cap: s.cap || '',
+        citta: s.citta,
+        telefono: s.telefono || '',
+        email: '',
+        coordinate: s.coordinate || null,
+        urlMappa: s.coordinate
+          ? `https://www.google.com/maps?q=${s.coordinate.lat},${s.coordinate.lng}`
+          : '',
+        programma: [],
+      }));
+    }
     
     return NextResponse.json({
       successo: true,

@@ -2,7 +2,7 @@
  * SCHEMA UTENTE
  */
 
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaUtente = {
@@ -11,7 +11,7 @@ type TSchemaUtente = {
   email: string;
   password: string;
   telefono: string;
-  ruolo: string;
+  ruolo: 'utente' | 'specialist' | 'barber' | 'admin';
   attivo?: boolean;
 }
 
@@ -37,6 +37,6 @@ const SchemaMongoose = new Schema<TSchemaUtente, ISettings>({
 if (process.env.NODE_ENV === 'development' && models.users) {
   delete models.users;
 }
-const UtenteSchema = models.users || model('users', SchemaMongoose);
+const UtenteSchema: Model<TSchemaUtente> = (models.users as Model<TSchemaUtente> | undefined) ?? model<TSchemaUtente>('users', SchemaMongoose);
 
 export default UtenteSchema;

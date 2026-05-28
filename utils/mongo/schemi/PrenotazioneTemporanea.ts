@@ -22,7 +22,7 @@
  * ============================================================================
  */
 
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaPrenotazioneTemporanea = {
@@ -83,6 +83,6 @@ SchemaMongoose.index({ scadenza: 1 }, { expireAfterSeconds: 0 });
 if (process.env.NODE_ENV === 'development' && models.temporary_bookings) {
   delete models.temporary_bookings;
 }
-const PrenotazioneTemporaneaSchema = models.temporary_bookings || model('temporary_bookings', SchemaMongoose);
+const PrenotazioneTemporaneaSchema: Model<TSchemaPrenotazioneTemporanea> = (models.temporary_bookings as Model<TSchemaPrenotazioneTemporanea> | undefined) ?? model<TSchemaPrenotazioneTemporanea>('temporary_bookings', SchemaMongoose);
 
 export default PrenotazioneTemporaneaSchema;

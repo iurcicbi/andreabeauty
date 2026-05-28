@@ -35,7 +35,7 @@ function writeLog(level: LogLevel, entry: Omit<LogEntry, 'timestamp' | 'level'>)
     timestamp: new Date().toISOString(),
     level,
     ...entry,
-  };
+  } as LogEntry;
 
   const output = JSON.stringify(sanitize(logEntry as unknown as Record<string, unknown>));
 

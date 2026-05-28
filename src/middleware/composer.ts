@@ -96,6 +96,12 @@ export function compose(handler: ComposedHandler, options: ComposerOptions = {})
   return async (req: NextRequest, context?: { params: Record<string, string> }): Promise<NextResponse> => {
     const correlationId = req.headers.get('x-correlation-id') || crypto.randomUUID();
     const startTime = Date.now();
+    const ctx: ComposedHandlerContext = {
+      body: {},
+      query: Object.fromEntries(req.nextUrl.searchParams.entries()),
+      params: context?.params || {},
+      correlationId,
+    };
 
     try {
       // ── NoSQL Injection protection ────────────────────────────────────

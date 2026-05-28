@@ -14,7 +14,7 @@
 
 import React from 'react';
 
-interface BottoneProps {
+export interface BottoneProps {
   children: React.ReactNode;
   variante?: 'primary' | 'secondary' | 'danger';
   dimensione?: 'small' | 'medium' | 'large';
@@ -22,6 +22,7 @@ interface BottoneProps {
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
+  title?: string; // Tooltip HTML nativo
 }
 
 export default function Bottone({
@@ -32,6 +33,8 @@ export default function Bottone({
   disabled = false,
   type = 'button',
   className = '',
+  title,
+  ...rest
 }: BottoneProps) {
   // Classi base
   const baseClasses = 'font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
@@ -63,6 +66,8 @@ export default function Bottone({
       onClick={onClick}
       disabled={disabled}
       className={classiFinali}
+      title={title}
+      {...rest}
     >
       {children}
     </button>

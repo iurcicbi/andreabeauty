@@ -12,12 +12,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import Appuntamento from '@/utils/mongo/schemi/Appuntamento';
-import Servizio from '@/utils/mongo/schemi/Servizio';
-import Utente from '@/utils/mongo/schemi/Utente';
-import Specialist from '@/utils/mongo/schemi/Specialist';
+import AppuntamentoModel from '@/utils/mongo/schemi/Appuntamento';
+import ServizioModel from '@/utils/mongo/schemi/Servizio';
 import { verificaToken } from '@/utils/middleware/autenticazione';
 import { calcolaOraFine } from '@/utils/helpers';
+
+// Cast per risolvere problemi di tipo Mongoose
+const Appuntamento = AppuntamentoModel as any;
+const Servizio = ServizioModel as any;
 
 /**
  * GET - Recupera dettagli di un appuntamento specifico

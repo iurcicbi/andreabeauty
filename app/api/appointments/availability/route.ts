@@ -14,11 +14,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import Specialist from '@/utils/mongo/schemi/Specialist';
-import Appuntamento from '@/utils/mongo/schemi/Appuntamento';
-import Servizio from '@/utils/mongo/schemi/Servizio';
-import PrenotazioneTemporanea from '@/utils/mongo/schemi/PrenotazioneTemporanea';
-import Sede from '@/utils/mongo/schemi/Sede';
+import SpecialistModel from '@/utils/mongo/schemi/Specialist';
+import AppuntamentoModel from '@/utils/mongo/schemi/Appuntamento';
+import ServizioModel from '@/utils/mongo/schemi/Servizio';
+import PrenotazioneTemporaneaModel from '@/utils/mongo/schemi/PrenotazioneTemporanea';
+import SedeModel from '@/utils/mongo/schemi/Sede';
+
+// Cast per risolvere problemi di tipo Mongoose
+const Specialist = SpecialistModel as any;
+const Appuntamento = AppuntamentoModel as any;
+const Servizio = ServizioModel as any;
+const PrenotazioneTemporanea = PrenotazioneTemporaneaModel as any;
+const Sede = SedeModel as any;
 
 export async function GET(req: NextRequest) {
   try {

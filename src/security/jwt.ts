@@ -9,7 +9,7 @@ const REFRESH_SECRET = env.JWT_REFRESH_SECRET;
 
 export function signAccessToken(payload: Omit<JwtPayload, 'type'>): string {
   return jwt.sign({ ...payload, type: 'access' }, ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_EXPIRES_IN,
+    expiresIn: env.JWT_ACCESS_EXPIRES_IN as any,
   });
 }
 
@@ -25,7 +25,7 @@ export function verifyAccessToken(token: string): JwtPayload {
 
 export function signRefreshToken(payload: Omit<RefreshTokenPayload, 'type'>): string {
   return jwt.sign({ ...payload, type: 'refresh' }, REFRESH_SECRET, {
-    expiresIn: env.JWT_REFRESH_EXPIRES_IN,
+    expiresIn: env.JWT_REFRESH_EXPIRES_IN as any,
   });
 }
 

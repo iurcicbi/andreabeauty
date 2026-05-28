@@ -2,7 +2,7 @@
  * SCHEMA IMPOSTAZIONI FRONTEND
  */
 
-import { Schema, Types, model, models } from 'mongoose';
+import { Schema, Types, model, models, Model } from 'mongoose';
 import { ISettings } from './types';
 
 type TSchemaImpostazioniFrontend = {
@@ -78,6 +78,6 @@ const SchemaMongoose = new Schema<TSchemaImpostazioniFrontend, ISettings>({
 if (process.env.NODE_ENV === 'development' && models.ImpostazioniFrontend) {
   delete models.ImpostazioniFrontend;
 }
-const ImpostazioniFrontend = models.ImpostazioniFrontend || model<TSchemaImpostazioniFrontend, ISettings>('ImpostazioniFrontend', SchemaMongoose);
+const ImpostazioniFrontend: Model<TSchemaImpostazioniFrontend> = (models.ImpostazioniFrontend as Model<TSchemaImpostazioniFrontend> | undefined) ?? model<TSchemaImpostazioniFrontend>('ImpostazioniFrontend', SchemaMongoose);
 
 export default ImpostazioniFrontend;

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import Sede from '@/utils/mongo/schemi/Sede';
+import SedeModel from '@/utils/mongo/schemi/Sede';
 import { richiedeRuolo } from '@/utils/middleware/autenticazione';
+
+// Cast per risolvere problemi di tipo Mongoose
+const Sede = SedeModel as any;
 
 export async function GET(req: NextRequest) {
   try {

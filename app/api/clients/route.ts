@@ -19,9 +19,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import Utente from '@/utils/mongo/schemi/Utente';
+import UtenteModel from '@/utils/mongo/schemi/Utente';
 import { richiedeRuolo } from '@/utils/middleware/autenticazione';
 import bcrypt from 'bcryptjs';
+
+// Cast per risolvere problemi di tipo Mongoose
+const Utente = UtenteModel as any;
 
 /**
  * GET - Lista tutti i clienti

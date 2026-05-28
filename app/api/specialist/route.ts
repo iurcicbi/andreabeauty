@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import connessioneMongoDB from '@/utils/mongo/connessione';
-import Utente from '@/utils/mongo/schemi/Utente';
+import UtenteModel from '@/utils/mongo/schemi/Utente';
+
+// Cast per risolvere problemi di tipo Mongoose
+const Utente = UtenteModel as any;
 
 export async function GET() {
   try {
