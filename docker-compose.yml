@@ -5,10 +5,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:27017/beauty
       - CORS_ORIGIN=https://tuodominio.com
+      - NEXT_PUBLIC_APP_URL=https://tuodominio.com
+      - NEXT_PUBLIC_BASE_URL_API=https://tuodominio.com
+      - NEXTAUTH_URL=https://tuodominio.com
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
     depends_on:
       mongo:
         condition: service_healthy
@@ -21,13 +28,13 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '1'
+          memory: 2G
+          cpus: '2'
 
   mongo:
     image: mongo:7
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
