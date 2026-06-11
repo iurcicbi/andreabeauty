@@ -46,5 +46,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 EXPOSE 3000
 
+RUN npm install -g tsx
+
 ENV NODE_ENV=production
-CMD ["node", "server.js"]
+CMD ["tsx", "server.js"]
