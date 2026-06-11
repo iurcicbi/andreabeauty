@@ -24,13 +24,19 @@ export const helmetMiddleware = helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 });
 
-export const corsMiddleware = cors({
-  origin: env.CORS_ORIGIN.split(',').map(o => o.trim()),
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Correlation-Id'],
-  maxAge: 86400,
-});
+let _corsMiddleware: any;
+export function getCorsMiddleware() {
+  if (!_corsMiddleware) {
+    _corsMiddleware = cors({
+      origin: env.CORS_ORIGIN.split(',').map(o => o.trim()),
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Correlation-Id'],
+      maxAge: 86400,
+    });
+  }
+  return _corsMiddleware;
+}
 
 export const hppMiddleware = hpp({
   whitelist: ['page', 'limit', 'sort'],

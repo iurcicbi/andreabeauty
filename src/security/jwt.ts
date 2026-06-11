@@ -4,18 +4,22 @@ import { env } from '../config/env';
 import { AuthenticationError } from '../errors/AppError';
 import type { JwtPayload, RefreshTokenPayload } from '../types/auth';
 
-const ACCESS_SECRET = env.JWT_ACCESS_SECRET;
-const REFRESH_SECRET = env.JWT_REFRESH_SECRET;
+function getAccessSecret(): string {
+  return env.JWT_ACCESS_SECRET;
+}
+function getRefreshSecret(): string {
+  return env.JWT_REFRESH_SECRET;
+}
 
 export function signAccessToken(payload: Omit<JwtPayload, 'type'>): string {
-  return jwt.sign({ ...payload, type: 'access' }, ACCESS_SECRET, {
+  return jwt.sign({ ...payload, type: 'access' }, getAccessSecret(), {
     expiresIn: env.JWT_ACCESS_EXPIRES_IN as any,
   });
 }
 
 export function verifyAccessToken(token: string): JwtPayload {
   try {
-    const decoded = jwt.verify(token, ACCESS_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, getAccessSecret()) as JwtPayload;
     if (decoded.type !== 'access') throw new Error('Invalid token type');
     return decoded;
   } catch {
@@ -24,14 +28,14 @@ export function verifyAccessToken(token: string): JwtPayload {
 }
 
 export function signRefreshToken(payload: Omit<RefreshTokenPayload, 'type'>): string {
-  return jwt.sign({ ...payload, type: 'refresh' }, REFRESH_SECRET, {
+  return jwt.sign({ ...payload, type: 'refresh' }, getRefreshSecret(), {
     expiresIn: env.JWT_REFRESH_EXPIRES_IN as any,
   });
 }
 
 export function verifyRefreshToken(token: string): RefreshTokenPayload {
   try {
-    const decoded = jwt.verify(token, REFRESH_SECRET) as RefreshTokenPayload;
+    const decoded = jwt.verify(token, getRefreshSecret()) as RefreshTokenPayload;
     if (decoded.type !== 'refresh') throw new Error('Invalid token type');
     return decoded;
   } catch {

@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/src/logging/logger';
 import { createAuditLog } from '@/src/logging/audit';
 
-const CRON_SECRET = process.env.CRON_SECRET || '';
+function getCronSecret(): string {
+  return process.env.CRON_SECRET || '';
+}
 
 export const POST = async (req: NextRequest) => {
   const auth = req.headers.get('authorization')?.replace('Bearer ', '');
-  if (auth !== CRON_SECRET) {
+  if (auth !== getCronSecret()) {
     return NextResponse.json({ error: { code: 'UNAUTHORIZED' } }, { status: 401 });
   }
 
