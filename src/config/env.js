@@ -1,8 +1,4 @@
 const { z } = require('zod');
-const dotenv = require('dotenv');
-
-dotenv.config({ path: '.env' });
-dotenv.config({ path: '.env.local', override: true });
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -44,6 +40,18 @@ function validateEnv() {
   return result.data;
 }
 
-const env = validateEnv();
+let _env;
+function getEnv() {
+  if (!_env) {
+    _env = validateEnv();
+  }
+  return _env;
+}
+
+const env = new Proxy({}, {
+  get(_, prop) {
+    return Reflect.get(getEnv(), prop, getEnv());
+  },
+});
 
 module.exports = { env };
