@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { appointmentRepository } from '../repositories/AppointmentRepository';
-import { scheduleReminder } from '../queues/setup';
 import { createAuditLog } from '../logging/audit';
 import { logger } from '../logging/logger';
 import { env } from '../config/env';
@@ -38,20 +37,6 @@ export class AppointmentService {
       );
 
       const appointmentId = appointment._id.toString();
-
-      const remindAt = new Date(input.data);
-      const [hours, minutes] = input.oraInizio.split(':').map(Number);
-      remindAt.setHours(hours, minutes, 0, 0);
-      remindAt.setHours(remindAt.getHours() - 2);
-
-      if (remindAt > new Date()) {
-        await scheduleReminder(
-          appointmentId,
-          remindAt,
-          input.utente.telefono,
-          input.utente.nome,
-        );
-      }
 
       await createAuditLog({
         userId: input.createdByUserId || 'system',

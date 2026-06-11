@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import webservice from '@/utils/webservice';
 import Messaggio from '@/componenti/comuni/Messaggio';
@@ -22,6 +22,8 @@ interface Specialist {
   _id: string;
   nome: string;
   cognome: string;
+  biografia?: string;
+  servizi?: { nome: string; categoria: string }[];
   giorniSede?: string[];
 }
 
@@ -66,9 +68,9 @@ export default function PrenotazionePage() {
   const [voucherData, setVoucherData] = useState<any>(null);
   const [voucherError, setVoucherError] = useState('');
 
-  const [nomeCliente, setNomeCliente] = useState('');
-  const [cognomeCliente, setCognomeCliente] = useState('');
+  const [nomeCompleto, setNomeCompleto] = useState('');
   const [telefonoCliente, setTelefonoCliente] = useState('');
+  const [prefissoTelefono, setPrefissoTelefono] = useState('+39');
   const [emailCliente, setEmailCliente] = useState('');
 
   const [mese, setMese] = useState(new Date().getMonth());
@@ -86,6 +88,19 @@ export default function PrenotazionePage() {
   const [caricamentoSpecialisti, setCaricamentoSpecialisti] = useState(false);
   const [errore, setErrore] = useState('');
   const [mostraPrezzi, setMostraPrezzi] = useState(true);
+  const [descrizioniAperte, setDescrizioniAperte] = useState<Set<string>>(new Set());
+
+  const toggleDescrizione = useCallback((id: string) => {
+    setDescrizioniAperte(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
   const [testiPrenotazione, setTestiPrenotazione] = useState({
     titoloPagina: 'Programare Online',
@@ -196,16 +211,19 @@ export default function PrenotazionePage() {
     }
   };
 
-  const scrollToSection = (sectionId: string) => {
+  const scrollToSection = (_sectionId?: string) => {
     setTimeout(() => {
-      const element = document.getElementById(sectionId);
-      if (element) {
+      const stickyBar = document.querySelector<HTMLElement>('.sticky');
+      if (stickyBar) {
+        // Scroll più in alto per mostrare meglio gli step indicator
+        // Sottrai un offset aggiuntivo (es. 100px) per mostrare la barra degli step
         const offset = 100;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        const top = Math.max(0, stickyBar.offsetTop - offset);
+        if (window.scrollY > top + 10 || window.scrollY < top - 10) {
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
       }
-    }, 100);
+    }, 50);
   };
 
   const handleSelezionaSede = (sede: any) => {
@@ -255,13 +273,10 @@ export default function PrenotazionePage() {
     scrollToSection('step-conferma');
   };
 
-  const normalizzaTelefono = (telefono: string): string => {
+  const normalizzaTelefono = (telefono: string, prefisso: string): string => {
     let numeroPulito = telefono.replace(/[\s\-\(\)\.]/g, '');
-    if (numeroPulito.startsWith('+39')) return numeroPulito;
-    if (numeroPulito.startsWith('39') && numeroPulito.length >= 12) return '+' + numeroPulito;
-    if (numeroPulito.startsWith('3') && numeroPulito.length >= 10) return '+39' + numeroPulito;
-    if (numeroPulito.startsWith('0') && numeroPulito.length >= 10) return '+39' + numeroPulito.substring(1);
-    return '+39' + numeroPulito;
+    if (numeroPulito.startsWith('+')) return numeroPulito;
+    return prefisso + numeroPulito;
   };
 
   const handleConferma = async () => {
@@ -269,23 +284,24 @@ export default function PrenotazionePage() {
       setErrore('Date lipsă pentru programare');
       return;
     }
-    if (!nomeCliente.trim() || !cognomeCliente.trim() || !telefonoCliente.trim() || !emailCliente.trim()) {
-      setErrore('Numele, prenumele, telefonul și emailul sunt obligatorii');
+    if (!nomeCompleto.trim() || !telefonoCliente.trim() || !emailCliente.trim()) {
+      setErrore('Numele, telefonul și emailul sunt obligatorii');
       return;
     }
     try {
       setCaricamento(true);
       setErrore('');
       const dataStr = dateToLocalString(dataSelezionata);
-      const telefonoNormalizzato = normalizzaTelefono(telefonoCliente.trim());
+      const telefonoNormalizzato = normalizzaTelefono(telefonoCliente.trim(), prefissoTelefono);
+      const partiNome = nomeCompleto.trim().split(/\s+/);
       const payload: any = {
         specialistaId: selectedSpecialist._id,
         servizioId: servizioSelezionato._id,
         data: dataStr,
         oraInizio: oraSelezionata,
         note,
-        clienteNome: nomeCliente.trim(),
-        clienteCognome: cognomeCliente.trim(),
+        clienteNome: partiNome[0] || '',
+        clienteCognome: partiNome.slice(1).join(' ') || '',
         clienteTelefono: telefonoNormalizzato,
         clienteEmail: emailCliente.trim(),
       };
@@ -374,10 +390,10 @@ export default function PrenotazionePage() {
       {/* Sticky Progress Bar */}
       <div className="sticky top-0 z-20 bg-surface border-b border-outline-variant/20 shadow-sm">
         <div className="px-container-padding-mobile md:px-container-padding-desktop max-w-[1440px] mx-auto py-2 md:py-3">
-          {/* Mobile View - Show only current step */}
+          {/* Mobile View - Step loading line */}
           <div className="md:hidden">
             <div className="flex justify-between items-center mb-2">
-              <div>
+              <div className="flex-1">
                 <div className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/60 mb-1">
                   PASUL {STEP_ORDINE.indexOf(step) + 1} DIN {STEP_ORDINE.length}
                 </div>
@@ -385,11 +401,28 @@ export default function PrenotazionePage() {
                   {LABEL_STEP[step]}
                 </div>
               </div>
+              {step !== 'locatie' && (
+                <button
+                  onClick={() => {
+                    const currentIndex = STEP_ORDINE.indexOf(step);
+                    if (currentIndex > 0) {
+                      const prevStep = STEP_ORDINE[currentIndex - 1];
+                      setStep(prevStep);
+                      scrollToSection(`step-${prevStep}`);
+                    }
+                  }}
+                  className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors ml-4"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                  </svg>
+                </button>
+              )}
             </div>
-            {/* Progress bar for mobile */}
+            {/* Step progress line */}
             <div className="h-1 bg-outline-variant/15 rounded-full overflow-hidden">
               <div
-                className="h-full bg-primary transition-all duration-700 ease-out rounded-full"
+                className="h-full bg-on-surface transition-all duration-700 ease-out rounded-full"
                 style={{ width: `${calcProgres()}%` }}
               />
             </div>
@@ -438,7 +471,7 @@ export default function PrenotazionePage() {
             {/* Progress fill bar */}
             <div className="max-w-6xl mx-auto mt-2 h-1 bg-outline-variant/15 rounded-full overflow-hidden">
               <div
-                className="h-full bg-primary transition-all duration-700 ease-out rounded-full"
+                className="h-full bg-on-surface transition-all duration-700 ease-out rounded-full"
                 style={{ width: `${calcProgres()}%` }}
               />
             </div>
@@ -454,17 +487,17 @@ export default function PrenotazionePage() {
 
       {/* STEP 1: LOCATION */}
       {step === 'locatie' && (
-        <section id="step-1" className="px-container-padding-mobile md:px-container-padding-desktop py-4 md:py-gutter bg-surface-bright">
+        <section id="step-locatie" className="scroll-mt-0 px-container-padding-mobile md:px-container-padding-desktop py-3 md:py-gutter bg-surface-bright">
           <div className="max-w-6xl mx-auto">
-          <div className="mb-6 hidden md:block">
+          <div className="mb-2 md:mb-6 hidden md:block">
             <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
               PASUL 01 — {testiPrenotazione.stepLocatie || 'Locație'}
             </span>
           </div>
-          <div className="flex justify-between items-start mb-4 md:mb-12">
+          <div className="flex justify-between items-start mb-2 md:mb-12">
             <div className="flex-1">
               <p className="hidden md:block font-label-caps text-label-caps text-primary mb-2 uppercase">Selectează locația</p>
-              <h2 className=" font-display-lg text-display-lg-mobile md:text-display-lg mb-6">
+              <h2 className="font-display-lg text-display-lg-mobile md:text-display-lg mb-1 md:mb-6">
                 {testiPrenotazione.stepLocatie || 'Alege Locația'}
               </h2>
               <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
@@ -473,12 +506,12 @@ export default function PrenotazionePage() {
             </div>
           </div>
           {sediPubbliche.length === 0 ? (
-            <div className="max-w-md mx-auto text-center py-16">
+            <div className="max-w-md mx-auto text-center py-8 md:py-16">
               <svg className="w-12 h-12 text-outline-variant mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
               <p className="font-body-md text-on-surface-variant">Nu există locații disponibile</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-gutter">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-gutter">
               {sediPubbliche.map((sede: any) => (
                 <div
                   key={sede._id}
@@ -486,7 +519,7 @@ export default function PrenotazionePage() {
                   className="location-card group cursor-pointer border border-outline-variant/50 transition-all duration-500 bg-surface-container-lowest hover:border-primary/60"
                 >
                   {(sede.coordinate?.lat && sede.coordinate?.lng) ? (
-                    <div className="aspect-[16/9] overflow-hidden relative bg-surface-variant">
+                    <div className="aspect-[3/1] md:aspect-[16/9] overflow-hidden relative bg-surface-variant">
                       <iframe
                         src={`https://www.google.com/maps?q=${sede.coordinate.lat},${sede.coordinate.lng}&z=15&output=embed`}
                         className="w-full h-full pointer-events-none"
@@ -501,32 +534,39 @@ export default function PrenotazionePage() {
                       )}
                     </div>
                   ) : (
-                    <div className="pt-4 md:pt-8 px-4 md:px-6">
+                    <div className="pt-2 md:pt-8 px-3 md:px-6">
                       {sede.eticheta && (
-                        <span className="inline-block mb-4 bg-surface-variant px-3 py-1 text-[10px] font-label-caps uppercase tracking-widest text-primary">
+                        <span className="inline-block mb-2 md:mb-4 bg-surface-variant px-2 md:px-3 py-1 text-[10px] font-label-caps uppercase tracking-widest text-primary">
                           {sede.eticheta}
                         </span>
                       )}
                     </div>
                   )}
-                  <div className={(sede.coordinate?.lat && sede.coordinate?.lng) ? 'px-4 md:px-6 pb-4 md:pb-6' : 'px-4 md:px-6 pb-4 md:pb-8'}>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">{sede.nome}</h3>
+                  <div className={(sede.coordinate?.lat && sede.coordinate?.lng) ? 'px-3 md:px-6 pb-3 md:pb-6' : 'px-3 md:px-6 pb-2 md:pb-8'}>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-body-lg md:font-headline-sm text-body-lg md:text-headline-sm text-on-surface">{sede.nome}</h3>
+                      {sede.eticheta && !(sede.coordinate?.lat && sede.coordinate?.lng) && (
+                        <span className="md:hidden shrink-0 bg-surface-variant px-2 py-0.5 text-[10px] font-label-caps uppercase tracking-widest text-primary">
+                          {sede.eticheta}
+                        </span>
+                      )}
+                    </div>
                     {sede.descriere && (
                       <p className="hidden md:block font-body-md text-on-surface-variant mb-4">{sede.descriere}</p>
                     )}
-                    <div className="flex items-center gap-2 text-on-surface-variant mb-2">
-                      <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                      <span className="text-label-md font-label-md">
+                    <div className="flex items-center gap-1.5 md:gap-2 text-on-surface-variant mt-1 md:mt-2">
+                      <svg className="w-3.5 h-3.5 md:w-[18px] md:h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <span className="text-label-sm md:text-label-md font-label-sm md:font-label-md">
                         {sede.indirizzo}{sede.citta ? `, ${sede.citta}` : ''}
                       </span>
                     </div>
                     {sede.orar && (
-                      <div className="flex items-center gap-2 text-on-surface-variant">
-                        <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span className="text-label-md font-label-md">{sede.orar}</span>
+                      <div className="flex items-center gap-1.5 md:gap-2 text-on-surface-variant mt-1">
+                        <svg className="w-3.5 h-3.5 md:w-[18px] md:h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span className="text-label-sm md:text-label-md font-label-sm md:font-label-md">{sede.orar}</span>
                       </div>
                     )}
-                    <div className="mt-3 md:mt-5 pt-3 md:pt-4 border-t border-outline-variant/20">
+                    <div className="hidden md:block mt-5 pt-4 border-t border-outline-variant/20">
                       <span className="text-[10px] font-label-caps uppercase tracking-widest text-primary/70 group-hover:text-primary transition-colors">
                         Selectează
                       </span>
@@ -538,7 +578,7 @@ export default function PrenotazionePage() {
           )}
 
           {/* Next button disabled - user must select */}
-          <div className="mt-6 md:mt-12 flex justify-center">
+          <div className="mt-3 md:mt-12 flex justify-center">
             <button
               disabled
               className="group flex items-center gap-4 bg-primary text-on-primary px-10 py-4 font-label-caps text-label-caps uppercase tracking-widest transition-all duration-300 hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -553,7 +593,7 @@ export default function PrenotazionePage() {
 
       {/* STEP 2: SERVICE */}
       {step === 'servizio' && (
-        <section id="step-servizio" className="px-container-padding-mobile md:px-container-padding-desktop py-4 md:py-gutter bg-surface-bright">
+        <section id="step-servizio" className="scroll-mt-0 px-container-padding-mobile md:px-container-padding-desktop py-4 md:py-gutter bg-surface-bright">
           <div className="max-w-6xl mx-auto">
             <div className="mb-6 hidden md:block">
               <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
@@ -566,7 +606,7 @@ export default function PrenotazionePage() {
                 <span className="hidden md:block font-label-caps text-label-caps text-primary uppercase tracking-[0.2em] mb-4">
                   {sedeSelezionata?.nome || 'Personalized Beauty'}
                 </span>
-                <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-4">
+                <h2 className=" font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-4">
                   {testiPrenotazione.stepServizio}
                 </h2>
                 <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant max-w-xl">
@@ -624,19 +664,17 @@ export default function PrenotazionePage() {
                         </div>
                       )}
                       <div>
-                        <div className="flex justify-between items-start mb-4 md:mb-6">
-                          <span className={`px-3 py-1 font-label-caps text-[10px] uppercase tracking-tighter ${
-                            isHighlighted
-                              ? 'bg-primary text-on-primary'
-                              : 'bg-surface-container-highest text-on-tertiary-container'
-                          }`}>
-                            {servizio.categoria || (isHighlighted ? 'Premium' : 'Artistry')}
-                          </span>
-                          <span className="font-label-md text-label-md text-on-surface-variant italic">{servizio.durata} min</span>
-                        </div>
-                        <h3 className="font-headline-md text-headline-md text-on-surface mb-2">{servizio.nome}</h3>
+                        <h3 className="font-headline-md text-headline-md text-on-surface mb-1 md:mb-2">{servizio.nome}</h3>
+                        <p className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1.5 mb-3 md:mb-4">
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          {servizio.durata} min
+                        </p>
                         {servizio.descrizione && (
-                          <p className="hidden md:block font-body-md text-body-md text-on-surface-variant mb-8 line-clamp-2">{servizio.descrizione}</p>
+                          <DescrizioneConDetalii
+                            descrizione={servizio.descrizione}
+                            isAperta={descrizioniAperte.has(servizio._id)}
+                            onToggle={() => toggleDescrizione(servizio._id)}
+                          />
                         )}
                       </div>
                       <div className="flex justify-between items-center pt-4 md:pt-6 border-t border-outline/10">
@@ -673,17 +711,17 @@ export default function PrenotazionePage() {
 
       {/* STEP 3: SPECIALIST */}
       {step === 'specialist' && servizioSelezionato && (
-        <section id="step-specialist" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+        <section id="step-specialist" className="scroll-mt-0 px-container-padding-mobile md:px-container-padding-desktop py-3 md:py-gutter bg-surface-bright">
           <div className="max-w-6xl mx-auto">
           <div className="mb-6 hidden md:block">
             <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
               PASUL 03 — {LABEL_STEP.specialist}
             </span>
           </div>
-          <div className="flex justify-between items-start mb-8 md:mb-12">
+          <div className="flex justify-between items-start mb-1 md:mb-12">
             <div className="flex-1">
               <p className="hidden md:block font-label-caps text-label-caps text-primary mb-2 uppercase">Găsește expertul potrivit</p>
-              <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg mb-6">{testiPrenotazione.stepSpecialist}</h2>
+              <h2 className="font-display-lg text-display-lg-mobile md:text-display-lg mb-6">{testiPrenotazione.stepSpecialist}</h2>
               <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
                 Fiecare specialist din echipa noastră aduce un amestec unic de rigoare tehnică și viziune artistică.
                 Selectați persoana care rezonează cel mai bine cu aspirațiile dumneavoastră estetice.
@@ -716,36 +754,49 @@ export default function PrenotazionePage() {
           ) : (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
-                {specialists.map((specialist) => (
+                {specialists.map((specialist) => {
+                  const specializare = specialist.servizi?.[0]?.nome;
+                  return (
                   <div
                     key={specialist._id}
-                    className="specialist-card group bg-surface-container-low border border-outline/20 p-8 flex flex-col md:flex-row gap-8 items-start"
+                    className="specialist-card group bg-surface-container-low border border-outline/20 p-3 md:p-6 flex flex-row gap-3 md:gap-5 items-start"
                   >
-                    <div className="relative w-full md:w-48 aspect-[3/4] overflow-hidden bg-surface-variant">
+                    <div className="relative w-16 md:w-24 aspect-square shrink-0 overflow-hidden bg-surface-variant rounded-full md:rounded-none">
                       <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-16 h-16 text-outline-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
+                        <svg className="w-8 h-8 md:w-12 md:h-12 text-outline-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
                       </div>
                       <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </div>
-                    <div className="flex-1">
-                      <span className="font-label-caps text-label-caps text-primary bg-primary-container/30 px-3 py-1 rounded-full">Specialist</span>
-                      <h4 className="font-headline-sm text-headline-sm mt-4 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <span className="font-label-caps text-[10px] md:text-label-caps text-primary bg-primary-container/30 px-2 md:px-3 py-0.5 md:py-1 rounded-full">Specialist</span>
+                      <h4 className="font-headline-sm text-[16px] md:text-headline-sm mt-1 md:mt-2 leading-tight">
                         {specialist.nome} {specialist.cognome}
                       </h4>
+                      {specializare && (
+                        <p className="font-label-md text-[13px] md:text-label-md text-on-surface-variant mt-0.5 md:mt-1">
+                          {specializare}
+                        </p>
+                      )}
+                      {specialist.biografia && (
+                        <p className="font-body-md text-[13px] md:text-body-md text-on-surface-variant/70 mt-1 md:mt-2 line-clamp-2 leading-relaxed">
+                          {specialist.biografia}
+                        </p>
+                      )}
                       {specialist.giorniSede && specialist.giorniSede.length > 0 && (
-                        <p className="hidden md:block font-body-md text-body-md text-on-surface-variant mb-4">
-                          Disponibil: {specialist.giorniSede.join(', ')}
+                        <p className="font-body-md text-[11px] text-on-surface-variant/50 mt-1">
+                          {specialist.giorniSede.join(', ')}
                         </p>
                       )}
                       <button
                         onClick={() => handleSelectSpecialist(specialist)}
-                        className="w-full md:w-auto bg-[#6b5c4a] text-white px-8 py-3 font-label-caps text-label-caps hover:bg-[#333028] transition-colors mt-4"
+                        className="w-full md:w-auto bg-[#6b5c4a] text-white px-4 md:px-6 py-1.5 md:py-2.5 font-label-caps text-[10px] md:text-label-caps hover:bg-[#333028] transition-colors mt-2 md:mt-3"
                       >
-                        Selectează Specialistul
+                        Selectează
                       </button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* All specialists option */}
@@ -780,7 +831,7 @@ export default function PrenotazionePage() {
 
       {/* STEP 4: DATE */}
       {step === 'data' && servizioSelezionato && (
-        <section id="step-data" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+        <section id="step-data" className="scroll-mt-0 px-container-padding-mobile md:px-container-padding-desktop py-3 md:py-gutter bg-surface-bright">
           <div className="max-w-6xl mx-auto">
 
           <div className="mb-6 hidden md:block">
@@ -788,9 +839,9 @@ export default function PrenotazionePage() {
               PASUL 04 — {LABEL_STEP.data}
             </span>
           </div>
-          <div className="flex justify-between items-start mb-8 md:mb-section-gap/2">
+          <div className="flex justify-between items-start mb-1 md:mb-section-gap/2">
             <header className="max-w-2xl">
-              <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-base">
+              <h2 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-base">
                 {testiPrenotazione.stepData}
               </h2>
               <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant">
@@ -890,16 +941,16 @@ export default function PrenotazionePage() {
 
       {/* STEP 4b: TIME */}
       {step === 'ora' && dataSelezionata && (
-        <section id="step-ora" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+        <section id="step-ora" className="scroll-mt-0 px-container-padding-mobile md:px-container-padding-desktop py-3 md:py-gutter bg-surface-bright">
           <div className="max-w-6xl mx-auto">
           <div className="mb-6 hidden md:block">
             <span className="font-label-caps text-[10px] tracking-[0.25em] uppercase text-on-surface-variant/50">
               PASUL 05 — {LABEL_STEP.ora}
             </span>
           </div>
-          <div className="flex justify-between items-start mb-8 md:mb-section-gap/2">
+          <div className="flex justify-between items-start mb-1 md:mb-section-gap/2">
             <header className="max-w-2xl">
-              <h2 className="hidden md:block font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-base">
+              <h2 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-base">
                 {testiPrenotazione.stepOrario}
               </h2>
               <p className="hidden md:block font-body-lg text-body-lg text-on-surface-variant">
@@ -936,14 +987,14 @@ export default function PrenotazionePage() {
               </div>
 
               {/* Location info */}
-              {sedeSelezionata && (
+              {/* {sedeSelezionata && (
                 <div className="bg-surface-container-low p-gutter mb-gutter">
                   <div className="flex items-center gap-3">
 <svg className="w-[18px] h-[18px] text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     <span className="font-body-md text-body-md">{sedeSelezionata.nome} · {sedeSelezionata.indirizzo}</span>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Station selection */}
               {sedeSelezionata?.postazioni?.length > 0 && (
@@ -1078,9 +1129,9 @@ export default function PrenotazionePage() {
 
       {/* STEP 5: CONFIRM */}
       {step === 'conferma' && (
-        <section id="step-conferma" className="px-container-padding-mobile md:px-container-padding-desktop py-gutter bg-surface-bright">
+        <section id="step-conferma" className="scroll-mt-0 px-container-padding-mobile md:px-container-padding-desktop py-3 md:py-gutter bg-surface-bright">
           <div className="max-w-6xl mx-auto">
-            <div className="flex justify-between items-start mb-8 md:mb-12">
+          <div className="flex justify-between items-start mb-1 md:mb-12">
               <div className="flex-1">
                 <h1 className="hidden md:block font-display-lg text-display-lg mb-4 text-on-surface">
                   {testiPrenotazione.stepConferma || 'Finalizare Programare'}
@@ -1101,113 +1152,119 @@ export default function PrenotazionePage() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-start">
               {/* Booking Summary Card */}
               <div className="md:col-span-5 flex flex-col gap-gutter">
-                <div className="bg-surface-container-low p-8 border border-outline/10">
-                  <h3 className="font-label-caps text-label-caps mb-6 text-primary">Rezumat Rezervare</h3>
-                  <ul className="flex flex-col gap-6">
-                    <li className="flex items-start gap-4">
-                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <div className="bg-surface-container-low p-3 md:p-5 border border-outline/10">
+                  <h3 className="font-label-caps text-[11px] md:text-label-caps mb-2 md:mb-4 text-primary">Rezumat Rezervare</h3>
+                  <ul className="flex flex-col gap-2 md:gap-4">
+                    <li className="flex items-start gap-3">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                       <div>
-                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">LOCAȚIE</p>
-                        <p className="font-body-md text-body-md font-medium">{sedeSelezionata?.nume || sedeSelezionata?.nome || '—'}{sedeSelezionata?.indirizzo ? `, ${sedeSelezionata.indirizzo}` : ''}</p>
+                        <p className="font-label-caps text-[9px] md:text-[10px] text-on-surface-variant opacity-60">LOCAȚIE</p>
+                        <p className="font-body-md text-[13px] md:text-body-md font-medium">{sedeSelezionata?.nume || sedeSelezionata?.nome || '—'}{sedeSelezionata?.indirizzo ? `, ${sedeSelezionata.indirizzo}` : ''}</p>
                       </div>
                     </li>
-                    <li className="flex items-start gap-4">
-                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    <li className="flex items-start gap-3">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                       <div>
-                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">SERVICIU</p>
-                        <p className="font-body-md text-body-md font-medium">{servizioSelezionato?.nome || '—'}</p>
+                        <p className="font-label-caps text-[9px] md:text-[10px] text-on-surface-variant opacity-60">SERVICIU</p>
+                        <p className="font-body-md text-[13px] md:text-body-md font-medium">{servizioSelezionato?.nome || '—'}</p>
                       </div>
                     </li>
-                    <li className="flex items-start gap-4">
-                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <li className="flex items-start gap-3">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                       <div>
-                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">SPECIALIST</p>
-                        <p className="font-body-md text-body-md font-medium">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</p>
+                        <p className="font-label-caps text-[9px] md:text-[10px] text-on-surface-variant opacity-60">SPECIALIST</p>
+                        <p className="font-body-md text-[13px] md:text-body-md font-medium">{selectedSpecialist?.nome} {selectedSpecialist?.cognome}</p>
                       </div>
                     </li>
-                    <li className="flex items-start gap-4">
-                      <svg className="w-5 h-5 text-primary mt-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <li className="flex items-start gap-3">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                       <div>
-                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">DATA ȘI ORA</p>
-                        <p className="font-body-md text-body-md font-medium">
+                        <p className="font-label-caps text-[9px] md:text-[10px] text-on-surface-variant opacity-60">DATA ȘI ORA</p>
+                        <p className="font-body-md text-[13px] md:text-body-md font-medium">
                           {dataSelezionata?.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' })} la ora {oraSelezionata}
                         </p>
                       </div>
                     </li>
                   </ul>
                   {mostraPrezzi && (
-                    <div className="mt-8 pt-8 border-t border-outline/20 flex justify-between items-end">
+                    <div className="mt-3 md:mt-5 pt-3 md:pt-5 border-t border-outline/20 flex justify-between items-end">
                       <div>
-                        <p className="font-label-caps text-[10px] text-on-surface-variant opacity-60">TOTAL DE PLATĂ</p>
-                        <p className="font-headline-sm text-headline-sm text-primary">
+                        <p className="font-label-caps text-[9px] md:text-[10px] text-on-surface-variant opacity-60">TOTAL DE PLATĂ</p>
+                        <p className="font-headline-sm text-[16px] md:text-headline-sm text-primary">
                           {voucherData && voucherData.type === 'free' ? 'GRATUIT' : formattaPrezzo(servizioSelezionato?.prezzo || 0)}
                         </p>
                       </div>
-                      <div className="text-[10px] text-on-surface-variant font-label-caps opacity-50">TVA INCLUS</div>
+                      <div className="text-[9px] md:text-[10px] text-on-surface-variant font-label-caps opacity-50">TVA INCLUS</div>
                     </div>
                   )}
                 </div>
 
-                {/* Aesthetic Image */}
-                <div className="h-48 bg-surface-container overflow-hidden group">
-                  <img
-                    alt="Beauty Detail"
-                    className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjuMQQkVPhSkbble2vR1RD1JMzyxXIJNyVG9Frq6O2sn6pPM8ZKfD1CWeNO26zW5Oqt9bSgEVlLXyQUTwPOJ1u6u8jvPkyQmJ0Jh7c3uMwJMjxcRDIRH7yhNU0Zi2nI-dweF_RcGRiMH4CGyR135oTJ4DDKMr1cU7kNy2BJq-IsSbpL_WJyRRhknA87VjYhYUdnTs92WIuQvZ6ogPVJUCZqJXinoRk1DQLLp5wwpKDatA6SIR0hNS3VY4ZPId0qf4J2IcY7Ri0QxHD"
-                  />
-                </div>
+
               </div>
 
               {/* Contact Form */}
               <div className="md:col-span-7">
-                <div className="flex flex-col gap-10">
+                <div className="flex flex-col gap-5 md:gap-10">
                   <div>
-                    <h3 className="font-headline-sm text-headline-sm mb-2">Date Contact</h3>
-                    <p className="font-body-md text-body-md text-on-surface-variant opacity-70">
-                      Te vom contacta prin email pentru confirmarea finală și instrucțiuni suplimentare.
-                    </p>
+                    <h3 className="font-headline-sm text-[16px] md:text-headline-sm mb-2 md:mb-4">Date Contact</h3>
                   </div>
 
-                  <div className="flex flex-col gap-8">
+                  <div className="flex flex-col gap-4 md:gap-7">
                     {/* Name Input */}
                     <div className="group">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-name">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-1 md:mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-name">
                         Nume Complet <span className="text-error">*</span>
                       </label>
                       <input
                         id="booking-name"
                         type="text"
-                        value={`${nomeCliente}${nomeCliente && cognomeCliente ? ' ' : ''}${cognomeCliente}`}
-                        onChange={(e) => {
-                          const parts = e.target.value.split(' ');
-                          setNomeCliente(parts[0] || '');
-                          setCognomeCliente(parts.slice(1).join(' ') || '');
-                        }}
+                        value={nomeCompleto}
+                        onChange={(e) => setNomeCompleto(e.target.value)}
                         placeholder="Ex: Maria Ionescu"
-                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-lg font-body-lg placeholder:text-outline/40 transition-all outline-none"
+                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-2 md:py-3 text-body-md md:text-body-lg font-body-md md:font-body-lg placeholder:text-outline/40 transition-all outline-none"
                         required
                       />
                     </div>
 
                     {/* Phone Input */}
                     <div className="group">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-phone">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-1 md:mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-phone">
                         Număr de Telefon <span className="text-error">*</span>
                       </label>
-                      <input
-                        id="booking-phone"
-                        type="tel"
-                        value={telefonoCliente}
-                        onChange={(e) => setTelefonoCliente(e.target.value)}
-                        placeholder="+40 7xx xxx xxx"
-                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-lg font-body-lg placeholder:text-outline/40 transition-all outline-none"
-                        required
-                      />
+                      <div className="flex gap-2">
+                        <select
+                          value={prefissoTelefono}
+                          onChange={(e) => setPrefissoTelefono(e.target.value)}
+                          className="shrink-0 bg-transparent border-b border-outline-variant focus:border-primary px-1 py-2 md:py-3 text-body-md md:text-body-lg font-body-md md:font-body-lg outline-none transition-all"
+                        >
+                          <option value="+39">🇮🇹 +39</option>
+                          <option value="+40">🇷🇴 +40</option>
+                          <option value="+373">🇲🇩 +373</option>
+                          <option value="+1">🇺🇸 +1</option>
+                          <option value="+44">🇬🇧 +44</option>
+                          <option value="+33">🇫🇷 +33</option>
+                          <option value="+34">🇪🇸 +34</option>
+                          <option value="+49">🇩🇪 +49</option>
+                          <option value="+43">🇦🇹 +43</option>
+                          <option value="+41">🇨🇭 +41</option>
+                          <option value="+48">🇵🇱 +48</option>
+                          <option value="+7">🇷🇺 +7</option>
+                        </select>
+                        <input
+                          id="booking-phone"
+                          type="tel"
+                          value={telefonoCliente}
+                          onChange={(e) => setTelefonoCliente(e.target.value)}
+                          placeholder="7xx xxx xxx"
+                          className="flex-1 bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-2 md:py-3 text-body-md md:text-body-lg font-body-md md:font-body-lg placeholder:text-outline/40 transition-all outline-none"
+                          required
+                        />
+                      </div>
                     </div>
 
                     {/* Email Input */}
                     <div className="group">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-email">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-1 md:mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-email">
                         Adresă de Email <span className="text-error">*</span>
                       </label>
                       <input
@@ -1216,14 +1273,14 @@ export default function PrenotazionePage() {
                         value={emailCliente}
                         onChange={(e) => setEmailCliente(e.target.value)}
                         placeholder="nume@exemplu.ro"
-                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-lg font-body-lg placeholder:text-outline/40 transition-all outline-none"
+                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-2 md:py-3 text-body-md md:text-body-lg font-body-md md:font-body-lg placeholder:text-outline/40 transition-all outline-none"
                         required
                       />
                     </div>
 
                     {/* Message Optional */}
                     <div className="group">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-notes">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant mb-1 md:mb-2 block group-focus-within:text-primary transition-colors" htmlFor="booking-notes">
                         Note adiționale (Opțional)
                       </label>
                       <textarea
@@ -1231,54 +1288,54 @@ export default function PrenotazionePage() {
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         placeholder="Mențiuni speciale pentru specialist..."
-                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-3 text-body-md font-body-md placeholder:text-outline/40 transition-all resize-none outline-none"
-                        rows={2}
+                        className="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant focus:border-primary px-0 py-2 md:py-3 text-body-md font-body-md placeholder:text-outline/40 transition-all resize-none outline-none"
+                        rows={1}
                       />
                     </div>
                   </div>
 
                   {/* Voucher */}
                   <div>
-                    <h3 className="font-headline-sm text-headline-sm mb-4">Cod Voucher</h3>
+                    <h3 className="font-headline-sm text-headline-sm mb-2 md:mb-4">Cod Voucher</h3>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={voucherCode}
                         onChange={(e) => { setVoucherCode(e.target.value.toUpperCase()); setVoucherData(null); setVoucherError(''); }}
                         placeholder="Introdu codul voucherului"
-                        className="flex-1 bg-transparent border-b border-outline-variant focus:border-primary px-0 py-3 text-body-md font-body-md placeholder:text-outline/40 transition-all outline-none"
+                        className="flex-1 bg-transparent border-b border-outline-variant focus:border-primary px-0 py-2 md:py-3 text-body-md font-body-md placeholder:text-outline/40 transition-all outline-none"
                       />
                       <button
                         onClick={valideazaVoucher}
-                        className="px-6 py-3 bg-primary text-on-primary font-label-caps text-label-caps hover:opacity-90 transition-all"
+                        className="px-5 md:px-6 py-2 md:py-3 bg-primary text-on-primary font-label-caps text-[11px] md:text-label-caps hover:opacity-90 transition-all"
                       >
                         Aplică
                       </button>
                     </div>
-                    {voucherError && <p className="text-error font-label-md text-label-md mt-2">{voucherError}</p>}
+                    {voucherError && <p className="text-error font-label-md text-label-md mt-1 md:mt-2">{voucherError}</p>}
                     {voucherData && (
-                      <p className="text-primary font-label-md text-label-md mt-2">
+                      <p className="text-primary font-label-md text-label-md mt-1 md:mt-2">
                         Voucher aplicat: {voucherData.type === 'percentage' ? `${voucherData.value}% reducere` : voucherData.type === 'fixed' ? `€${voucherData.value} reducere` : 'GRATUIT'}
                       </p>
                     )}
                   </div>
 
                   {/* Submit */}
-                  <div className="flex flex-col gap-4 mt-4">
-                    <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="flex flex-col gap-2 md:gap-4 mt-2 md:mt-4">
+                    <label className="flex items-start gap-2 md:gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
                         className="mt-1 border-outline text-primary focus:ring-primary rounded-sm transition-all"
                         required
                       />
-                      <span className="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface">
+                      <span className="font-label-md text-[12px] md:text-label-md text-on-surface-variant group-hover:text-on-surface">
                         Accept <a className="underline" href="#">Termenii și Condițiile</a> și Politica de Confidențialitate a salonului.
                       </span>
                     </label>
                     <button
                       onClick={handleConferma}
-                      disabled={caricamento || !nomeCliente.trim() || !telefonoCliente.trim() || !emailCliente.trim()}
-                      className="mt-4 w-full bg-[#6b5c4a] text-white py-6 font-label-caps text-label-caps tracking-[0.2em] hover:bg-[#333028] transition-all duration-500 quiet-luxury-shadow active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={caricamento || !nomeCompleto.trim() || !telefonoCliente.trim() || !emailCliente.trim()}
+                      className="w-full bg-[#6b5c4a] text-white py-4 md:py-6 font-label-caps text-label-caps tracking-[0.2em] hover:bg-[#333028] transition-all duration-500 quiet-luxury-shadow active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {caricamento ? 'PROGRAMARE...' : 'Confirmă Programarea'}
                     </button>
@@ -1373,5 +1430,36 @@ function CalendarioPrenotazione({ mese, anno, onSelezionaData, isDisponibile, no
         })}
       </div>
     </>
+  );
+}
+
+function DescrizioneConDetalii({ descrizione, isAperta, onToggle }: { descrizione: string; isAperta: boolean; onToggle: () => void }) {
+  const [haOverflow, setHaOverflow] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (el) {
+      setHaOverflow(el.scrollHeight > el.clientHeight);
+    }
+  }, [descrizione]);
+
+  return (
+    <div className="mb-6">
+      <p
+        ref={ref}
+        className={`font-body-md text-body-md text-on-surface-variant ${isAperta ? '' : 'line-clamp-2'}`}
+      >
+        {descrizione}
+      </p>
+      {(haOverflow || isAperta) && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggle(); }}
+          className="mt-1 font-label-caps text-label-caps text-primary hover:opacity-80 transition-opacity uppercase tracking-wider"
+        >
+          {isAperta ? 'Mai puțin' : 'Detalii'}
+        </button>
+      )}
+    </div>
   );
 }

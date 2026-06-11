@@ -426,11 +426,9 @@ export default function ServiziPage() {
                     }`}>
                       {servizio.nome}
                     </h3>
-                  <span className={`text-xs capitalize flex items-center gap-1 ${
+                    <span className={`text-xs capitalize flex items-center gap-1 ${
                       servizio.attivo ? 'text-gray-500' : 'text-gray-400'
                     }`}>
-                      <Tag className="w-3 h-3" />
-                      {servizio.categoria}
                     </span>
                   </div>
                   <span

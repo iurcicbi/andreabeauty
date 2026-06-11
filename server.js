@@ -1,8 +1,7 @@
 /**
- * PRODUCTION SERVER - Next.js + New Backend Architecture
- * 
- * Bootstraps the new modular backend alongside Next.js.
- * WhatsApp worker runs in a separate process (docker-compose).
+ * PRODUCTION SERVER - Next.js + Cron Reminders
+ *
+ * Single process: Next.js + MongoDB + WhatsApp + Cron reminders.
  */
 
 const { createServer } = require('http');
@@ -26,7 +25,7 @@ require('./src/config/env');
 async function main() {
   await app.prepare();
 
-  // Bootstrap new architecture (logging, Redis, queue workers)
+  // Bootstrap: MongoDB + WhatsApp + Cron reminders
   try {
     const { bootstrap } = await import('./src/bootstrap');
     await bootstrap();

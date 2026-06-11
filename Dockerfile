@@ -43,7 +43,7 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
-EXPOSE 3000 9090
+EXPOSE 3000
 
 ENV NODE_ENV=production
 CMD ["node", "server.js"]
