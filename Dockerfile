@@ -26,6 +26,8 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
+RUN npm install -g tsx
+
 RUN addgroup --system --gid 1001 appuser
 RUN adduser --system --uid 1001 appuser
 
@@ -45,8 +47,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 EXPOSE 3000
-
-RUN npm install -g tsx
 
 ENV NODE_ENV=production
 CMD ["tsx", "server.js"]
