@@ -3,6 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - JWT_SECRET
+        - CSRF_SECRET
+        - JWT_ACCESS_SECRET
+        - JWT_REFRESH_SECRET
+        - MONGODB_URI
+        - COOKIE_SECRET
     ports:
       - "3000:3000"
     env_file:
