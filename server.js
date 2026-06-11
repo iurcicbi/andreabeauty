@@ -20,7 +20,9 @@ try { require('dotenv').config({ path: '.env' }); } catch (_) {}
 try { require('dotenv').config({ path: '.env.local', override: true }); } catch (_) {}
 
 // Fail-fast: validate environment on startup
-require('./src/config/env');
+const { env: validatedEnv } = require('./src/config/env');
+// Trigger validation immediately
+void validatedEnv.NODE_ENV;
 
 async function main() {
   await app.prepare();
