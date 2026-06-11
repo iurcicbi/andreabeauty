@@ -40,4 +40,16 @@ function validateEnv(): z.infer<typeof envSchema> {
   return result.data;
 }
 
-export const env = validateEnv();
+let _env: z.infer<typeof envSchema> | undefined;
+function getEnv(): z.infer<typeof envSchema> {
+  if (!_env) {
+    _env = validateEnv();
+  }
+  return _env;
+}
+
+export const env = new Proxy({} as z.infer<typeof envSchema>, {
+  get(_, prop) {
+    return Reflect.get(getEnv(), prop, getEnv());
+  },
+});
