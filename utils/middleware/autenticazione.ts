@@ -22,10 +22,12 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('❌ JWT_SECRET non configurata. Imposta la variabile d\'ambiente JWT_SECRET.');
+function getJWTSecret(): string {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('❌ JWT_SECRET non configurata. Imposta la variabile d\'ambiente JWT_SECRET.');
+  }
+  return process.env.JWT_SECRET;
 }
-const JWT_SECRET = process.env.JWT_SECRET;
 
 // Interfaccia per il payload del token
 export interface TokenPayload {
@@ -77,7 +79,7 @@ export async function verificaToken(req: NextRequest | Request): Promise<TokenPa
 
   try {
     // Verifica e decodifica il token
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const decoded = jwt.verify(token, getJWTSecret()) as TokenPayload;
     
     return decoded;
   } catch (errore) {
@@ -136,7 +138,7 @@ export function generaToken(
   payload: Omit<TokenPayload, 'iat' | 'exp'>,
   expiresIn: string = '7d'
 ): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn } as SignOptions);
+  return jwt.sign(payload, getJWTSecret(), { expiresIn } as SignOptions);
 }
 
 /**

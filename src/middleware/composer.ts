@@ -7,10 +7,12 @@ import { createAuditLog } from '../logging/audit';
 import type { AuthUser, Permission, UserRole } from '../types/auth';
 import { ROLE_PERMISSIONS } from '../types/auth';
 
-if (!process.env.CSRF_SECRET) {
-  throw new Error('❌ CSRF_SECRET non configurata. Imposta la variabile d\'ambiente CSRF_SECRET.');
+function getCSRFSecret(): string {
+  if (!process.env.CSRF_SECRET) {
+    throw new Error('❌ CSRF_SECRET non configurata. Imposta la variabile d\'ambiente CSRF_SECRET.');
+  }
+  return process.env.CSRF_SECRET;
 }
-const CSRF_SECRET = process.env.CSRF_SECRET;
 
 const SUSPICIOUS_PATTERNS = /\$(where|regex|ne|gt|lt|exists|eq|nin|in|all|or|and|nor|not)|eval\(|Function\(/i;
 
@@ -70,7 +72,7 @@ function validateCSRF(req: NextRequest): boolean {
 
   if (!csrfCookie || !csrfHeader) return false;
 
-  const expected = crypto.createHmac('sha256', CSRF_SECRET)
+  const expected = crypto.createHmac('sha256', getCSRFSecret())
     .update(csrfCookie).digest('hex').slice(0, 32);
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(csrfHeader));
 }
