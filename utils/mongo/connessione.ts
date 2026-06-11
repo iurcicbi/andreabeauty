@@ -35,15 +35,6 @@ declare global {
   var mongoose: MongooseCache | undefined;
 }
 
-// URI di connessione dal file .env
-const MONGODB_URI = process.env.MONGODB_URI || '';
-
-if (!MONGODB_URI) {
-  throw new Error(
-    '⚠️ ERRORE: Definisci la variabile MONGODB_URI nel file .env'
-  );
-}
-
 /**
  * Cache globale per la connessione MongoDB
  * Persiste tra i ricaricamenti in development
@@ -68,6 +59,13 @@ if (!global.mongoose) {
  * @returns Promise con l'istanza mongoose connessa
  */
 async function connessioneMongoDB(): Promise<typeof mongoose> {
+  const MONGODB_URI = process.env.MONGODB_URI || '';
+  if (!MONGODB_URI) {
+    throw new Error(
+      '⚠️ ERRORE: Definisci la variabile MONGODB_URI nel file .env'
+    );
+  }
+
   // Se abbiamo già una connessione attiva, riutilizzala
   if (cached.conn) {
     console.log('✅ Utilizzo connessione MongoDB esistente');
