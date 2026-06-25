@@ -224,6 +224,7 @@ export default function CMSLayout({
     { href: '/cms/homepage', label: 'Homepage', icon: LayoutDashboard },
     { href: '/cms/hours', label: 'Orar', icon: Clock },
     { href: '/cms/availability', label: 'Disponibilitate echipă', icon: Users },
+    ...(utente?.ruolo === 'admin' ? [{ href: '/cms/users', label: 'Utilizatori', icon: Users }] : []),
     { href: '/cms/appearance', label: 'Aspect', icon: Settings },
     { href: '/cms/profile', label: 'Profil', icon: User },
   ];
