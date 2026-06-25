@@ -100,7 +100,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FDF6F8] text-[#4A3035]  overflow-hidden">
       <Header />
-      <FeaturedReviewsStrip limit={3} />
       {sezioni.map((s, index) => s.render(index))}
       <Footer />
     </div>

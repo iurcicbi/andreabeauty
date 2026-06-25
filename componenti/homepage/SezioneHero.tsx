@@ -30,7 +30,7 @@ export default function SezioneHero({ impostazioni, sezioneConfig, bgIndex = 0 }
   return (
     <section 
       id="home" 
-      className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center pt-20  overflow-hidden"
     >
       <style>{`
         .hero-bg-img {

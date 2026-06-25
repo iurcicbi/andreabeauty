@@ -7,12 +7,14 @@ export const createAppointmentSchema = z.object({
   servizioId: objectId,
   data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data must be YYYY-MM-DD'),
   oraInizio: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Invalid time (HH:MM)'),
-  clienteNome: z.string().min(1).max(100).optional(),
-  clienteCognome: z.string().min(1).max(100).optional(),
-  clienteTelefono: z.string().regex(/^\+?[1-9]\d{6,14}$/).optional(),
+  clienteNome: z.string().max(100).optional().default(''),
+  clienteCognome: z.string().max(100).optional().default(''),
+  clienteTelefono: z.string().regex(/^\+?[1-9]\d{6,14}$/).optional().or(z.literal('')),
   clienteEmail: z.string().email().optional().or(z.literal('')),
   note: z.string().max(1000).optional().default(''),
   voucherCode: z.string().max(50).optional(),
+  sedeId: objectId.optional(),
+  postazione: z.string().max(100).optional(),
 });
 
 export const updateAppointmentSchema = z.object({

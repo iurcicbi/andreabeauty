@@ -309,14 +309,13 @@ export default function PrenotazionePage() {
       if (sedeSelezionata) payload.sedeId = sedeSelezionata._id;
       if (postazioneSelezionata) payload.postazione = postazioneSelezionata;
 
-      await webservice.post('/api/appointments', payload);
+      await webservice.post('/api/v2/appointments', payload);
 
       const params = new URLSearchParams({
         specialist: `${selectedSpecialist.nome} ${selectedSpecialist.cognome}`,
         servizio: servizioSelezionato.nome,
         data: dataStr,
         ora: oraSelezionata,
-        prezzo: `€${servizioSelezionato.prezzo.toFixed(2)}`,
       });
       if (sedeSelezionata) params.set('sede', sedeSelezionata.nome);
       if (postazioneSelezionata) params.set('postazione', postazioneSelezionata);

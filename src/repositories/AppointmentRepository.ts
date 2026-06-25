@@ -1,4 +1,4 @@
-import { Types, ClientSession } from 'mongoose';
+import { Types } from 'mongoose';
 import Appuntamento from '../../utils/mongo/schemi/Appuntamento';
 import { BookingConflictError } from '../errors/AppError';
 
@@ -11,6 +11,8 @@ interface CreateAppointmentInput {
   oraFine: string;
   note?: string;
   voucherCode?: string;
+  sede?: Types.ObjectId;
+  postazione?: string;
 }
 
 export class AppointmentRepository {
@@ -43,7 +45,7 @@ export class AppointmentRepository {
     return Appuntamento.find(filtro);
   }
 
-  async createAtomic(input: CreateAppointmentInput, session?: ClientSession): Promise<ReturnType<typeof Appuntamento.hydrate>> {
+  async createAtomic(input: CreateAppointmentInput): Promise<ReturnType<typeof Appuntamento.hydrate>> {
     const [existing] = await this.findOverlapping(
       input.specialista.toString(),
       input.data,
@@ -55,29 +57,29 @@ export class AppointmentRepository {
       throw new BookingConflictError();
     }
 
-    return Appuntamento.create([input], { session }).then(r => r[0]);
+    return Appuntamento.create(input);
   }
 
-  async updateStatus(id: string, stato: string, session?: ClientSession): Promise<void> {
-    await Appuntamento.findByIdAndUpdate(id, { stato }, { session });
+  async updateStatus(id: string, stato: string): Promise<void> {
+    await Appuntamento.findByIdAndUpdate(id, { stato });
   }
 
-  async markConfirmed(id: string, session?: ClientSession): Promise<void> {
+  async markConfirmed(id: string): Promise<void> {
     await Appuntamento.findByIdAndUpdate(id, {
       stato: 'confermato',
       confirmationResponse: 'si',
       confirmationRespondedAt: new Date(),
-    }, { session });
+    });
   }
 
-  async markCancelled(id: string, cancelledBy: 'customer' | 'specialist', session?: ClientSession): Promise<void> {
+  async markCancelled(id: string, cancelledBy: 'customer' | 'specialist'): Promise<void> {
     await Appuntamento.findByIdAndUpdate(id, {
       stato: 'cancellato',
       confirmationResponse: 'no',
       confirmationRespondedAt: new Date(),
       cancelledBy,
       cancelledAt: new Date(),
-    }, { session });
+    });
   }
 }
 

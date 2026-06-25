@@ -21,6 +21,8 @@ interface CreateBookingParams {
   clienteEmail?: string;
   note?: string;
   voucherCode?: string;
+  sedeId?: string;
+  postazione?: string;
   userId?: string;
   userRole?: string;
 }
@@ -55,11 +57,12 @@ export class AppointmentController {
 
     let datiCliente: { nome: string; cognome: string; telefono: string; email?: string };
 
-    if (params.clienteNome && params.clienteCognome && params.clienteTelefono) {
+    if (params.clienteNome && params.clienteTelefono) {
+      const cognome = params.clienteCognome || params.clienteNome;
       let cliente = await Utente.findOne({ telefono: params.clienteTelefono });
       if (cliente) {
         cliente.nome = params.clienteNome;
-        cliente.cognome = params.clienteCognome;
+        cliente.cognome = cognome;
         if (params.clienteEmail) cliente.email = params.clienteEmail;
         await cliente.save();
       } else {
@@ -68,7 +71,7 @@ export class AppointmentController {
         const passwordHash = await bcrypt.hash(passwordTemp, salt);
         cliente = await Utente.create({
           nome: params.clienteNome,
-          cognome: params.clienteCognome,
+          cognome: cognome,
           email: params.clienteEmail || `${params.clienteTelefono}@temp.com`,
           password: passwordHash,
           telefono: params.clienteTelefono,
@@ -78,7 +81,7 @@ export class AppointmentController {
       }
       datiCliente = {
         nome: params.clienteNome,
-        cognome: params.clienteCognome,
+        cognome: cognome,
         telefono: params.clienteTelefono,
         email: params.clienteEmail || cliente.email,
       };
@@ -115,6 +118,8 @@ export class AppointmentController {
       oraFine,
       note: params.note,
       voucherCode: params.voucherCode,
+      sedeId: params.sedeId,
+      postazione: params.postazione,
       createdByUserId: params.userId,
     });
   }
