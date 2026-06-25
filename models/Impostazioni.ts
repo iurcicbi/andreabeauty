@@ -337,15 +337,15 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   nomeAzienda: {
     type: String,
     required: true,
-    default: 'Beauty Salon'
+    default: 'AG Studio'
   },
   tagline: {
     type: String,
-    default: 'Il tuo stile, la nostra passione'
+    default: 'Artă și eleganță în fiecare detaliu'
   },
   descrizione: {
     type: String,
-    default: 'Beauty salon booking portal'
+    default: 'Platformă de prezentare AG Studio – Makeup & Beauty'
   },
   
   // CONTATTI
@@ -625,8 +625,8 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
   
   // SEO
   seo: {
-    titoloPagina: { type: String,     default: 'Beauty Salon - Book your appointment' },
-    descrizioneMeta: { type: String, default: 'Portale di prenotazione per il tuo beauty salon di fiducia' },
+    titoloPagina: { type: String,     default: 'AG Studio – Artă și Eleganță' },
+    descrizioneMeta: { type: String, default: 'Platformă de prezentare a portofoliului artistic AG Studio – Makeup & Beauty în Chișinău' },
     keywords: { type: String, default: 'beauty salon, makeup, aesthetic, skincare, booking' },
     ogImage: { type: String, default: '' }
   },

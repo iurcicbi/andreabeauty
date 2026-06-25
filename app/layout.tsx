@@ -17,12 +17,12 @@ async function getMetadata(): Promise<Metadata> {
     const impostazioni = await Impostazioni.getImpostazioni();
     
     return {
-      title: impostazioni.seo?.titoloPagina || 'Beauty Salon - Prenota il tuo appuntamento',
-      description: impostazioni.seo?.descrizioneMeta || 'Portale di prenotazione per il tuo beauty salon di fiducia',
-      keywords: impostazioni.seo?.keywords || 'beauty salon, makeup, aesthetic, skincare',
+      title: impostazioni.seo?.titoloPagina || 'AG Studio – Artă și Eleganță',
+      description: impostazioni.seo?.descrizioneMeta || 'Platformă de prezentare a portofoliului artistic AG Studio – Makeup & Beauty în Chișinău',
+      keywords: impostazioni.seo?.keywords || 'AG Studio, makeup, beauty, Chișinău, machiaj profesionist',
       openGraph: {
-        title: impostazioni.seo?.titoloPagina || 'Beauty Salon',
-        description: impostazioni.seo?.descrizioneMeta || 'Portale di prenotazione',
+        title: impostazioni.seo?.titoloPagina || 'AG Studio – Artă și Eleganță',
+        description: impostazioni.seo?.descrizioneMeta || 'Platformă de prezentare a portofoliului artistic AG Studio',
         images: impostazioni.seo?.ogImage ? [impostazioni.seo.ogImage] : [],
       },
       icons: {
@@ -31,8 +31,8 @@ async function getMetadata(): Promise<Metadata> {
     };
   } catch (error) {
     return {
-      title: 'Beauty Salon - Prenota il tuo appuntamento',
-      description: 'Portale di prenotazione per il tuo beauty salon di fiducia',
+      title: 'AG Studio – Artă și Eleganță',
+      description: 'Platformă de prezentare a portofoliului artistic AG Studio – Makeup & Beauty în Chișinău',
     };
   }
 }
@@ -47,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="it">
+    <html lang="ro">
       <body>{children}</body>
     </html>
   );
