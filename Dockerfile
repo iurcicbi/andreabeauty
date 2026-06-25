@@ -1,6 +1,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_BASE_URL_API
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV NEXT_PUBLIC_BASE_URL_API=${NEXT_PUBLIC_BASE_URL_API}
+
 RUN apk add --no-cache python3 make g++
 
 COPY package*.json ./
@@ -44,7 +49,7 @@ RUN mkdir -p /app/uploads /app/logs /app/.wwebjs_auth && \
 USER appuser
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/v2/health || exit 1
 
 EXPOSE 3000
 

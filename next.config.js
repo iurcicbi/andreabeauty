@@ -27,7 +27,11 @@ const nextConfig = {
         'whatsapp-web.js',
         'puppeteer',
         'puppeteer-core',
+
         '@aws-sdk/client-s3',
+        'puppeteer-extra',
+        'puppeteer-extra-plugin',
+        'puppeteer-extra-plugin-stealth',
         'qrcode-terminal',
       ];
     }

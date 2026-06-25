@@ -86,6 +86,25 @@ export default function Footer() {
 
   return (
     <footer className="w-full border-t" style={{ backgroundColor: bgColor, borderColor: 'rgba(107,92,74,0.15)' }}>
+      
+      {/* ══════════════ DISCLAIMER LEGALE ══════════════ */}
+      <div className="w-full bg-[#f8f6f3] border-b border-[rgba(107,92,74,0.15)] py-4 px-6">
+        <div className="container mx-auto">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="w-4 h-4 text-[#C49A8C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <div className="text-xs leading-relaxed text-[#4d453e]" style={{ fontFamily: 'Manrope, sans-serif' }}>
+              <strong className="font-semibold">andreea-gmuastudio.com</strong> este o platformă de prezentare și un portofoliu artistic independent. 
+              Acest formular gestionează exclusiv solicitări de contact și propuneri de colaborare fără caracter obligatoriu. 
+              Pe acest site nu se efectuează tranzacții comerciale directe și nu se fac rezervări în scopuri lucrative.
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ══════════════ MOBILE ══════════════ */}
       <div className="md:hidden flex flex-col items-center text-center px-6 py-16 gap-10">

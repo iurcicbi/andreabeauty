@@ -19,6 +19,7 @@ const envSchema = z.object({
   ARGON2_TIME_COST: z.coerce.number().int().positive().default(3),
   ARGON2_MEMORY_COST: z.coerce.number().int().positive().default(65536),
 
+  WHATSAPP_ENABLED: z.string().default('true').transform(v => v === 'true' || v === '1'),
   WHATSAPP_SESSION_PATH: z.string().default('.wwebjs_auth'),
 
   UPLOAD_MAX_SIZE: z.coerce.number().int().positive().default(5 * 1024 * 1024),

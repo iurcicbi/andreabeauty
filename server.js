@@ -6,6 +6,8 @@
 
 const { createServer } = require('http');
 const { parse } = require('url');
+const path = require('path');
+const fs = require('fs');
 const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -29,16 +31,51 @@ async function main() {
 
   // Bootstrap: MongoDB + WhatsApp + Cron reminders
   try {
-    const { bootstrap } = await import('./src/bootstrap');
-    await bootstrap();
+    const mod = await import('./src/bootstrap');
+    const bootstrapFn = mod.bootstrap || mod.default?.bootstrap || mod.default;
+    if (typeof bootstrapFn !== 'function') {
+      console.error('❌ Bootstrap export not found. Module keys:', Object.keys(mod));
+      throw new Error('bootstrap export not found');
+    }
+    await bootstrapFn();
   } catch (err) {
     console.error('❌ Bootstrap error:', err.message);
     console.log('⚠️ Server continuing without bootstrap services');
   }
 
+  const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
+
   createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
+      // Serve file statici da public/uploads/ (caricati dopo il build)
+      if (parsedUrl.pathname.startsWith('/uploads/')) {
+        const filePath = path.join(UPLOADS_DIR, parsedUrl.pathname.replace('/uploads/', ''));
+        // Security: evita path traversal
+        if (!filePath.startsWith(UPLOADS_DIR)) {
+          res.statusCode = 403;
+          res.end('Forbidden');
+          return;
+        }
+        const stat = fs.existsSync(filePath) && fs.statSync(filePath);
+        if (stat && stat.isFile()) {
+          const ext = path.extname(filePath).toLowerCase();
+          const mimeTypes = {
+            '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
+            '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
+            '.avif': 'image/avif', '.ico': 'image/x-icon', '.pdf': 'application/pdf',
+          };
+          res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          const stream = fs.createReadStream(filePath);
+          stream.on('error', () => {
+            res.statusCode = 404;
+            res.end('Not Found');
+          });
+          stream.pipe(res);
+          return;
+        }
+      }
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error('❌ Request error:', req.url, err);

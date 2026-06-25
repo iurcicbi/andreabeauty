@@ -15,13 +15,17 @@ export async function bootstrap(): Promise<void> {
   await mongoose.connect(env.MONGODB_URI);
   logger.info({ msg: 'MongoDB connected' });
 
-  try {
-    const { initReminderScheduler, stopScheduler } = require('../lib/cron/reminders');
-    reminderScheduler = { initReminderScheduler, stopScheduler };
-    await initReminderScheduler();
-    logger.info({ msg: 'Reminder scheduler started' });
-  } catch (err) {
-    logger.warn({ msg: 'Reminder scheduler failed to start', error: (err as Error).message });
+  if (env.WHATSAPP_ENABLED) {
+    try {
+      const { initReminderScheduler, stopScheduler } = require('../lib/cron/reminders');
+      reminderScheduler = { initReminderScheduler, stopScheduler };
+      await initReminderScheduler();
+      logger.info({ msg: 'Reminder scheduler started' });
+    } catch (err) {
+      logger.warn({ msg: 'Reminder scheduler failed to start', error: (err as Error).message });
+    }
+  } else {
+    logger.info({ msg: 'WhatsApp disabled by WHATSAPP_ENABLED=false' });
   }
 
   logger.info({ msg: 'Bootstrap complete' });

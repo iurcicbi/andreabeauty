@@ -12,6 +12,7 @@
     "setup:servizi": "node scripts/crea-servizi-test.js",
     "db:clean": "node scripts/pulisci-database.js",
     "cleanup": "node scripts/cleanup-whatsapp.js",
+    "whatsapp": "node scripts/whatsapp-standalone.js",
     "migrate:beauty": "node scripts/migra-specialisti.js",
     "migrate:beauty:auto": "AUTO_MIGRATE=true node scripts/migra-specialisti.js"
   },
@@ -33,6 +34,8 @@
     "mongoose": "^8.23.0",
     "next": "^14.0.0",
     "node-cron": "^4.2.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "qrcode-terminal": "^0.12.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
