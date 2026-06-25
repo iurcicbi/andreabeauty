@@ -295,6 +295,10 @@ export interface IImpostazioni extends Document {
     oreAnticipo: number; // ore prima dell'appuntamento per inviare richiesta conferma
   };
   
+  // LEGAL
+  linkPrivacyPolicy: string;
+  linkCookiePolicy: string;
+
   // METADATA
   ultimaModifica: Date;
   modificatoDa: string;
@@ -646,6 +650,16 @@ const ImpostazioniSchema = new Schema<IImpostazioni, IImpostazioniModel>({
     oreAnticipo: { type: Number, default: 24 } // default 24 ore prima
   },
   
+  // LEGAL
+  linkPrivacyPolicy: {
+    type: String,
+    default: ''
+  },
+  linkCookiePolicy: {
+    type: String,
+    default: ''
+  },
+
   // METADATA
   ultimaModifica: {
     type: Date,

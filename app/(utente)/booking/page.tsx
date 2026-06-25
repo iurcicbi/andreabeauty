@@ -88,6 +88,7 @@ export default function PrenotazionePage() {
   const [caricamentoSpecialisti, setCaricamentoSpecialisti] = useState(false);
   const [errore, setErrore] = useState('');
   const [mostraPrezzi, setMostraPrezzi] = useState(true);
+  const [linkPrivacyPolicy, setLinkPrivacyPolicy] = useState('');
   const [descrizioniAperte, setDescrizioniAperte] = useState<Set<string>>(new Set());
 
   const toggleDescrizione = useCallback((id: string) => {
@@ -135,6 +136,7 @@ export default function PrenotazionePage() {
         setTestiPrenotazione(prev => ({ ...prev, ...risposta.dati.testiPrenotazione }));
       }
       setMostraPrezzi(risposta.dati?.funzionalita?.mostraPrezziFrontend !== false);
+      setLinkPrivacyPolicy(risposta.dati?.linkPrivacyPolicy || '');
     } catch { }
   };
 
@@ -1328,7 +1330,13 @@ export default function PrenotazionePage() {
                         required
                       />
                       <span className="font-label-md text-[12px] md:text-label-md text-on-surface-variant group-hover:text-on-surface">
-                        Accept <a className="underline" href="#">Termenii și Condițiile</a> și Politica de Confidențialitate a salonului.
+                        Accept{' '}
+                        {linkPrivacyPolicy ? (
+                          <a href={linkPrivacyPolicy} target="_blank" rel="noopener noreferrer" className="underline hover:text-on-surface transition-colors">Politica de Confidențialitate</a>
+                        ) : (
+                          'Politica de Confidențialitate'
+                        )}
+                        {' '}a salonului.
                       </span>
                     </label>
                     <button

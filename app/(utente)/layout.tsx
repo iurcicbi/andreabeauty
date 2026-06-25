@@ -1,5 +1,6 @@
 import Header from '@/componenti/layout/Header';
 import Footer from '@/componenti/layout/Footer';
+import CookieConsent from '@/componenti/layout/CookieConsent';
 
 export default function UtenteLayout({
   children,
@@ -11,6 +12,7 @@ export default function UtenteLayout({
       <Header />
       {children}
       <Footer />
+      <CookieConsent />
     </>
   );
 }

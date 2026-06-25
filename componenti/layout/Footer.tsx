@@ -141,13 +141,13 @@ export default function Footer() {
             <span className="text-xs tracking-[0.12em] uppercase text-[#4d453e]"
               style={{ fontFamily: 'Manrope, sans-serif' }}>Confidențialitate</span>
           )}
-          {impostazioni?.linkTerminiCondizioni ? (
-            <a href={impostazioni.linkTerminiCondizioni} target="_blank" rel="noopener noreferrer"
+          {impostazioni?.linkCookiePolicy ? (
+            <a href={impostazioni.linkCookiePolicy} target="_blank" rel="noopener noreferrer"
               className="text-xs tracking-[0.12em] uppercase text-[#4d453e] hover:text-[#1e1b14] transition-colors"
-              style={{ fontFamily: 'Manrope, sans-serif' }}>Termeni</a>
+              style={{ fontFamily: 'Manrope, sans-serif' }}>Cookie-uri</a>
           ) : (
             <span className="text-xs tracking-[0.12em] uppercase text-[#4d453e]"
-              style={{ fontFamily: 'Manrope, sans-serif' }}>Termeni</span>
+              style={{ fontFamily: 'Manrope, sans-serif' }}>Cookie-uri</span>
           )}
         </div>
 
@@ -155,6 +155,11 @@ export default function Footer() {
           style={{ fontFamily: 'Manrope, sans-serif' }}>
           © {anno} {nome.toUpperCase()}.
         </p>
+        <a href="/cms"
+          className="text-[10px] tracking-[0.12em] uppercase text-[#7f756d] hover:text-[#1e1b14] transition-colors"
+          style={{ fontFamily: 'Manrope, sans-serif' }}>
+          Admin
+        </a>
       </div>
 
       {/* ══════════════ DESKTOP ══════════════ */}
@@ -215,15 +220,15 @@ export default function Footer() {
                 )}
               </li>
               <li>
-                {impostazioni?.linkTerminiCondizioni ? (
-                  <a href={impostazioni.linkTerminiCondizioni} target="_blank" rel="noopener noreferrer"
+                {impostazioni?.linkCookiePolicy ? (
+                  <a href={impostazioni.linkCookiePolicy} target="_blank" rel="noopener noreferrer"
                     className="text-sm text-[#4d453e] hover:text-[#1e1b14] transition-colors hover:underline underline-offset-4"
                     style={{ fontFamily: 'Manrope, sans-serif' }}>
-                    Termeni și Condiții
+                    Politică Cookie-uri
                   </a>
                 ) : (
                   <span className="text-sm text-[#4d453e]" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                    Termeni și Condiții
+                    Politică Cookie-uri
                   </span>
                 )}
               </li>
@@ -260,10 +265,11 @@ export default function Footer() {
               style={{ fontFamily: 'Manrope, sans-serif' }}>
               © {anno} {nome.toUpperCase()}. 
             </span>
-            {/* <span className="text-[11px] tracking-[0.1em] uppercase text-[#7f756d]"
+            <a href="/cms"
+              className="text-[10px] tracking-[0.12em] uppercase text-[#7f756d] hover:text-[#1e1b14] transition-colors"
               style={{ fontFamily: 'Manrope, sans-serif' }}>
-              DESIGNED IN PURSUIT OF RADIANCE
-            </span> */}
+              Admin
+            </a>
           </div>
 
         </div>

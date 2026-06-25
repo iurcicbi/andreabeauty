@@ -18,7 +18,8 @@ import {
   Upload,
   Search,
   FileText,
-  ToggleLeft
+  ToggleLeft,
+  Shield
 } from 'lucide-react';
 
 interface ImpostazioniFrontend {
@@ -110,6 +111,7 @@ export default function FrontendPage() {
   const [errore, setErrore] = useState('');
   const [successo, setSuccesso] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState<string | null>(null);
+  const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [tabAttiva, setTabAttiva] = useState<string>('generale');
 
   useEffect(() => {
@@ -214,6 +216,52 @@ export default function FrontendPage() {
     }
   };
 
+  const handleUploadDocumento = async (e: React.ChangeEvent<HTMLInputElement>, campo: 'linkPrivacyPolicy' | 'linkCookiePolicy') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      setErrore('Doar fișiere PDF sunt acceptate');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrore('Fișier prea mare. Maxim 10MB');
+      return;
+    }
+
+    try {
+      setUploadingDoc(campo);
+      setErrore('');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('tipo', 'documento');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.errore || 'Eroare upload');
+      }
+
+      setImpostazioni({ ...impostazioni, [campo]: data.url });
+
+      const nuoveImpostazioni = { ...impostazioni, [campo]: data.url };
+      await webservice.put('/api/settings', nuoveImpostazioni);
+
+      setSuccesso('PDF încărcat și salvat cu succes!');
+    } catch (err: any) {
+      setErrore(err.message || 'Eroare în timpul încărcării PDF-ului');
+    } finally {
+      setUploadingDoc(null);
+    }
+  };
+
   if (caricamento) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -244,6 +292,7 @@ export default function FrontendPage() {
             { id: 'testi', label: 'Texte', icon: FileText },
             { id: 'seo', label: 'SEO', icon: Search },
             { id: 'funzionalita', label: 'Funcționalități', icon: ToggleLeft },
+            { id: 'legal', label: 'Legal', icon: Shield },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1053,6 +1102,129 @@ export default function FrontendPage() {
                 <span className="text-sm font-medium">{func.label}</span>
               </label>
             ))}
+          </div>
+        </Card>}
+
+        {/* LEGAL */}
+        {tabAttiva === 'legal' && <Card>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            Politici Legale
+          </h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Încarcă PDF-urile cu Politica de Confidențialitate și Politica privind Cookie-urile.
+            Acestea vor fi disponibile în footer-ul site-ului.
+          </p>
+          <div className="space-y-8">
+
+            {/* PRIVACY POLICY */}
+            <div className="border-b border-gray-200 pb-8">
+              <h3 className="text-lg font-bold mb-2">Politica de Confidențialitate</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                PDF-ul cu Politica de Confidențialitate (conform Legii nr. 133/2011)
+              </p>
+
+              <label className="cursor-pointer inline-block">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-primary-500 transition-colors text-center min-w-[200px]">
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={(e) => handleUploadDocumento(e, 'linkPrivacyPolicy')}
+                    className="hidden"
+                    disabled={uploadingDoc === 'linkPrivacyPolicy'}
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="w-8 h-8 text-gray-400" />
+                    <span className="text-sm font-medium">
+                      {uploadingDoc === 'linkPrivacyPolicy' ? 'Încărcare...' : 'Click pentru încărcare PDF'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      PDF (max 10MB)
+                    </span>
+                  </div>
+                </div>
+              </label>
+
+              {impostazioni.linkPrivacyPolicy && (
+                <div className="bg-gray-50 rounded-lg p-4 mt-3 flex items-center justify-between">
+                  <a
+                    href={impostazioni.linkPrivacyPolicy}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary-600 hover:underline flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    {impostazioni.linkPrivacyPolicy.split('/').pop()}
+                  </a>
+                  <button
+                    onClick={() => setImpostazioni({ ...impostazioni, linkPrivacyPolicy: '' })}
+                    className="text-sm text-red-600 hover:text-red-700 ml-4"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* COOKIE POLICY */}
+            <div>
+              <h3 className="text-lg font-bold mb-2">Politica privind Cookie-urile</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                PDF-ul cu Politica privind Cookie-urile (conform Legii nr. 133/2011)
+              </p>
+
+              <label className="cursor-pointer inline-block">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-primary-500 transition-colors text-center min-w-[200px]">
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={(e) => handleUploadDocumento(e, 'linkCookiePolicy')}
+                    className="hidden"
+                    disabled={uploadingDoc === 'linkCookiePolicy'}
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="w-8 h-8 text-gray-400" />
+                    <span className="text-sm font-medium">
+                      {uploadingDoc === 'linkCookiePolicy' ? 'Încărcare...' : 'Click pentru încărcare PDF'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      PDF (max 10MB)
+                    </span>
+                  </div>
+                </div>
+              </label>
+
+              {impostazioni.linkCookiePolicy && (
+                <div className="bg-gray-50 rounded-lg p-4 mt-3 flex items-center justify-between">
+                  <a
+                    href={impostazioni.linkCookiePolicy}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary-600 hover:underline flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    {impostazioni.linkCookiePolicy.split('/').pop()}
+                  </a>
+                  <button
+                    onClick={() => setImpostazioni({ ...impostazioni, linkCookiePolicy: '' })}
+                    className="text-sm text-red-600 hover:text-red-700 ml-4"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+
           </div>
         </Card>}
 
