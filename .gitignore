@@ -45,3 +45,6 @@ next-env.d.ts
 .wwebjs_cache/
 .wwebjs_test/
 .wwebjs_reminders/
+
+# Markdown documentation (may contain credentials)
+*.md
