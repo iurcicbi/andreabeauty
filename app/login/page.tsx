@@ -13,9 +13,17 @@ export default function LoginPage() {
   const [errore, setErrore] = useState('');
   const [mostraPassword, setMostraPassword] = useState(false);
   const [animato, setAnimato] = useState(false);
+  const [logoSrc, setLogoSrc] = useState('');
+  const [nomeAzienda, setNomeAzienda] = useState('AG Studio');
 
   useEffect(() => {
     setAnimato(true);
+    webservice.get('/api/settings')
+      .then((r) => {
+        if (r.dati?.logoCMS) setLogoSrc(r.dati.logoCMS);
+        if (r.dati?.nomeAzienda) setNomeAzienda(r.dati.nomeAzienda);
+      })
+      .catch(() => {});
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,13 +66,17 @@ export default function LoginPage() {
       <div className={`w-full max-w-md relative transition-all duration-700 ${animato ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         {/* Brand */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/80 backdrop-blur-sm rounded-full mb-6 shadow-sm border border-[#E0B2B7]/40">
-            <svg className="w-9 h-9 text-[#C49098]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-              <path d="M12 8v8M8 12h8"/>
-            </svg>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/80 backdrop-blur-sm rounded-full mb-6 shadow-sm border border-[#E0B2B7]/40 overflow-hidden">
+            {logoSrc ? (
+              <img src={logoSrc} alt={nomeAzienda} className="w-full h-full object-contain p-2" />
+            ) : (
+              <svg className="w-9 h-9 text-[#C49098]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                <path d="M12 8v8M8 12h8"/>
+              </svg>
+            )}
           </div>
-          <h1 className="text-3xl font-light text-[#4A3035] tracking-[0.15em] uppercase mb-2">Beauty Salon</h1>
+          <h1 className="text-3xl font-light text-[#4A3035] tracking-[0.15em] uppercase mb-2">{nomeAzienda}</h1>
           <p className="text-[#A07078] text-sm tracking-wide">Acces în contul tău</p>
         </div>
 
