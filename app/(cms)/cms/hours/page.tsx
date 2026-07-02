@@ -301,7 +301,7 @@ export default function OrariPage() {
   const stats = calcolaStatistiche();
 
   return (
-    <div className="container mx-auto px-3 md:px-4 py-4 md:py-8">
+    <div className="container mx-auto px-3 md:px-4 pb-24 md:pb-0 py-4 md:py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Gestionare Orar</h1>
         <Bottone onClick={handleSalva} disabled={salvando} className="w-full sm:w-auto">

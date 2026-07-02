@@ -83,7 +83,12 @@ export default function AppuntamentiPage() {
     try {
       setCaricamento(true);
       const risposta = await webservice.get('/api/appointments');
-      setAppuntamenti(risposta.dati);
+      const dati = (risposta.dati || []).sort((a: Appuntamento, b: Appuntamento) => {
+        const dateA = new Date(a.data + 'T' + a.oraInizio).getTime();
+        const dateB = new Date(b.data + 'T' + b.oraInizio).getTime();
+        return dateB - dateA;
+      });
+      setAppuntamenti(dati);
     } catch (err) {
       setErrore('Eroare la încărcarea programărilor');
     } finally {
@@ -181,7 +186,7 @@ export default function AppuntamentiPage() {
   }
 
   return (
-    <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
+    <div className="container mx-auto px-2 pb-24 md:px-4 py-2 md:py-8">
       {/* Header - Mobile Optimized */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-4 md:mb-8">
         <div>
@@ -265,28 +270,67 @@ onClick={() => router.push('/cms/appointments/new')}
               {/* Mobile */}
               <div className="flex flex-col md:hidden gap-1.5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-primary-600">{app.oraInizio}</span>
-                    <span className="text-xs text-gray-500">
-                      {new Date(app.data).toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-primary-600 shrink-0" />
+                    <span className="font-bold text-primary-600">{app.oraInizio}</span>
+                    <span className="text-[10px] text-gray-400">- {app.oraFine}</span>
+                    <span className="text-[10px] text-gray-500">
+                      {new Date(app.data).toLocaleDateString('ro-RO', { weekday: 'short', day: 'numeric', month: 'short' })}
                     </span>
                   </div>
-                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${getStatoColore(app.stato)}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatoColore(app.stato)}`}>
                     {getStatoLabel(app.stato)}
                   </span>
                 </div>
-                <div className="text-xs space-y-0.5">
-                  <div className="flex justify-between"><span className="text-gray-400">Client</span><span className="font-medium">{app.utente.nome} {app.utente.cognome}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-400">Specialist</span><span className="font-medium">{app.specialista?.utente?.nome} {app.specialista?.utente?.cognome}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-400">Serviciu</span><span className="font-medium">{app.servizio?.nome || '—'} · {formattaPrezzo(app.servizio?.prezzo || 0)}{app.prezzoFinale !== undefined && <span className="text-green-600 font-bold ml-1">→ {formattaPrezzo(app.prezzoFinale)}</span>}</span></div>
-                  {app.sede && <div className="flex justify-between"><span className="text-gray-400">Locație</span><span className="font-medium">{app.sede.nome}{app.postazione ? ` · ${app.postazione}` : ''}</span></div>}
-                  {app.voucherCode && <div className="flex justify-between"><span className="text-gray-400">🎟 Voucher</span><span className="text-green-700 font-medium">{app.voucherCode}</span></div>}
+
+                <div className="text-[11px] leading-relaxed space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <User className="w-3 h-3 text-gray-400 shrink-0" />
+                    <span className="font-medium text-gray-800">{app.utente.nome} {app.utente.cognome}</span>
+                    <span className="text-gray-300">·</span>
+                    <Phone className="w-3 h-3 text-gray-400 shrink-0" />
+                    <a href={`tel:${app.utente.telefono}`} className="text-primary-600">{app.utente.telefono}</a>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Scissors className="w-3 h-3 text-gray-400 shrink-0" />
+                    <span className="text-gray-700">{app.servizio?.nome || '—'}</span>
+                    <span className="text-gray-300">·</span>
+                    <span>{app.servizio?.durata} min</span>
+                    <span className="text-gray-300">·</span>
+                    <span className="font-semibold text-primary-600">{formattaPrezzo(app.servizio?.prezzo || 0)}</span>
+                    {app.prezzoFinale !== undefined && (
+                      <span className="text-green-600 font-bold">→ {formattaPrezzo(app.prezzoFinale)}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-gray-700">{app.specialista?.utente?.nome} {app.specialista?.utente?.cognome}</span>
+                    {app.sede && (
+                      <><span className="text-gray-300">·</span><MapPin className="w-3 h-3 text-gray-400 shrink-0" /><span className="text-gray-500">{app.sede.nome}{app.postazione ? ` · ${app.postazione}` : ''}</span></>
+                    )}
+                  </div>
+                  {app.voucherCode && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-green-600 font-medium text-[10px]">🎟 Voucher:</span>
+                      <span className="text-green-700 font-bold text-[10px]">{app.voucherCode}</span>
+                      {app.voucher && (
+                        <span className="text-green-600 text-[10px]">
+                          ({app.voucher.type === 'percent' ? `${app.voucher.value}%` : formattaPrezzo(app.voucher.value)})
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {app.note && (
+                    <div className="flex items-start gap-1">
+                      <FileText className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
+                      <span className="text-gray-500">{app.note}</span>
+                    </div>
+                  )}
                 </div>
-                {app.note && <p className="text-xs text-gray-400">📝 {app.note}</p>}
+
                 <div className="flex gap-1.5">
-                  <Bottone onClick={() => router.push(`/cms/appointments/${app._id}`)} dimensione="small" className="flex-1 text-xs py-1"><Edit3 className="w-3 h-3 inline" /> Editare</Bottone>
-                  {app.stato === 'in_attesa' && <Bottone onClick={() => cambiaStato(app._id, 'confermato')} dimensione="small" variante="primary" className="flex-1 text-xs py-1"><CheckCircle className="w-3 h-3 inline" /> Confirmă</Bottone>}
-                  {app.stato === 'confermato' && <Bottone onClick={() => cambiaStato(app._id, 'completato')} dimensione="small" variante="primary" className="flex-1 text-xs py-1"><CheckCircle className="w-3 h-3 inline" /> Completează</Bottone>}
+                  <Bottone onClick={() => router.push(`/cms/appointments/${app._id}`)} dimensione="small" className="flex-1 text-[10px] py-1 flex items-center justify-center gap-1"><Edit3 className="w-3 h-3" /> Editare</Bottone>
+                  {app.stato === 'in_attesa' && <Bottone onClick={() => cambiaStato(app._id, 'confermato')} dimensione="small" variante="primary" className="flex-1 text-[10px] py-1 flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> Confirmă</Bottone>}
+                  {app.stato === 'confermato' && <Bottone onClick={() => cambiaStato(app._id, 'completato')} dimensione="small" variante="primary" className="flex-1 text-[10px] py-1 flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> Completează</Bottone>}
                 </div>
               </div>
 

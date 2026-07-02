@@ -76,30 +76,30 @@ export default function CruscottoPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-4 md:py-8">
       <div className="container mx-auto px-3 md:px-4">
-        <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-gray-800">Panou de control Specialist</h1>
+        <h1 className="text-xl md:text-4xl font-bold mb-4 md:mb-8 text-gray-800">Panou de control Specialist</h1>
 
         {errore && <Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} />}
 
         {/* Statistiche */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
-          <Card>
-            <div className="text-center">
-              <p className="text-gray-600 mb-2">Programări astăzi</p>
-              <p className="text-4xl font-bold text-primary-600">{appuntamenti.length}</p>
+        <div className="grid grid-cols-3 gap-2 md:gap-6 mb-4 md:mb-8">
+          <Card className="h-full">
+            <div className="text-center flex flex-col items-center justify-center h-full">
+              <p className="text-[10px] md:text-base text-gray-600 mb-1 md:mb-2">Programări astăzi</p>
+              <p className="text-xl md:text-4xl font-bold text-primary-600">{appuntamenti.length}</p>
             </div>
           </Card>
 
-          <Card>
-            <div className="text-center">
-              <p className="text-gray-600 mb-2">În așteptare</p>
-              <p className="text-4xl font-bold text-yellow-600">{appuntamentiInAttesa}</p>
+          <Card className="h-full">
+            <div className="text-center flex flex-col items-center justify-center h-full">
+              <p className="text-[10px] md:text-base text-gray-600 mb-1 md:mb-2">În așteptare</p>
+              <p className="text-xl md:text-4xl font-bold text-yellow-600">{appuntamentiInAttesa}</p>
             </div>
           </Card>
 
-          <Card>
-            <div className="text-center">
-              <p className="text-gray-600 mb-2">Venit astăzi</p>
-              <p className="text-4xl font-bold text-green-600">
+          <Card className="h-full">
+            <div className="text-center flex flex-col items-center justify-center h-full">
+              <p className="text-[10px] md:text-base text-gray-600 mb-1 md:mb-2">Venit astăzi</p>
+              <p className="text-xl md:text-4xl font-bold text-green-600">
                 {formattaPrezzo(ricavoGiornaliero)}
               </p>
             </div>

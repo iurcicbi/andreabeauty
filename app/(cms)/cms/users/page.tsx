@@ -135,7 +135,7 @@ export default function UsersPage() {
   if (caricamento) return <Caricamento />;
 
   return (
-    <div className="container mx-auto px-3 md:px-4 py-4 md:py-8">
+    <div className="container mx-auto px-3 md:px-4 pb-24 md:pb-0 py-4 md:py-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <h1 className="text-2xl md:text-4xl font-bold">Utilizatori</h1>
       </div>

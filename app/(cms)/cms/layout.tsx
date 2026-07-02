@@ -443,9 +443,8 @@ export default function CMSLayout({
         </header>
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 pb-48 md:pb-6 overflow-auto">
           {children}
-          <div className="h-48 md:h-0" />
         </main>
       </div>
     </div>

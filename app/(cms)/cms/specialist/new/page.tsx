@@ -91,7 +91,7 @@ export default function NewSpecialistPage() {
   if (caricamento) return <Caricamento />;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pb-24">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-8">
         <h1 className="text-2xl md:text-4xl font-bold flex items-center gap-2 md:gap-3">
           <Plus className="w-5 h-5 md:w-8 md:h-8" />

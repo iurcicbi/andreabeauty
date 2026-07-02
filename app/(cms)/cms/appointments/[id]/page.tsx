@@ -267,7 +267,7 @@ export default function ModificaAppuntamentoPage() {
   const servizioCorrente = servizi.find(s => s._id === servizioSelezionato);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pb-24">
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 md:mb-8">
           <h1 className="text-2xl md:text-4xl font-bold">Editare Programare</h1>

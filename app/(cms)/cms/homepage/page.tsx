@@ -119,7 +119,7 @@ export default function GestioneHomepage() {
   const sezioni = impostazioni?.sezioniHomepage || {};
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 pb-24">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Gestionare Pagină Principală</h1>

@@ -248,7 +248,7 @@ export default function NuovoAppuntamentoPage() {
   const servizioCorrente = servizi.find(s => s._id === servizioSelezionato);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pb-24">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8">Programare Nouă</h1>
 

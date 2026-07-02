@@ -169,7 +169,7 @@ export default function VouchersPage() {
   if (caricamento) return <Caricamento />;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className=" pb-24">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
         <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
           <Gift className="w-6 h-6 md:w-7 md:h-7" />

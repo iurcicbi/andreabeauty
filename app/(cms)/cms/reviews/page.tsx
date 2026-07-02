@@ -425,7 +425,7 @@ export default function ReviewsPage() {
   if (caricamento) return <Caricamento />;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pb-24">
       {errore && <Messaggio tipo="errore" messaggio={errore} onChiudi={() => setErrore('')} />}
       {successo && <Messaggio tipo="successo" messaggio={successo} onChiudi={() => setSuccesso('')} />}
 

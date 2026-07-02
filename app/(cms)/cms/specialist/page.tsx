@@ -192,7 +192,7 @@ export default function SpecialistListPage() {
   };
 
   return (
-    <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
+    <div className="container mx-auto px-2 md:px-4 pb-24 md:pb-0 py-4 md:py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-4 md:mb-8">
         <div>
           <h1 className="text-2xl md:text-4xl font-bold">Specialiști</h1>
