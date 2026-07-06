@@ -155,12 +155,12 @@ export function capitalizza(str: string): string {
 }
 
 /**
- * Formatta prezzo in euro
+ * Formatta prezzo in Lei Moldovenesti (MDL)
  */
 export function formattaPrezzo(prezzo: number): string {
-  return new Intl.NumberFormat('it-IT', {
+  return new Intl.NumberFormat('ro-RO', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'MDL',
   }).format(prezzo);
 }
 
