@@ -41,6 +41,14 @@ interface Servizio {
   categoria: string;
 }
 
+interface Specialist {
+  _id: string;
+  utente: { nome: string; cognome: string };
+  specializzazioni: string[];
+  giorniChiusura: any[];
+  attivo: boolean;
+}
+
 const dateToLocalString = (data: Date): string => {
   const anno = data.getFullYear();
   const mese = String(data.getMonth() + 1).padStart(2, '0');
@@ -71,6 +79,36 @@ export default function NuovoAppuntamentoPage() {
   const [servizi, setServizi] = useState<Servizio[]>([]);
   const [servizioSelezionato, setServizioSelezionato] = useState('');
 
+  // STATO: Specialisti
+  const [specialisti, setSpecialisti] = useState<Specialist[]>([]);
+  const [specialistaId, setSpecialistaId] = useState('');
+  const [specialistClosures, setSpecialistClosures] = useState<any[]>([]);
+  const [caricamentoSpecialisti, setCaricamentoSpecialisti] = useState(true);
+
+  // Carica clienti, servizi e specialisti all'avvio
+  useEffect(() => {
+    caricaClienti();
+    caricaServizi();
+    caricaSpecialisti();
+  }, []);
+
+  // Carica slot disponibili quando cambiano data, servizio o specialista
+  useEffect(() => {
+    if (data && servizioSelezionato && specialistaId) {
+      caricaSlotDisponibili();
+    }
+  }, [data, servizioSelezionato, specialistaId]);
+
+  // Aggiorna chiusure quando cambia specialista
+  useEffect(() => {
+    const specialista = specialisti.find(s => s._id === specialistaId);
+    if (specialista) {
+      setSpecialistClosures(specialista.giorniChiusura || []);
+    } else {
+      setSpecialistClosures([]);
+    }
+  }, [specialistaId, specialisti]);
+
   // STATO: Data e ora
   const [data, setData] = useState('');
   const [slotOrari, setSlotOrari] = useState<{ ora: string; disponibile: boolean }[]>([]);
@@ -79,7 +117,6 @@ export default function NuovoAppuntamentoPage() {
   // STATO: Calendario
   const [mese, setMese] = useState(new Date().getMonth());
   const [anno, setAnno] = useState(new Date().getFullYear());
-  const [specialistClosures, setSpecialistClosures] = useState<any[]>([]);
 
   // STATO: Note
   const [note, setNote] = useState('');
@@ -89,22 +126,6 @@ export default function NuovoAppuntamentoPage() {
   const [caricamentoSlot, setCaricamentoSlot] = useState(false);
   const [errore, setErrore] = useState('');
   const [successo, setSuccesso] = useState('');
-  const [specialistaId, setSpecialistaId] = useState('');
-  const [caricamentoSpecialista, setCaricamentoSpecialista] = useState(true);
-
-  // Carica clienti, servizi e profilo specialista all'avvio
-  useEffect(() => {
-    caricaClienti();
-    caricaServizi();
-    caricaProfiloSpecialista();
-  }, []);
-
-  // Carica slot disponibili quando cambiano data, servizio o profilo specialista
-  useEffect(() => {
-    if (data && servizioSelezionato && specialistaId) {
-      caricaSlotDisponibili();
-    }
-  }, [data, servizioSelezionato, specialistaId]);
 
   const caricaClienti = async () => {
     try {
@@ -124,17 +145,16 @@ export default function NuovoAppuntamentoPage() {
     }
   };
 
-  const caricaProfiloSpecialista = async () => {
+  const caricaSpecialisti = async () => {
     try {
-      const risposta = await webservice.get('/api/specialist/profile');
-      if (risposta.dati && risposta.dati._id) {
-        setSpecialistaId(risposta.dati._id);
-        setSpecialistClosures(risposta.dati.giorniChiusura || []);
-      }
+      setCaricamentoSpecialisti(true);
+      const risposta = await webservice.get('/api/specialist/list');
+      const attivi = (risposta.dati || []).filter((s: Specialist) => s.attivo !== false);
+      setSpecialisti(attivi);
     } catch (err) {
-      console.error('Errore caricamento profilo specialista:', err);
+      console.error('Errore caricamento specialisti:', err);
     } finally {
-      setCaricamentoSpecialista(false);
+      setCaricamentoSpecialisti(false);
     }
   };
 
@@ -292,9 +312,32 @@ export default function NuovoAppuntamentoPage() {
 
         <Card>
           <form onSubmit={handleSubmit}>
+            {/* ========== SELEZIONE SPECIALISTA ========== */}
+            <div className="mb-6">
+              <h3 className="text-lg font-bold mb-4">1. Specialist</h3>
+              <label className="label">Selectează Specialistul</label>
+              {caricamentoSpecialisti ? (
+                <p className="text-gray-500 text-sm">Se încarcă specialiștii...</p>
+              ) : (
+                <select
+                  value={specialistaId}
+                  onChange={(e) => { setSpecialistaId(e.target.value); setOraSelezionata(''); }}
+                  className="input-field"
+                  required
+                >
+                  <option value="">-- Selectează specialist --</option>
+                  {specialisti.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.utente?.nome} {s.utente?.cognome}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
             {/* ========== SELEZIONE CLIENTE ========== */}
             <div className="mb-6">
-              <h3 className="text-lg font-bold mb-4">1. Client</h3>
+              <h3 className="text-lg font-bold mb-4">2. Client</h3>
               
               {!mostraFormCliente ? (
                 <>
@@ -371,7 +414,7 @@ export default function NuovoAppuntamentoPage() {
 
             {/* ========== SELEZIONE SERVIZIO ========== */}
             <div className="mb-6">
-              <h3 className="text-lg font-bold mb-4">2. Serviciu</h3>
+              <h3 className="text-lg font-bold mb-4">3. Serviciu</h3>
               
               <label className="label">Selectează Serviciu</label>
               <select
@@ -381,17 +424,24 @@ export default function NuovoAppuntamentoPage() {
                 required
               >
                 <option value="">-- Selectează serviciu --</option>
-                {servizi.map((servizio) => (
-                  <option key={servizio._id} value={servizio._id}>
-                    {servizio.nome} - {formattaPrezzo(servizio.prezzo)} ({servizio.durata} min)
-                  </option>
-                ))}
+                {servizi
+                  .filter(s => {
+                    if (!specialistaId) return true;
+                    const spec = specialisti.find(sp => sp._id === specialistaId);
+                    if (!spec || !spec.specializzazioni?.length) return true;
+                    return spec.specializzazioni.includes(s._id);
+                  })
+                  .map((servizio) => (
+                    <option key={servizio._id} value={servizio._id}>
+                      {servizio.nome} - {formattaPrezzo(servizio.prezzo)} ({servizio.durata} min)
+                    </option>
+                  ))}
               </select>
             </div>
 
             {/* ========== SELEZIONE DATA ========== */}
             <div className="mb-6">
-              <h3 className="text-lg font-bold mb-4">3. Data</h3>
+              <h3 className="text-lg font-bold mb-4">4. Data</h3>
 
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
@@ -471,9 +521,9 @@ export default function NuovoAppuntamentoPage() {
             </div>
 
             {/* ========== SELEZIONE ORARIO ========== */}
-            {data && servizioSelezionato && (
+            {data && servizioSelezionato && specialistaId && (
               <div className="mb-6">
-                <h3 className="text-lg font-bold mb-4">4. Oră</h3>
+                <h3 className="text-lg font-bold mb-4">5. Oră</h3>
                 
                 {caricamentoSlot ? (
                   <p className="text-gray-600">Se încarcă sloturile disponibile...</p>
@@ -535,6 +585,10 @@ export default function NuovoAppuntamentoPage() {
             {servizioCorrente && oraSelezionata && (
               <div className="bg-primary-50 p-4 rounded-lg mb-6">
                 <h3 className="font-bold mb-2">Rezumat</h3>
+                {(() => {
+                  const spec = specialisti.find(s => s._id === specialistaId);
+                  return spec ? <p><strong>Specialist:</strong> {spec.utente?.nome} {spec.utente?.cognome}</p> : null;
+                })()}
                 <p><strong>Serviciu:</strong> {servizioCorrente.nome}</p>
                 <p><strong>Durată:</strong> {servizioCorrente.durata} minute</p>
                 <p><strong>Preț:</strong> {formattaPrezzo(servizioCorrente.prezzo)}</p>
