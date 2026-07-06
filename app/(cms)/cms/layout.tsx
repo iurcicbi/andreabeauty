@@ -27,7 +27,7 @@
 // ============================================
 // IMPORT DEI MODULI
 // ============================================
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Caricamento from '@/componenti/comuni/Caricamento';
@@ -42,6 +42,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   MessageSquare,
   Gift,
   MapPin
@@ -79,8 +81,21 @@ export default function CMSLayout({
   // null: inizialmente nessun utente
 
   const [sidebarAperta, setSidebarAperta] = useState(true);
-  // sidebarAperta: true = sidebar larga, false = sidebar stretta
-  // setSidebarAperta: funzione per cambiare la larghezza
+  const [menuMobileAperto, setMenuMobileAperto] = useState(false);
+  const [profiloMenuAperto, setProfiloMenuAperto] = useState(false);
+
+  const profiloRef = useRef<HTMLDivElement>(null);
+
+  // Chiudi profilo menu al click fuori
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (profiloRef.current && !profiloRef.current.contains(e.target as Node)) {
+        setProfiloMenuAperto(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const [logoCMS, setLogoCMS] = useState<string>('');
   const [nomeAzienda, setNomeAzienda] = useState<string>('Beauty Salon CMS');
@@ -107,6 +122,11 @@ export default function CMSLayout({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);  // [] = nessuna dipendenza, esegui solo all'avvio
+
+  // Chiudi menu mobile al cambio pagina
+  useEffect(() => {
+    setMenuMobileAperto(false);
+  }, [pathname]);
 
   // ============================================
   // FUNZIONE: CARICA IMPOSTAZIONI DINAMICHE (CON CACHE)
@@ -233,7 +253,6 @@ export default function CMSLayout({
   // RENDERING PRINCIPALE - MOBILE FIRST
   // ============================================
   return (
-    // Layout responsive: mobile = colonna, desktop = sidebar + contenuto
     <div className="min-h-screen bg-[#faf7f2] flex flex-col md:flex-row">
       
       {/* ========================================
@@ -383,34 +402,65 @@ export default function CMSLayout({
         </div>
       </aside>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[#e8dccc] z-50 safe-area-bottom">
-        <div className="grid grid-cols-4 gap-1 p-2">
-          {menuItems.map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  menu-item
-                  flex flex-col items-center justify-center
-                  py-2 px-1 rounded-lg
-                  transition-colors
-                  ${
-                    pathname === item.href
-                      ? 'bg-[#c9a96e]/10 text-[#8a6a3a]'
-                      : 'text-[#6a6a5a] active:bg-[#f0ebe2]'
-                  }
-                `}
-              >
-                <IconComponent className="w-5 h-5 mb-1" />
-                <span className="text-[10px] font-medium text-center leading-tight">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
+        {menuMobileAperto ? (
+          <div className="bg-white border-t border-[#e8dccc] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] rounded-t-xl">
+            <button
+              onClick={() => setMenuMobileAperto(false)}
+              className="w-full flex items-center justify-center gap-2 py-3 text-xs font-medium text-gray-400 hover:text-gray-600 active:text-gray-800 transition-colors"
+            >
+              <ChevronDown className="w-4 h-4" />
+              Comprimă meniul
+            </button>
+            <div className="grid grid-cols-4 gap-1 px-2 pb-4 pt-1">
+              {menuItems.filter(item => item.href !== '/cms/profile').map((item) => {
+                const IconComponent = item.icon;
+                const attivo = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuMobileAperto(false)}
+                    className={`
+                      flex flex-col items-center justify-center
+                      py-2 px-0.5 rounded-lg
+                      transition-all active:scale-95
+                      ${attivo
+                        ? 'bg-[#c9a96e]/15 text-[#8a6a3a] font-semibold'
+                        : 'text-[#6a6a5a]'
+                      }
+                    `}
+                  >
+                    <IconComponent className={`w-[18px] h-[18px] mb-1 ${attivo ? 'text-[#8a6a3a]' : 'text-gray-400'}`} />
+                    <span className="text-[9px] text-center leading-tight">
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setMenuMobileAperto(true)}
+            className="w-full bg-white/90 backdrop-blur-md border-t border-[#e8dccc] shadow-[0_-2px_10px_rgba(0,0,0,0.05)] active:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3 px-5 py-2.5">
+              <div className="flex items-center gap-2 text-[#8a6a3a]">
+                {(() => {
+                  const item = menuItems.find(i => i.href === pathname);
+                  if (!item) return <span className="text-sm text-gray-500">Meniu</span>;
+                  const IconComponent = item.icon;
+                  return <><IconComponent className="w-5 h-5" /><span className="font-semibold text-sm">{item.label}</span></>;
+                })()}
+              </div>
+              <div className="ml-auto flex items-center gap-1 text-xs text-gray-400">
+                <ChevronUp className="w-4 h-4" />
+                Meniu
+              </div>
+            </div>
+          </button>
+        )}
       </nav>
 
       {/* ========================================
@@ -427,23 +477,39 @@ export default function CMSLayout({
               </h1>
             </div>
             
-            <div className="md:hidden flex items-center gap-2">
-              <span className="text-sm text-[#6a6a5a] truncate max-w-[100px]">
-                {utente?.nome}
-              </span>
+            <div className="md:hidden relative" ref={profiloRef}>
               <button
-                onClick={handleLogout}
-                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                aria-label="Deconectare"
+                onClick={() => setProfiloMenuAperto(!profiloMenuAperto)}
+                className="flex items-center gap-1.5 text-sm text-[#6a6a5a] hover:text-[#8a6a3a] transition-colors active:bg-gray-50 rounded-lg px-2 py-1.5"
               >
-                <LogOut className="w-5 h-5" />
+                <span className="truncate max-w-[80px]">{utente?.nome}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${profiloMenuAperto ? 'rotate-180' : ''}`} />
               </button>
+              {profiloMenuAperto && (
+                <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
+                  <Link
+                    href="/cms/profile"
+                    onClick={() => setProfiloMenuAperto(false)}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <User className="w-4 h-4 text-gray-400" />
+                    Profilul meu
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Deconectare
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 p-4 md:p-6 pb-48 md:pb-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">
           {children}
         </main>
       </div>

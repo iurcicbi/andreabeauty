@@ -8,7 +8,7 @@ import Bottone from '@/componenti/interfaccia/Bottone';
 import Input from '@/componenti/interfaccia/Input';
 import Messaggio from '@/componenti/comuni/Messaggio';
 import Caricamento from '@/componenti/comuni/Caricamento';
-import { Edit3, CheckCircle } from 'lucide-react';
+import { Edit3, CheckCircle, Save } from 'lucide-react';
 
 interface Servizio {
   _id: string;

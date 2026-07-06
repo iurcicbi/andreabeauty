@@ -143,80 +143,92 @@ function SortableReviewCard({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-3">
-        <button {...attributes} {...listeners} className="mt-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing shrink-0">
-          <GripVertical className="w-5 h-5" />
+    <div ref={setNodeRef} style={style} className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start gap-2 p-3">
+        <button {...attributes} {...listeners} className="mt-0.5 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing shrink-0">
+          <GripVertical className="w-4 h-4" />
         </button>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                {review.avatar ? (
-                  <img src={review.avatar} alt="" className="w-7 h-7 rounded-full object-cover" />
-                ) : null}
-                <h3 className="font-semibold text-sm truncate">{review.customerName}</h3>
-                {review.usernameInstagram && (
-                  <span className="text-xs text-gray-400">@{review.usernameInstagram}</span>
-                )}
-                {review.verified && (
-                  <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                {renderStars(review.rating)}
-                {review.serviceName && (
-                  <span className="text-xs text-gray-400">{review.serviceName}</span>
-                )}
-                <span className="text-xs text-gray-400 flex items-center gap-0.5">
-                  {iconSource(review.source)}{review.source}
-                </span>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {review.avatar ? (
+                <img src={review.avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-primary-600">{review.customerName.charAt(0).toUpperCase()}</span>
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="font-semibold text-sm truncate">{review.customerName}</h3>
+                  {review.verified && <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap text-xs text-gray-400">
+                  {renderStars(review.rating)}
+                  {review.serviceName && <span>· {review.serviceName}</span>}
+                </div>
               </div>
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
-              <span className={`px-2 py-0.5 rounded text-xs font-medium ${badgeStatus(review.status)}`}>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${badgeStatus(review.status)}`}>
                 {labelStatus(review.status)}
               </span>
+              {review.featured && (
+                <span className="flex items-center gap-0.5 text-[10px] text-amber-600">
+                  <Sparkles className="w-2.5 h-2.5" /> În evidență
+                </span>
+              )}
             </div>
           </div>
 
-          <p className="text-sm text-gray-700 leading-relaxed mb-2 line-clamp-2">{review.comment}</p>
+          <p className="text-sm text-gray-700 leading-relaxed mb-2 line-clamp-3">{review.comment}</p>
 
           {review.images.length > 0 && (
-            <div className="flex gap-1 mb-2 flex-wrap">
+            <div className="flex gap-1.5 mb-2 flex-wrap">
               {review.images.map((url, i) => (
-                <img key={i} src={url} alt="" className="w-12 h-12 object-cover rounded-lg border" />
+                <img key={i} src={url} alt="" className="w-14 h-14 object-cover rounded-lg border" />
               ))}
             </div>
           )}
 
-          {review.featured && (
-            <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mb-2 w-fit">
-              <Sparkles className="w-3 h-3" /> În evidență
+          <div className="flex items-center gap-2 text-xs text-gray-400 mb-2 flex-wrap">
+            {review.usernameInstagram && (
+              <span className="flex items-center gap-0.5">@{review.usernameInstagram}</span>
+            )}
+            <span className="flex items-center gap-0.5">
+              {iconSource(review.source)}{review.source}
+            </span>
+            <span>· {new Date(review.reviewDate || review.createdAt).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+          </div>
+
+          {review.reply && (
+            <div className="bg-gray-50 rounded-lg p-2.5 mb-2 border-l-2 border-primary-400">
+              <p className="text-xs font-semibold text-gray-500 mb-0.5">Răspuns:</p>
+              <p className="text-xs text-gray-600 leading-relaxed">{review.reply}</p>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-1.5 pt-2 border-t">
+          <div className="flex gap-1.5 pt-2 border-t flex-wrap">
             {review.status !== 'approvata' && review.status !== 'approved' && (
-              <Bottone onClick={() => onToggleApprova(review)} dimensione="small" className="text-xs flex items-center gap-1">
+              <button onClick={() => onToggleApprova(review)} className="px-2.5 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1">
                 <ThumbsUp className="w-3 h-3" /> Aprobă
-              </Bottone>
+              </button>
             )}
             {review.status !== 'nascosta' && review.status !== 'rejected' && (
-              <Bottone onClick={() => onToggleHide(review)} dimensione="small" variante="secondary" className="text-xs flex items-center gap-1">
+              <button onClick={() => onToggleHide(review)} className="px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1">
                 <EyeOff className="w-3 h-3" /> Ascunde
-              </Bottone>
+              </button>
             )}
-            <Bottone onClick={() => onToggleFeature(review)} dimensione="small" variante="secondary" className={`text-xs flex items-center gap-1 ${review.featured ? 'text-amber-600' : ''}`}>
-              <Sparkles className="w-3 h-3" /> {review.featured ? 'Scoate evidența' : 'Evidență'}
-            </Bottone>
-            <Bottone onClick={() => onEdit(review)} dimensione="small" variante="secondary" className="text-xs flex items-center gap-1">
+            <button onClick={() => onToggleFeature(review)} className={`px-2.5 py-1.5 text-xs font-medium rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1 ${review.featured ? 'text-amber-700 bg-amber-50' : 'text-gray-600 bg-gray-100'}`}>
+              <Sparkles className="w-3 h-3" /> {review.featured ? 'Scoate' : 'Evidență'}
+            </button>
+            <button onClick={() => onEdit(review)} className="px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1">
               <Edit3 className="w-3 h-3" /> Editează
-            </Bottone>
-            <Bottone onClick={() => onDelete(review._id)} dimensione="small" variante="secondary" className="text-xs flex items-center gap-1 text-red-600">
+            </button>
+            <button onClick={() => onDelete(review._id)} className="px-2.5 py-1.5 text-xs font-medium bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1">
               <Trash2 className="w-3 h-3" /> Șterge
-            </Bottone>
+            </button>
           </div>
         </div>
       </div>

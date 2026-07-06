@@ -119,11 +119,11 @@ export default function GestioneHomepage() {
   const sezioni = impostazioni?.sezioniHomepage || {};
 
   return (
-    <div className="max-w-6xl mx-auto p-6 pb-24">
+    <div className="max-w-6xl mx-auto p-3 md:p-6 pb-32 md:pb-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Gestionare Pagină Principală</h1>
-        <p className="text-gray-600">Personalizează secțiunile paginii tale principale</p>
+      <div className="mb-4 md:mb-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2">Gestionare Pagină Principală</h1>
+        <p className="text-xs md:text-base text-gray-600">Personalizează secțiunile paginii tale principale</p>
       </div>
 
       {/* Messaggio */}
@@ -135,73 +135,31 @@ export default function GestioneHomepage() {
         </div>
       )}
 
-      {/* Pulsante Salva Globale */}
-      <div className="mb-6 flex justify-end">
+      {/* Pulsante Salva - sempre visibile in alto */}
+      <div className="flex mb-6 md:justify-end">
         <button
           onClick={salvaImpostazioni}
           disabled={salvando}
-          className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+          className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
         >
           <Save className="w-5 h-5" />
           {salvando ? 'Salvare...' : 'Salvează Toate Modificările'}
         </button>
       </div>
 
-      {/* Sezioni */}
-      <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-        <h3 className="font-semibold mb-3">Culori Secțiuni</h3>
-        <p className="text-sm text-gray-500 mb-4">Alege cele două culori alternative pentru secțiunile paginii principale</p>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Culoare Principală</label>
-            <div className="flex gap-2 items-center">
-              <input
-                type="color"
-                value={sezioni.colorePrimario || '#FFF8F0'}
-                onChange={(v) => setImpostazioni((prev: any) => ({
-                  ...prev,
-                  sezioniHomepage: { ...prev.sezioniHomepage, colorePrimario: v.target.value }
-                }))}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-300"
-              />
-              <input
-                type="text"
-                value={sezioni.colorePrimario || '#FFF8F0'}
-                onChange={(v) => setImpostazioni((prev: any) => ({
-                  ...prev,
-                  sezioniHomepage: { ...prev.sezioniHomepage, colorePrimario: v.target.value }
-                }))}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono"
-                placeholder="#FFF8F0"
-              />
-            </div>
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Culoare Secundară</label>
-            <div className="flex gap-2 items-center">
-              <input
-                type="color"
-                value={sezioni.coloreSecondario || '#F5EEE1'}
-                onChange={(v) => setImpostazioni((prev: any) => ({
-                  ...prev,
-                  sezioniHomepage: { ...prev.sezioniHomepage, coloreSecondario: v.target.value }
-                }))}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-300"
-              />
-              <input
-                type="text"
-                value={sezioni.coloreSecondario || '#F5EEE1'}
-                onChange={(v) => setImpostazioni((prev: any) => ({
-                  ...prev,
-                  sezioniHomepage: { ...prev.sezioniHomepage, coloreSecondario: v.target.value }
-                }))}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono"
-                placeholder="#F5EEE1"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Culori */}
+      <CollapsibleColorSection
+        colorePrimario={sezioni.colorePrimario || '#FFF8F0'}
+        coloreSecondario={sezioni.coloreSecondario || '#F5EEE1'}
+        onChangePrimario={(v: string) => setImpostazioni((prev: any) => ({
+          ...prev,
+          sezioniHomepage: { ...prev.sezioniHomepage, colorePrimario: v }
+        }))}
+        onChangeSecondario={(v: string) => setImpostazioni((prev: any) => ({
+          ...prev,
+          sezioniHomepage: { ...prev.sezioniHomepage, coloreSecondario: v }
+        }))}
+      />
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={sezioniOrdinate} strategy={verticalListSortingStrategy}>
@@ -512,16 +470,18 @@ export default function GestioneHomepage() {
                             </button>
                           </div>
                           {(sede.programma || []).map((riga: any, rigaIdx: number) => (
-                            <div key={rigaIdx} className="flex gap-2 items-center mb-2">
-                              <input type="text" value={riga.giorno || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], giorno: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="Luni - Vineri" className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm" />
-                              <input type="text" value={riga.orario || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], orario: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="09:00 - 20:00" className="w-32 px-2 py-1.5 border border-gray-300 rounded text-sm" disabled={riga.chiuso} />
-                              <label className="flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap">
-                                <input type="checkbox" checked={riga.chiuso || false} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], chiuso: e.target.checked }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} className="w-3.5 h-3.5" />
-                                Închis
-                              </label>
-                              <button type="button" onClick={() => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], programma: (s[idx].programma || []).filter((_: any, ri: number) => ri !== rigaIdx) }; aggiornaSezione('contatti', 'sedi', s); }} className="text-red-400 hover:text-red-600">
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                            <div key={rigaIdx} className="flex flex-col md:flex-row gap-1.5 md:gap-2 items-start md:items-center mb-2">
+                              <input type="text" value={riga.giorno || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], giorno: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="Luni - Vineri" className="w-full md:flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm" />
+                              <div className="flex gap-1.5 items-center w-full md:w-auto">
+                                <input type="text" value={riga.orario || ''} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], orario: e.target.value }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} placeholder="09:00 - 20:00" className="flex-1 md:w-32 px-2 py-1.5 border border-gray-300 rounded text-sm" disabled={riga.chiuso} />
+                                <label className="flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap shrink-0">
+                                  <input type="checkbox" checked={riga.chiuso || false} onChange={(e) => { const s = [...(sezione?.sedi || [])]; const p = [...(s[idx].programma || [])]; p[rigaIdx] = { ...p[rigaIdx], chiuso: e.target.checked }; s[idx] = { ...s[idx], programma: p }; aggiornaSezione('contatti', 'sedi', s); }} className="w-3.5 h-3.5" />
+                                  <span className="hidden md:inline">Închis</span>
+                                </label>
+                                <button type="button" onClick={() => { const s = [...(sezione?.sedi || [])]; s[idx] = { ...s[idx], programma: (s[idx].programma || []).filter((_: any, ri: number) => ri !== rigaIdx) }; aggiornaSezione('contatti', 'sedi', s); }} className="text-red-400 hover:text-red-600 shrink-0">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -690,17 +650,6 @@ export default function GestioneHomepage() {
       </SortableContext>
       </DndContext>
 
-      {/* Pulsante Salva Footer */}
-      <div className="mt-8 flex justify-end">
-        <button
-          onClick={salvaImpostazioni}
-          disabled={salvando}
-          className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
-        >
-          <Save className="w-5 h-5" />
-          {salvando ? 'Salvare...' : 'Salvează Toate Modificările'}
-        </button>
-      </div>
     </div>
   );
 }
@@ -717,36 +666,58 @@ function SortableSectionWrapper({ id, children }: { id: string; children: React.
 }
 
 function SezioneCard({ titolo, descrizione, attiva, onToggle, children }: any) {
-  const [espansa, setEspansa] = useState(true);
+  const [espansa, setEspansa] = useState(false);
 
   return (
     <div className={`border rounded-lg overflow-hidden ${attiva ? 'border-gray-300' : 'border-gray-200 bg-gray-50'}`}>
-      <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
-            <GripVertical className="w-5 h-5" />
+      <div className="p-2 md:p-4 bg-gray-50 border-b flex items-center justify-between gap-1">
+        <div className="flex items-center gap-1 md:gap-4 flex-1 min-w-0">
+          <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 shrink-0">
+            <GripVertical className="w-4 h-4 md:w-5 md:h-5" />
           </div>
           <button
             onClick={onToggle}
-            className={`p-2 rounded ${attiva ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}
+            className={`p-1.5 md:p-2 rounded shrink-0 ${attiva ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}
+            title={attiva ? 'Dezactivează secțiunea' : 'Activează secțiunea'}
           >
-            {attiva ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+            {attiva ? <Eye className="w-4 h-4 md:w-5 md:h-5" /> : <EyeOff className="w-4 h-4 md:w-5 md:h-5" />}
           </button>
-          <div>
-            <h3 className="font-semibold text-lg">{titolo}</h3>
-            <p className="text-sm text-gray-600">{descrizione}</p>
-          </div>
+          <button
+            onClick={() => setEspansa(!espansa)}
+            className="flex-1 min-w-0 text-left"
+          >
+            <h3 className="font-semibold text-sm md:text-lg truncate flex items-center gap-1.5">
+              {!espansa && attiva && (
+                <span className="text-primary-500 text-xs md:text-sm shrink-0">▶</span>
+              )}
+              {titolo}
+            </h3>
+            <p className="text-xs md:text-sm text-gray-500 truncate">{descrizione}</p>
+            {!espansa && attiva && (
+              <p className="text-[10px] md:text-xs text-primary-500 mt-0.5 font-medium">
+                Atinge pentru a edita conținutul
+              </p>
+            )}
+          </button>
         </div>
         <button
           onClick={() => setEspansa(!espansa)}
-          className="p-2 hover:bg-gray-200 rounded"
+          className={`p-1.5 md:p-2 rounded shrink-0 transition-colors ${
+            espansa ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+          }`}
+          title={espansa ? 'Închide' : 'Deschide secțiunea'}
         >
-          {espansa ? '▼' : '▶'}
+          {espansa ? '▲' : '▼'}
         </button>
       </div>
       {espansa && attiva && (
-        <div className="p-6 bg-white">
+        <div className="p-3 md:p-6 bg-white">
           {children}
+        </div>
+      )}
+      {!attiva && (
+        <div className="px-3 md:px-4 py-2 bg-gray-100 text-xs text-gray-500 flex items-center gap-1">
+          <EyeOff className="w-3 h-3" /> Secțiune dezactivată - nu apare pe site
         </div>
       )}
     </div>
@@ -815,6 +786,72 @@ function SelectField({ label, value, onChange, options }: any) {
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+function CollapsibleColorSection({ colorePrimario, coloreSecondario, onChangePrimario, onChangeSecondario }: any) {
+  const [aperto, setAperto] = useState(false);
+  return (
+    <div className="mb-4 md:mb-6 border border-gray-200 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setAperto(!aperto)}
+        className="w-full flex items-center justify-between p-3 md:p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex -space-x-1">
+            <div className="w-4 h-4 rounded-full border border-gray-300" style={{ backgroundColor: colorePrimario }} />
+            <div className="w-4 h-4 rounded-full border border-gray-300" style={{ backgroundColor: coloreSecondario }} />
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-sm md:text-base">Culori Secțiuni</h3>
+            <p className="text-xs text-gray-500">Alege culorile alternative pentru secțiuni</p>
+          </div>
+        </div>
+        <span className={`text-sm transition-transform ${aperto ? 'rotate-180' : ''}`}>▼</span>
+      </button>
+      {aperto && (
+        <div className="p-3 md:p-4 border-t border-gray-200 bg-white">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+            <div className="flex-1">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Culoare Principală</label>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="color"
+                  value={colorePrimario}
+                  onChange={(v) => onChangePrimario(v.target.value)}
+                  className="w-8 h-8 md:w-10 md:h-10 rounded cursor-pointer border border-gray-300 shrink-0"
+                />
+                <input
+                  type="text"
+                  value={colorePrimario}
+                  onChange={(v) => onChangePrimario(v.target.value)}
+                  className="flex-1 px-2 md:px-3 py-1.5 md:py-2 border border-gray-300 rounded-lg text-xs md:text-sm font-mono"
+                  placeholder="#FFF8F0"
+                />
+              </div>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Culoare Secundară</label>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="color"
+                  value={coloreSecondario}
+                  onChange={(v) => onChangeSecondario(v.target.value)}
+                  className="w-8 h-8 md:w-10 md:h-10 rounded cursor-pointer border border-gray-300 shrink-0"
+                />
+                <input
+                  type="text"
+                  value={coloreSecondario}
+                  onChange={(v) => onChangeSecondario(v.target.value)}
+                  className="flex-1 px-2 md:px-3 py-1.5 md:py-2 border border-gray-300 rounded-lg text-xs md:text-sm font-mono"
+                  placeholder="#F5EEE1"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -289,9 +289,8 @@ export default function ServiziPage() {
             </span>
           </label>
         </div>
-        {/* Pulsante Nuovo - Solo Desktop */}
         {!mostraForm && (
-          <Bottone onClick={handleNuovo} dimensione="small" className="hidden sm:flex items-center gap-2">
+          <Bottone onClick={handleNuovo} className="flex items-center gap-2 w-full sm:w-auto justify-center">
             <Plus className="w-4 h-4" />
             Serviciu Nou
           </Bottone>
@@ -418,64 +417,56 @@ export default function ServiziPage() {
               }`}
             >
               <div className="space-y-2">
-                {/* Header compatto */}
-                <div className="flex justify-between items-start">
+                {/* Header */}
+                <div className="flex justify-between items-start gap-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className={`text-sm md:text-lg font-bold truncate leading-tight ${
+                    <h3 className={`text-sm md:text-lg font-bold leading-tight ${
                       servizio.attivo ? 'text-gray-900' : 'text-gray-500'
                     }`}>
                       {servizio.nome}
                     </h3>
-                    <span className={`text-xs capitalize flex items-center gap-1 ${
-                      servizio.attivo ? 'text-gray-500' : 'text-gray-400'
-                    }`}>
-                    </span>
                   </div>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 flex-shrink-0 ml-1 ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-0.5 shrink-0 ${
                       servizio.attivo
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {servizio.attivo ? (
-                      <CheckCircle className="w-3 h-3" />
+                      <CheckCircle className="w-2.5 h-2.5" />
                     ) : (
-                      <XCircle className="w-3 h-3" />
+                      <XCircle className="w-2.5 h-2.5" />
                     )}
-                    <span className="hidden sm:inline">
-                      {servizio.attivo ? 'Activ' : 'Inactiv'}
-                    </span>
+                    {servizio.attivo ? 'Activ' : 'Inactiv'}
                   </span>
                 </div>
 
-                {/* Descrizione solo su desktop */}
-                <p className={`hidden md:block text-sm line-clamp-2 ${
-                  servizio.attivo ? 'text-gray-700' : 'text-gray-500'
+                {/* Descrizione - visibile anche su mobile */}
+                <p className={`text-xs md:text-sm line-clamp-2 leading-relaxed ${
+                  servizio.attivo ? 'text-gray-600' : 'text-gray-400'
                 }`}>
                   {servizio.descrizione}
                 </p>
 
-                {/* Prezzo e durata compatti */}
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className={`text-lg md:text-xl font-bold flex items-center gap-1 ${
-                      servizio.attivo ? 'text-primary-600' : 'text-gray-400'
-                    }`}>
-                      <Euro className="w-4 h-4" />
-                      {formattaPrezzo(servizio.prezzo)}
-                    </p>
-                    <p className={`text-xs flex items-center gap-1 ${
-                      servizio.attivo ? 'text-gray-600' : 'text-gray-400'
-                    }`}>
-                      <Clock className="w-3 h-3" />
-                      {servizio.durata}min
-                    </p>
+                {/* Prezzo e durata */}
+                <div className="flex gap-3">
+                  <div className={`flex items-center gap-1 text-sm md:text-base font-bold ${
+                    servizio.attivo ? 'text-primary-600' : 'text-gray-400'
+                  }`}>
+                    <Euro className="w-3.5 h-3.5" />
+                    {formattaPrezzo(servizio.prezzo)}
+                  </div>
+                  <div className={`flex items-center gap-1 text-xs ${
+                    servizio.attivo ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    <Clock className="w-3 h-3" />
+                    {servizio.durata} min
                   </div>
                 </div>
 
-                {/* Azioni compatte */}
-                <div className="flex gap-1 pt-2">
+                {/* Azioni */}
+                <div className="flex gap-1 pt-1">
                   <button
                     onClick={() => handleModifica(servizio)}
                     className={`flex-1 px-2 py-1.5 rounded text-xs font-medium transition-colors flex items-center justify-center gap-1 ${
@@ -485,7 +476,7 @@ export default function ServiziPage() {
                     }`}
                   >
                     <Edit3 className="w-3 h-3" />
-                    <span className="hidden sm:inline">Editare</span>
+                    Editare
                   </button>
                   <button
                     onClick={() => handleToggleAttivo(servizio)}
@@ -494,7 +485,7 @@ export default function ServiziPage() {
                         ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
                         : 'bg-green-100 text-green-700 hover:bg-green-200'
                     }`}
-                    title={servizio.attivo ? 'Dezactivează serviciu' : 'Activează serviciu'}
+                    title={servizio.attivo ? 'Dezactivează' : 'Activează'}
                   >
                     {servizio.attivo ? (
                       <Pause className="w-3 h-3" />
@@ -505,7 +496,7 @@ export default function ServiziPage() {
                   <button
                     onClick={() => handleElimina(servizio)}
                     className="px-2 py-1.5 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors flex items-center justify-center"
-                    title="Șterge serviciu"
+                    title="Șterge"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -514,31 +505,15 @@ export default function ServiziPage() {
                 {/* Overlay per servizi disattivati */}
                 {!servizio.attivo && (
                   <div className="absolute inset-0 bg-gray-200 bg-opacity-20 rounded-lg pointer-events-none">
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      <span className="hidden sm:inline">INACTIV</span>
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-0.5">
+                      <AlertCircle className="w-2.5 h-2.5" />
+                      INACTIV
                     </div>
                   </div>
                 )}
               </div>
             </Card>
           ))}
-        </div>
-      )}
-
-      {/* Spazio per pulsante fisso mobile */}
-      <div className="sm:hidden h-20"></div>
-
-      {/* PULSANTE NUOVO FISSO - Mobile */}
-      {!mostraForm && (
-        <div className="sm:hidden fixed bottom-28 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-40">
-          <button
-            onClick={handleNuovo}
-            className="w-full px-4 py-3 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Serviciu Nou
-          </button>
         </div>
       )}
 

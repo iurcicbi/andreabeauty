@@ -7,6 +7,7 @@ import Bottone from '@/componenti/interfaccia/Bottone';
 import Input from '@/componenti/interfaccia/Input';
 import Messaggio from '@/componenti/comuni/Messaggio';
 import Caricamento from '@/componenti/comuni/Caricamento';
+import { Save } from 'lucide-react';
 
 export default function ProfiloPage() {
   const [ruolo, setRuolo] = useState<string>('');

@@ -201,26 +201,26 @@ export default function DisponibilitaPage() {
       {successo && <Messaggio tipo="successo" messaggio={successo} onChiudi={() => setSuccesso('')} />}
 
       {/* STATISTICHE RAPIDE */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6">
         <Card>
           <div className="text-center">
-            <Users className="w-10 h-10 mx-auto mb-2 text-primary-600" />
-            <div className="text-3xl font-bold text-primary-600">{specialists.length}</div>
-            <div className="text-sm text-gray-600">Total Specialiști</div>
+            <Users className="w-6 h-6 md:w-10 md:h-10 mx-auto mb-1 md:mb-2 text-primary-600" />
+            <div className="text-xl md:text-3xl font-bold text-primary-600">{specialists.length}</div>
+            <div className="text-xs md:text-sm text-gray-600">Total Specialiști</div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <UserCheck className="w-10 h-10 mx-auto mb-2 text-green-600" />
-            <div className="text-3xl font-bold text-green-600">{attivi.length}</div>
-            <div className="text-sm text-gray-600">Activi</div>
+            <UserCheck className="w-6 h-6 md:w-10 md:h-10 mx-auto mb-1 md:mb-2 text-green-600" />
+            <div className="text-xl md:text-3xl font-bold text-green-600">{attivi.length}</div>
+            <div className="text-xs md:text-sm text-gray-600">Activi</div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <UserX className="w-10 h-10 mx-auto mb-2 text-red-600" />
-            <div className="text-3xl font-bold text-red-600">{inattivi.length}</div>
-            <div className="text-sm text-gray-600">Indisponibili</div>
+            <UserX className="w-6 h-6 md:w-10 md:h-10 mx-auto mb-1 md:mb-2 text-red-600" />
+            <div className="text-xl md:text-3xl font-bold text-red-600">{inattivi.length}</div>
+            <div className="text-xs md:text-sm text-gray-600">Indisponibili</div>
           </div>
         </Card>
       </div>

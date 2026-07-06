@@ -9,6 +9,8 @@ import Messaggio from '@/componenti/comuni/Messaggio';
 import Caricamento from '@/componenti/comuni/Caricamento';
 import { Pencil, Trash2, X, CheckCircle, XCircle, Search } from 'lucide-react';
 
+const DESKTOP_BREAKPOINT = 768;
+
 interface User {
   _id: string;
   nome: string;
@@ -38,6 +40,14 @@ export default function UsersPage() {
   const [errore, setErrore] = useState('');
   const [successo, setSuccesso] = useState('');
   const [filtroRuolo, setFiltroRuolo] = useState('');
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= DESKTOP_BREAKPOINT);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editNome, setEditNome] = useState('');
@@ -184,11 +194,13 @@ export default function UsersPage() {
         </div>
       </Card>
 
-      {/* Users Table */}
-      <Card>
-        {users.length === 0 ? (
+      {/* Users - Cards (mobile) / Table (desktop) */}
+      {users.length === 0 ? (
+        <Card>
           <p className="text-gray-500 text-center py-8">Niciun utilizator găsit</p>
-        ) : (
+        </Card>
+      ) : isDesktop ? (
+        <Card>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -250,8 +262,65 @@ export default function UsersPage() {
               </tbody>
             </table>
           </div>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {users.map((user) => (
+            <Card key={user._id} className="flex flex-col">
+              <div className="p-4 flex flex-col">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="font-semibold text-lg">{user.nome} {user.cognome}</h3>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                  <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${ruoloColori[user.ruolo] || 'bg-gray-100 text-gray-800'}`}>
+                    {ruoloLabel[user.ruolo] || user.ruolo}
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-sm mb-4">
+                  {user.telefono && (
+                    <p className="text-gray-600">
+                      <span className="font-medium">Tel:</span> {user.telefono}
+                    </p>
+                  )}
+                  <p>
+                    <span className="font-medium">Status:</span>{' '}
+                    {user.attivo ? (
+                      <span className="text-green-600 flex items-center gap-1 inline-flex">
+                        <CheckCircle className="w-4 h-4" /> Activ
+                      </span>
+                    ) : (
+                      <span className="text-red-600 flex items-center gap-1 inline-flex">
+                        <XCircle className="w-4 h-4" /> Inactiv
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex gap-2 pt-3 border-t border-gray-100">
+                  <Bottone
+                    variante="secondary"
+                    dimensione="small"
+                    onClick={() => openEdit(user)}
+                    className="flex-1"
+                  >
+                    <Pencil className="w-4 h-4 mr-1" /> Editează
+                  </Bottone>
+                  <Bottone
+                    variante="danger"
+                    dimensione="small"
+                    onClick={() => setDeleteId(user._id)}
+                    className="flex-1"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" /> Dezactivează
+                  </Bottone>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Delete Confirmation */}
       {deleteId && (

@@ -84,8 +84,8 @@ export default function AppuntamentiPage() {
       setCaricamento(true);
       const risposta = await webservice.get('/api/appointments');
       const dati = (risposta.dati || []).sort((a: Appuntamento, b: Appuntamento) => {
-        const dateA = new Date(a.data + 'T' + a.oraInizio).getTime();
-        const dateB = new Date(b.data + 'T' + b.oraInizio).getTime();
+        const dateA = new Date(a.data.split('T')[0] + 'T' + a.oraInizio).getTime();
+        const dateB = new Date(b.data.split('T')[0] + 'T' + b.oraInizio).getTime();
         return dateB - dateA;
       });
       setAppuntamenti(dati);
@@ -112,6 +112,8 @@ export default function AppuntamentiPage() {
     // Filtro stato
     if (filtroStato !== 'tutti') {
       risultato = risultato.filter(app => app.stato === filtroStato);
+    } else {
+      risultato = risultato.filter(app => app.stato !== 'completato' && app.stato !== 'cancellato');
     }
 
     // Filtro range di date
@@ -214,7 +216,7 @@ export default function AppuntamentiPage() {
             )}
           </div>
         </div>
-        <Bottone onClick={() => router.push('/cms/appointments/new')} dimensione="small" className="w-full sm:w-auto flex items-center justify-center gap-2">
+        <Bottone onClick={() => router.push('/cms/appointments/new')}  className="w-full sm:w-auto flex items-center justify-center gap-2">
           <Plus className="w-4 h-4" />
           Nouă
         </Bottone>
@@ -270,13 +272,15 @@ onClick={() => router.push('/cms/appointments/new')}
               {/* Mobile */}
               <div className="flex flex-col md:hidden gap-1.5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-primary-600 shrink-0" />
-                    <span className="font-bold text-primary-600">{app.oraInizio}</span>
-                    <span className="text-[10px] text-gray-400">- {app.oraFine}</span>
-                    <span className="text-[10px] text-gray-500">
-                      {new Date(app.data).toLocaleDateString('ro-RO', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 font-medium">
+                      {new Date(app.data.split('T')[0] + 'T' + app.oraInizio).toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </span>
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-primary-600 shrink-0" />
+                      <span className="font-bold text-primary-600">{app.oraInizio}</span>
+                      <span className="text-[10px] text-gray-400">- {app.oraFine}</span>
+                    </div>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatoColore(app.stato)}`}>
                     {getStatoLabel(app.stato)}

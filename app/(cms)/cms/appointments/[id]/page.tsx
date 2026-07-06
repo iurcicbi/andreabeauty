@@ -328,7 +328,7 @@ export default function ModificaAppuntamentoPage() {
 
         {/* Form Modifica */}
         <Card>
-          <form onSubmit={handleSubmit}>
+          <form id="appointment-form" onSubmit={handleSubmit}>
             {/* Servizio */}
             <div className="mb-6">
               <label className="label">Serviciu</label>

@@ -21,7 +21,9 @@ import {
   Eye, 
   CalendarRange,
   Trash2,
-  Plus
+  Plus,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface GiornoLavorativo {
@@ -80,6 +82,17 @@ export default function OrariPage() {
   });
   
   const [mostraAggiuntaRapida, setMostraAggiuntaRapida] = useState(false);
+  
+  const [accordionMobile, setAccordionMobile] = useState<Record<string, boolean>>({
+    statistici: false,
+    anteprima: false,
+  });
+  
+  const [giornoExpanded, setGiornoExpanded] = useState<string | null>(null);
+  
+  const toggleAccordionMobile = (sezione: string) => {
+    setAccordionMobile(prev => ({ ...prev, [sezione]: !prev[sezione] }));
+  };
   
   const [caricamento, setCaricamento] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -322,46 +335,55 @@ export default function OrariPage() {
         {/* Statistiche */}
         {stats && (
           <Card titolo={
-            <span className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Statistici Săptămânale
-            </span>
+            <button
+              type="button"
+              onClick={() => toggleAccordionMobile('statistici')}
+              className="w-full text-left flex items-center gap-2"
+            >
+              <BarChart3 className="w-5 h-5 shrink-0" />
+              <span>Statistici Săptămânale</span>
+              <span className="ml-auto md:hidden">
+                {accordionMobile.statistici ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+            </button>
           }>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
-                <span className="text-gray-700 flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Ore de lucru/săptămână
-                </span>
-                <span className="font-bold text-xl text-blue-600">{stats.oreTotali}h</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-                <span className="text-gray-700 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Zile deschise
-                </span>
-                <span className="font-bold text-xl text-green-600">{stats.giorniAperti}/7</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-purple-50 rounded">
-                <span className="text-gray-700 flex items-center gap-2">
-                  <Coffee className="w-4 h-4" />
-                  Pauze totale
-                </span>
-                <span className="font-bold text-xl text-purple-600">{stats.orePausa}h</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-amber-50 rounded">
-                <span className="text-gray-700 flex items-center gap-2">
-                  <Target className="w-4 h-4" />
-                  Ore efective
-                </span>
-                <span className="font-bold text-xl text-amber-600">{stats.oreEffettive}h</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-indigo-50 rounded">
-                <span className="text-gray-700 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Sloturi disponibile/zi
-                </span>
-                <span className="font-bold text-xl text-indigo-600">~{stats.slotPerGiorno}</span>
+            <div className={`md:block ${accordionMobile.statistici ? 'block' : 'hidden'}`}>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
+                  <span className="text-gray-700 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Ore de lucru/săptămână
+                  </span>
+                  <span className="font-bold text-xl text-blue-600">{stats.oreTotali}h</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                  <span className="text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Zile deschise
+                  </span>
+                  <span className="font-bold text-xl text-green-600">{stats.giorniAperti}/7</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-purple-50 rounded">
+                  <span className="text-gray-700 flex items-center gap-2">
+                    <Coffee className="w-4 h-4" />
+                    Pauze totale
+                  </span>
+                  <span className="font-bold text-xl text-purple-600">{stats.orePausa}h</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-amber-50 rounded">
+                  <span className="text-gray-700 flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    Ore efective
+                  </span>
+                  <span className="font-bold text-xl text-amber-600">{stats.oreEffettive}h</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-indigo-50 rounded">
+                  <span className="text-gray-700 flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4" />
+                    Sloturi disponibile/zi
+                  </span>
+                  <span className="font-bold text-xl text-indigo-600">~{stats.slotPerGiorno}</span>
+                </div>
               </div>
             </div>
           </Card>
@@ -369,43 +391,52 @@ export default function OrariPage() {
 
         {/* Anteprima Cliente */}
         <Card titolo={
-          <span className="flex items-center gap-2">
-            <Eye className="w-5 h-5" />
-            Previzualizare Client
-          </span>
+          <button
+            type="button"
+            onClick={() => toggleAccordionMobile('anteprima')}
+            className="w-full text-left flex items-center gap-2"
+          >
+            <Eye className="w-5 h-5 shrink-0" />
+            <span>Previzualizare Client</span>
+            <span className="ml-auto md:hidden">
+              {accordionMobile.anteprima ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </span>
+          </button>
         }>
-          <div className="space-y-2">
-            <p className="text-sm text-gray-600 mb-3">Cum văd clienții programul tău:</p>
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border">
-              <h3 className="font-bold text-lg mb-3 text-gray-800 flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Orar de Lucru
-              </h3>
-              <div className="space-y-2">
-                {orari && giorni.map((giorno) => {
-                  const giornoData = orari[giorno as keyof OrariSettimanali];
-                  if (!giornoData) return null;
+          <div className={`md:block ${accordionMobile.anteprima ? 'block' : 'hidden'}`}>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600 mb-3">Cum văd clienții programul tău:</p>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border">
+                <h3 className="font-bold text-lg mb-3 text-gray-800 flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Orar de Lucru
+                </h3>
+                <div className="space-y-2">
+                  {orari && giorni.map((giorno) => {
+                    const giornoData = orari[giorno as keyof OrariSettimanali];
+                    if (!giornoData) return null;
 
-                  return (
-                    <div key={giorno} className="flex justify-between items-center text-sm">
-                      <span className="font-medium text-gray-700 w-24">{giorniLabel[giorno]}</span>
-                      {giornoData.aperto ? (
-                        <div className="flex-1 text-right">
-                          <span className="text-green-700 font-medium">
-                            {giornoData.oraInizio} - {giornoData.oraFine}
-                          </span>
-                          {giornoData.pausa && (
-                            <span className="text-xs text-gray-500 ml-2">
-                              (Pauză: {giornoData.pausa.oraInizio}-{giornoData.pausa.oraFine})
+                    return (
+                      <div key={giorno} className="flex justify-between items-center text-sm">
+                        <span className="font-medium text-gray-700 w-24">{giorniLabel[giorno]}</span>
+                        {giornoData.aperto ? (
+                          <div className="flex-1 text-right">
+                            <span className="text-green-700 font-medium">
+                              {giornoData.oraInizio} - {giornoData.oraFine}
                             </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-red-600 font-medium">ÎNCHIS</span>
-                      )}
-                    </div>
-                  );
-                })}
+                            {giornoData.pausa && (
+                              <span className="text-xs text-gray-500 ml-2">
+                                (Pauză: {giornoData.pausa.oraInizio}-{giornoData.pausa.oraFine})
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-red-600 font-medium">ÎNCHIS</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -423,9 +454,7 @@ export default function OrariPage() {
                 <th className="text-center py-3 px-3 font-semibold">Stare</th>
                 <th className="text-left py-3 px-3 font-semibold">Deschidere</th>
                 <th className="text-left py-3 px-3 font-semibold">Închidere</th>
-                <th className="text-center py-3 px-3 font-semibold">Pauză</th>
-                <th className="text-left py-3 px-3 font-semibold">Început Pauză</th>
-                <th className="text-left py-3 px-3 font-semibold">Sfârșit Pauză</th>
+                <th className="text-left py-3 px-3 font-semibold" colSpan={2}>Pauză</th>
               </tr>
             </thead>
             <tbody>
@@ -468,38 +497,32 @@ export default function OrariPage() {
                         />
                       )}
                     </td>
-                    <td className="py-3 px-3 text-center">
-                      {giornoData.aperto && giornoData.pausa && (
+                    <td className="py-3 px-3">
+                      {giornoData.aperto && !giornoData.pausa && (
                         <button
                           onClick={() => handleTogglePausa(giorno)}
-                          className={`px-3 py-1 rounded text-sm transition-colors flex items-center gap-1 ${
-                            giornoData.pausa
-                              ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                          className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
                         >
-                          {giornoData.pausa ? (
-                            <>
-                              <Coffee className="w-3 h-3" />
-                              Da
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="w-3 h-3" />
-                              Nu
-                            </>
-                          )}
+                          <Plus className="w-4 h-4" />
+                          Adaugă pauză
                         </button>
                       )}
-                    </td>
-                    <td className="py-3 px-3">
                       {giornoData.aperto && giornoData.pausa && (
-                        <input
-                          type="time"
-                          value={giornoData.pausa.oraInizio || ''}
-                          onChange={(e) => handlePausaChange(giorno, 'oraInizio', e.target.value)}
-                          className="border rounded px-2 py-1 text-sm w-full"
-                        />
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="time"
+                            value={giornoData.pausa.oraInizio || ''}
+                            onChange={(e) => handlePausaChange(giorno, 'oraInizio', e.target.value)}
+                            className="border rounded px-2 py-1 text-sm w-full"
+                          />
+                          <button
+                            onClick={() => handleTogglePausa(giorno)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                            title="Elimină pauză"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       )}
                     </td>
                     <td className="py-3 px-3">
@@ -520,29 +543,36 @@ export default function OrariPage() {
         </div>
 
         {/* Mobile Cards */}
-        <div className="block md:hidden space-y-3">
+        <div className="block md:hidden space-y-1">
           {giorni.map((giorno) => {
             const giornoData = orari?.[giorno as keyof OrariSettimanali];
             if (!giornoData) return null;
+            const isExpanded = giornoExpanded === giorno;
 
             return (
-              <div key={giorno} className="border rounded-lg p-3 space-y-3 bg-white">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-base">{giorniLabel[giorno]}</span>
-                  <button
-                    onClick={() => handleToggleGiorno(giorno)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      giornoData.aperto
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    {giornoData.aperto ? '✓ Deschis' : '✗ Închis'}
-                  </button>
+              <div key={giorno} className="border rounded overflow-hidden bg-white">
+                <div
+                  className="flex items-center justify-between p-2 cursor-pointer"
+                  onClick={() => setGiornoExpanded(isExpanded ? null : giorno)}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">{giorniLabel[giorno]}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleToggleGiorno(giorno); }}
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        giornoData.aperto
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {giornoData.aperto ? '✓ Deschis' : '✗ Închis'}
+                    </button>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                 </div>
 
-                {giornoData.aperto && (
-                  <>
+                {isExpanded && giornoData.aperto && (
+                  <div className="px-2 pb-2 border-t space-y-2 pt-2">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-xs text-gray-500 block mb-1">Deschidere</label>
@@ -600,11 +630,13 @@ export default function OrariPage() {
                         </div>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
 
-                {!giornoData.aperto && (
-                  <p className="text-xs text-gray-500 italic">Magazinul este închis în această zi</p>
+                {isExpanded && !giornoData.aperto && (
+                  <div className="px-2 pb-2 border-t">
+                    <p className="text-xs text-gray-500 italic pt-1">Magazinul este închis în această zi</p>
+                  </div>
                 )}
               </div>
             );
@@ -661,22 +693,27 @@ export default function OrariPage() {
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold">Adaugă Închidere</h3>
-              <button
-                onClick={() => setMostraAggiuntaRapida(!mostraAggiuntaRapida)}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-              >
-                {mostraAggiuntaRapida ? (
-                  <>
-                    <Calendar className="w-4 h-4" />
-                    Zi individuală
-                  </>
-                ) : (
-                  <>
-                    <CalendarRange className="w-4 h-4" />
-                    Perioadă concediu
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setMostraAggiuntaRapida(false)}
+                  className={`text-sm font-medium flex items-center gap-1 ${
+                    !mostraAggiuntaRapida ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <Calendar className="w-4 h-4" />
+                  Zi individuală
+                </button>
+                <span className="text-gray-300">|</span>
+                <button
+                  onClick={() => setMostraAggiuntaRapida(true)}
+                  className={`text-sm font-medium flex items-center gap-1 ${
+                    mostraAggiuntaRapida ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <CalendarRange className="w-4 h-4" />
+                  Perioadă concediu
+                </button>
+              </div>
             </div>
 
             {mostraAggiuntaRapida ? (

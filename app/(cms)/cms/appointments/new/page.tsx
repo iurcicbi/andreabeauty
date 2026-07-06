@@ -41,6 +41,16 @@ interface Servizio {
   categoria: string;
 }
 
+const dateToLocalString = (data: Date): string => {
+  const anno = data.getFullYear();
+  const mese = String(data.getMonth() + 1).padStart(2, '0');
+  const giorno = String(data.getDate()).padStart(2, '0');
+  return `${anno}-${mese}-${giorno}`;
+};
+
+const nomiMesi = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie',
+  'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+
 export default function NuovoAppuntamentoPage() {
   const router = useRouter();
 
@@ -63,8 +73,13 @@ export default function NuovoAppuntamentoPage() {
 
   // STATO: Data e ora
   const [data, setData] = useState('');
-  const [slotDisponibili, setSlotDisponibili] = useState<string[]>([]);
+  const [slotOrari, setSlotOrari] = useState<{ ora: string; disponibile: boolean }[]>([]);
   const [oraSelezionata, setOraSelezionata] = useState('');
+
+  // STATO: Calendario
+  const [mese, setMese] = useState(new Date().getMonth());
+  const [anno, setAnno] = useState(new Date().getFullYear());
+  const [specialistClosures, setSpecialistClosures] = useState<any[]>([]);
 
   // STATO: Note
   const [note, setNote] = useState('');
@@ -114,12 +129,33 @@ export default function NuovoAppuntamentoPage() {
       const risposta = await webservice.get('/api/specialist/profile');
       if (risposta.dati && risposta.dati._id) {
         setSpecialistaId(risposta.dati._id);
+        setSpecialistClosures(risposta.dati.giorniChiusura || []);
       }
     } catch (err) {
       console.error('Errore caricamento profilo specialista:', err);
     } finally {
       setCaricamentoSpecialista(false);
     }
+  };
+
+  const isDisponibile = (giorno: Date): boolean => {
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+    if (giorno < oggi) return false;
+    if (giorno.getDay() === 0) return false;
+    const dataStr = dateToLocalString(giorno);
+    const chiusura = specialistClosures.find((c: any) => {
+      const dataChiusura = typeof c.data === 'string' ? c.data.split('T')[0] : dateToLocalString(new Date(c.data));
+      return dataChiusura === dataStr;
+    });
+    if (chiusura) return false;
+    return true;
+  };
+
+  const handleSelezionaData = (giorno: Date) => {
+    const dataStr = dateToLocalString(giorno);
+    setData(dataStr);
+    setOraSelezionata('');
   };
 
   const caricaSlotDisponibili = async () => {
@@ -138,12 +174,11 @@ export default function NuovoAppuntamentoPage() {
         },
       });
 
-      const slot = risposta.dati.slot || [];
-      setSlotDisponibili(slot.map((s: any) => s.ora));
+      setSlotOrari(risposta.dati.slot || []);
       setOraSelezionata('');
     } catch (err) {
       console.error('Errore caricamento slot:', err);
-      setSlotDisponibili([]);
+      setSlotOrari([]);
     } finally {
       setCaricamentoSlot(false);
     }
@@ -357,14 +392,82 @@ export default function NuovoAppuntamentoPage() {
             {/* ========== SELEZIONE DATA ========== */}
             <div className="mb-6">
               <h3 className="text-lg font-bold mb-4">3. Data</h3>
-              
-              <Input
-                label="Selectează Data"
-                type="date"
-                value={data}
-                onChange={setData}
-                required
-              />
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold text-gray-800">{nomiMesi[mese]} {anno}</h4>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { if (mese === 0) { setMese(11); setAnno(anno - 1); } else { setMese(mese - 1); } }}
+                      className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { if (mese === 11) { setMese(0); setAnno(anno + 1); } else { setMese(mese + 1); } }}
+                      className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-7 mb-2">
+                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((g) => (
+                    <div key={g} className="text-center text-xs font-semibold text-gray-500 pb-3">{g}</div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7">
+                  {(() => {
+                    const primoGiorno = new Date(anno, mese, 1);
+                    const ultimoGiorno = new Date(anno, mese + 1, 0);
+                    const giorni: (Date | null)[] = [];
+                    let primoGiornoSettimana = primoGiorno.getDay();
+                    primoGiornoSettimana = primoGiornoSettimana === 0 ? 6 : primoGiornoSettimana - 1;
+                    for (let i = 0; i < primoGiornoSettimana; i++) giorni.push(null);
+                    for (let giorno = 1; giorno <= ultimoGiorno.getDate(); giorno++) giorni.push(new Date(anno, mese, giorno));
+                    return giorni;
+                  })().map((giorno, index) => {
+                    if (!giorno) return <div key={`e-${index}`} className="text-center py-3" />;
+
+                    const disponibile = isDisponibile(giorno);
+                    const dataStr = dateToLocalString(giorno);
+                    const isSelected = data === dataStr;
+                    const oggi = new Date();
+                    oggi.setHours(0, 0, 0, 0);
+                    const isToday = giorno.getTime() === oggi.getTime();
+
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => disponibile && handleSelezionaData(giorno)}
+                        disabled={!disponibile}
+                        className={`text-center py-3 text-sm transition-all ${
+                          isToday ? 'ring-1 ring-primary-500' : ''
+                        } ${
+                          isSelected
+                            ? 'bg-primary-600 text-white font-bold rounded-lg'
+                            : disponibile
+                            ? 'text-gray-700 cursor-pointer hover:bg-gray-200 rounded-lg'
+                            : 'text-gray-300 cursor-not-allowed'
+                        }`}
+                      >
+                        {giorno.getDate()}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {data && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Selectat: {new Date(data + 'T12:00').toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              )}
             </div>
 
             {/* ========== SELEZIONE ORARIO ========== */}
@@ -374,22 +477,41 @@ export default function NuovoAppuntamentoPage() {
                 
                 {caricamentoSlot ? (
                   <p className="text-gray-600">Se încarcă sloturile disponibile...</p>
-                ) : slotDisponibili.length > 0 ? (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {slotDisponibili.map((slot) => (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => setOraSelezionata(slot)}
-                        className={`p-3 rounded-lg border-2 transition-colors ${
-                          oraSelezionata === slot
-                            ? 'border-primary-600 bg-primary-100 text-primary-700 font-semibold'
-                            : 'border-gray-300 hover:border-primary-400'
-                        }`}
-                      >
-                        {slot}
-                      </button>
-                    ))}
+                ) : slotOrari.length > 0 ? (
+                  <div className="space-y-4">
+                    {(() => {
+                      const morning = slotOrari.filter(s => parseInt(s.ora) < 12);
+                      const afternoon = slotOrari.filter(s => parseInt(s.ora) >= 12 && parseInt(s.ora) < 17);
+                      const evening = slotOrari.filter(s => parseInt(s.ora) >= 17);
+                      const groups: [string, typeof slotOrari][] = [];
+                      if (morning.length) groups.push(['Dimineață', morning]);
+                      if (afternoon.length) groups.push(['După-amiază', afternoon]);
+                      if (evening.length) groups.push(['Seară', evening]);
+                      return groups.map(([label, slots]) => (
+                        <div key={label}>
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">{label}</span>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                            {slots.map((slot) => (
+                              <button
+                                key={slot.ora}
+                                type="button"
+                                onClick={() => slot.disponibile && setOraSelezionata(slot.ora)}
+                                disabled={!slot.disponibile}
+                                className={`p-3 rounded-lg border-2 transition-colors ${
+                                  oraSelezionata === slot.ora
+                                    ? 'border-primary-600 bg-primary-100 text-primary-700 font-semibold'
+                                    : slot.disponibile
+                                    ? 'border-gray-300 hover:border-primary-400 text-gray-700 cursor-pointer'
+                                    : 'border-gray-200 bg-gray-100 text-gray-300 cursor-not-allowed line-through'
+                                }`}
+                              >
+                                {slot.ora}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 ) : (
                   <p className="text-red-600">Nici un slot disponibil pentru această dată</p>

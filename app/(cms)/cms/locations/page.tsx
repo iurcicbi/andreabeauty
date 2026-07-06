@@ -362,7 +362,7 @@ export default function LocatiiPage() {
           </div>
 
           {/* Workstations */}
-          <div className="pt-4 border-t">
+          {/* <div className="pt-4 border-t">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                 Posturi de Lucru
@@ -420,10 +420,10 @@ export default function LocatiiPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
-        <div className="flex justify-end gap-3 mt-8 pt-4 border-t">
+        <div className="hidden sm:flex justify-end gap-3 mt-8 pt-4 border-t">
           <Bottone onClick={() => setModalDeschisa(false)} variante="secondary">
             Anulează
           </Bottone>
@@ -532,7 +532,7 @@ function SediCard({
         )}
 
         {/* Workstations */}
-        <div className="mt-4 pt-3 border-t border-gray-100">
+        {/* <div className="mt-4 pt-3 border-t border-gray-100">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Posturi de Lucru
@@ -552,7 +552,7 @@ function SediCard({
           ) : (
             <p className="text-xs text-gray-400 italic">Niciun post activ</p>
           )}
-        </div>
+        </div> */}
 
         {/* Footer actions */}
         <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-end gap-2">

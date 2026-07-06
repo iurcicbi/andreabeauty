@@ -200,7 +200,7 @@ export default function SpecialistListPage() {
             Total: {specialists.length} | Activi: {activeSpecialists.length} | Inactivi: {inactiveSpecialists.length}
           </p>
         </div>
-        <Bottone onClick={() => router.push('/cms/specialist/new')} dimensione="small" className="w-full sm:w-auto flex items-center justify-center gap-2">
+        <Bottone onClick={() => router.push('/cms/specialist/new')} className="w-full sm:w-auto flex items-center justify-center gap-2">
           <Plus className="w-4 h-4" /> Specialist Nou
         </Bottone>
       </div>
