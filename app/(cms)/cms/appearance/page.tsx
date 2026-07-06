@@ -22,7 +22,14 @@ import {
   Shield,
   ChevronDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BookOpen,
+  LayoutDashboard,
+  Calendar,
+  Scissors,
+  Sparkles,
+  Users,
+  MessageSquare
 } from 'lucide-react';
 
 interface ImpostazioniFrontend {
@@ -63,6 +70,7 @@ const TABS = [
   { id: 'seo', label: 'SEO', icon: Search },
   { id: 'funzionalita', label: 'Funcționalități', icon: ToggleLeft },
   { id: 'legal', label: 'Legal', icon: Shield },
+  { id: 'ghid', label: 'Ghid', icon: BookOpen },
 ];
 
 function CampoInput({ label, value, onChange, type = 'text', placeholder, required, maxLength, className = '' }: {
@@ -698,6 +706,291 @@ export default function FrontendPage() {
                 </div>
               )}
             </div>
+          </div>
+        </Card>}
+
+        {/* ==================== GHID ==================== */}
+        {tabAttiva === 'ghid' && <Card>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <BookOpen className="w-5 h-5" /> Ghid CMS
+          </h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Acest ghid explică fiecare pagină din CMS, ce modifici și cum apare pe site.
+            Apasă pe fiecare secțiune pentru detalii.
+          </p>
+
+          <div className="space-y-3">
+            {/* Panou de control */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <LayoutDashboard className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Panou de Control</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/dashboard</span></p>
+                <p><strong>📋 Ce vezi:</strong> Număr total de programări (azi, săptămâna aceasta, lună), venituri, programări recente</p>
+                <p><strong>🔗 Ce afectează:</strong> Doar statistici interne, nu afectează site-ul vizibil</p>
+              </div>
+            </details>
+
+            {/* Programări */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Programări</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/appointments</span></p>
+                <p><strong>➕ Cum creezi o programare:</strong></p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>Mergi la <strong>"Programare Nouă"</strong></li>
+                  <li>Alege <strong>Specialistul</strong> (listă cu toți specialiștii activi)</li>
+                  <li>Alege <strong>Clientul</strong> (existent sau adaugă unul nou)</li>
+                  <li>Alege <strong>Serviciul</strong> (se filtrează automat după specialist)</li>
+                  <li>Alege <strong>Data</strong> (zilele indisponibile sunt gri)</li>
+                  <li>Alege <strong>Ora</strong> (sloturile libere se încarcă automat)</li>
+                  <li>Apasă <strong>"Creează Programare"</strong></li>
+                </ol>
+                <p><strong>✏️ Editează:</strong> Click pe o programare din listă pentru a modifica data, ora, serviciul, notele</p>
+                <p><strong>✅ Acțiuni rapide:</strong> Confirmă, finalizează sau anulează direct din listă</p>
+                <p><strong>🔗 Ce afectează:</strong> Programările apar în calendarul intern și în lista de programări. Clienții primesc confirmare (WhatsApp).</p>
+              </div>
+            </details>
+
+            {/* Specialiști */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Scissors className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Specialiști</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/specialist</span></p>
+                <p><strong>➕ Cum adaugi:</strong> Click "Adaugă Specialist" → completezi nume, email, telefon, serviciile pe care le face (specializări)</p>
+                <p><strong>🛠️ Ce poți modifica:</strong> Nume, servicii, orar individual, zile de concediu</p>
+                <p><strong>🔗 Ce afectează frontend:</strong></p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Booking (pasul 3) — clientul alege specialistul disponibil</li>
+                  <li>Homepage — secțiunea "Echipa noastră" dacă e activată</li>
+                  <li>Disponibilitatea — fiecare specialist are orarul și concediile proprii</li>
+                </ul>
+                <p className="bg-blue-50 p-3 rounded-lg text-blue-800"><strong>💡 Sfat:</strong> Dacă un specialist nu mai lucrează cu tine, poți să-l dezactivezi (nu trebuie să-l ștergi).</p>
+              </div>
+            </details>
+
+            {/* Servicii */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Sparkles className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Servicii</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/services</span></p>
+                <p><strong>➕ Cum adaugi:</strong> Click "Adaugă Serviciu" → nume, descriere, preț (<strong>Lei MDL</strong>), durată (minute), categorie</p>
+                <p><strong>🔗 Ce afectează frontend:</strong></p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Booking (pasul 2) — clientul alege serviciul dorit</li>
+                  <li>Homepage — secțiunea "Servicii" cu prețuri și durată</li>
+                  <li>Prețurile se calculează automat în Lei Moldovenești (MDL)</li>
+                </ul>
+                <p className="bg-blue-50 p-3 rounded-lg text-blue-800"><strong>💡 Sfat:</strong> Prețurile pot fi ascunse public din Aspect → Funcționalități → "Afișează Prețurile în Frontend".</p>
+              </div>
+            </details>
+
+            {/* Orar */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Clock className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Orar</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/hours</span></p>
+                <p><strong>📋 Ce modifici:</strong> Programul de lucru al salonului (Luni-Duminică)</p>
+                <p><strong>🔗 Ce afectează frontend:</strong></p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Booking — sistemul calculează automat orele disponibile</li>
+                  <li>Homepage — secțiunea "Orar" (dacă e activată)</li>
+                  <li>Pagină separată de contact</li>
+                </ul>
+                <p className="bg-yellow-50 p-3 rounded-lg text-yellow-800"><strong>⚠️ Atentie:</strong> Orarul general al salonului. Pentru zile libere individuale (concedii), vezi "Disponibilitate echipă".</p>
+              </div>
+            </details>
+
+            {/* Disponibilitate echipă */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Users className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Disponibilitate Echipă</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/availability</span></p>
+                <p><strong>📋 Ce modifici:</strong> Concedii, zile libere, perioade de indisponibilitate pentru fiecare specialist</p>
+                <p><strong>🔗 Ce afectează frontend:</strong> Booking — specialistul nu apare în zilele când e în concediu</p>
+                <p className="bg-blue-50 p-3 rounded-lg text-blue-800"><strong>💡 Sfat:</strong> Poți seta și o singură zi sau o perioadă întreagă. Specialistul nu va primi programări în acele zile.</p>
+              </div>
+            </details>
+
+            {/* Homepage CMS */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <LayoutDashboard className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Homepage CMS</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/homepage</span></p>
+                <p><strong>🎨 Culori:</strong> Setează culoarea principală și secundară a site-ului</p>
+                <p><strong>📦 Secțiuni pe care le poți gestiona:</strong></p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="bg-gray-50 p-2 rounded"><strong>Hero</strong> — titlu, subtitlu, butoane, imagine fundal, logo</div>
+                  <div className="bg-gray-50 p-2 rounded"><strong>Servicii</strong> — titlu, layout, ce servicii apar, prețuri</div>
+                  <div className="bg-gray-50 p-2 rounded"><strong>About</strong> — descriere, imagine, statistici, detalii</div>
+                  <div className="bg-gray-50 p-2 rounded"><strong>Galerie</strong> — imagini în grid</div>
+                  <div className="bg-gray-50 p-2 rounded"><strong>Orar</strong> — titlu, text înaintea orarului</div>
+                  <div className="bg-gray-50 p-2 rounded"><strong>Recenzii</strong> — layout, câte să apară, stil</div>
+                  <div className="bg-gray-50 p-2 rounded"><strong>Contact</strong> — text, email, telefon, hărți, sedii</div>
+                  <div className="bg-gray-50 p-2 rounded"><strong>CTA Final</strong> — text și buton în partea de jos</div>
+                </div>
+                <p><strong>🔗 Ce afectează:</strong> TOATĂ pagina principală a site-ului. Fiecare modificare se vede instant.</p>
+                <p className="bg-blue-50 p-3 rounded-lg text-blue-800"><strong>💡 Sfat:</strong> Poți ascunde/opri secțiuni pe care nu vrei să le afișezi (ex: galeria) fără să ștergi conținutul.</p>
+              </div>
+            </details>
+
+            {/* Aspect - pagina curentă */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Settings className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Aspect (pagina curentă)</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/appearance</span> (ești aici)</p>
+
+                <p className="font-semibold mt-3">🔹 General</p>
+                <p>Nume firmă, tagline, descriere, email, telefon, adresă, coordonate hartă — apar în header, footer, și pe site.</p>
+
+                <p className="font-semibold mt-3">🔹 Logo-uri</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li><strong>Header & Footer</strong> — logo-ul din bara de navigare și din subsol</li>
+                  <li><strong>Pagina Principală</strong> — logo mare din centrul paginii (opțional)</li>
+                  <li><strong>Bară Laterală CMS</strong> — logo-ul din sidebar-ul panoului de control</li>
+                </ul>
+
+                <p className="font-semibold mt-3">🔹 Social Media</p>
+                <p>Link-uri Facebook, Instagram, TikTok, etc. — apar în footer și pe pagina de contact.</p>
+
+                <p className="font-semibold mt-3">🔹 Texte în rezervare</p>
+                <p>Schimbă titlurile și subtitlurile din fluxul de booking (pașii: Locație, Specialist, Serviciu, Dată, Oră, Confirmare).</p>
+
+                <p className="font-semibold mt-3">🔹 SEO</p>
+                <p>Titlu pagină, descriere meta, keywords, imagine Open Graph — pentru optimizare Google și când se partajează linkul pe social media.</p>
+
+                <p className="font-semibold mt-3">🔹 Funcționalități</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li><strong>Programări</strong> — activează/dezactivează tot sistemul de rezervări</li>
+                  <li><strong>Prețurile în Frontend</strong> — arată sau ascunde prețurile pe site</li>
+                  <li><strong>Social Media</strong> — arată sau ascunde linkurile sociale</li>
+                  <li><strong>Contact</strong> — arată sau ascunde informațiile de contact</li>
+                  <li><strong>Servicii</strong> — arată sau ascunde secțiunea servicii</li>
+                  <li><strong>Orar</strong> — arată sau ascunde orarul</li>
+                </ul>
+                <p className="bg-yellow-50 p-3 rounded-lg text-yellow-800"><strong>⚠️ Nota:</strong> Prețurile sunt momentan <strong>dezactivate</strong>. Le poți activa bifând "Afișează Prețurile în Frontend" când studioul e deschis legal.</p>
+
+                <p className="font-semibold mt-3">🔹 Legal</p>
+                <p>Încarcă PDF-urile cu Politica de Confidențialitate și Politica Cookie. Acestea apar în footer-ul site-ului.</p>
+              </div>
+            </details>
+
+            {/* Utilizatori */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Users className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Utilizatori</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/users</span></p>
+                <p><strong>🔒 Vizibil doar pentru admin</strong></p>
+                <p><strong>📋 Ce poți face:</strong> Gestionare conturi utilizatori (adaugă, editează, șterge), schimbare roluri (admin/specialist)</p>
+                <p><strong>🔗 Ce afectează:</strong> Cine are acces la CMS. Un utilizator nou poate primi acces la panoul de control.</p>
+              </div>
+            </details>
+
+            {/* Recenzii */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <MessageSquare className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Recenzii</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/reviews</span></p>
+                <p><strong>📋 Ce poți face:</strong> Aproba, respinge, editează, reordonează, șterge recenzii</p>
+                <p><strong>🔗 Ce afectează frontend:</strong> Secțiunea "Recenzii" de pe homepage. Doar recenziile aprobate apar public.</p>
+                <p className="bg-blue-50 p-3 rounded-lg text-blue-800"><strong>💡 Sfat:</strong> Poți "pune în evidență" recenzii importante ca să apară primele.</p>
+              </div>
+            </details>
+
+            {/* Locații */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Locații</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>📍 Unde:</strong> <span className="text-primary-600">/cms/locations</span></p>
+                <p><strong>📋 Ce poți face:</strong> Adaugă, editează, șterge sedii/locații ale salonului</p>
+                <p><strong>🔗 Ce afectează frontend:</strong></p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Booking (pasul 1) — clientul alege locația</li>
+                  <li>Contact — harta și adresa pe site</li>
+                  <li>Footer — lista sediilor</li>
+                </ul>
+              </div>
+            </details>
+
+            {/* Booking clienți */}
+            <details className="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <summary className="flex items-center gap-3 cursor-pointer select-none p-4 list-none [&::-webkit-details-marker]:hidden hover:bg-gray-50 transition-colors">
+                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="font-semibold text-sm flex-1">Booking (rezervare clienți)</span>
+                <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180 shrink-0" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-gray-100 text-sm text-gray-700 space-y-2">
+                <p><strong>🔗 Link public:</strong> <span className="text-primary-600">/booking</span></p>
+                <p><strong>📋 Pașii rezervării:</strong></p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li><strong>Locație</strong> — clientul alege salonul (dacă ai mai multe sedii)</li>
+                  <li><strong>Serviciu</strong> — alege din serviciile tale</li>
+                  <li><strong>Specialist</strong> — alege specialistul disponibil</li>
+                  <li><strong>Dată</strong> — calendar cu zilele disponibile</li>
+                  <li><strong>Oră</strong> — alege ora liberă</li>
+                  <li><strong>Confirmare</strong> — completează nume, telefon, email, note</li>
+                </ol>
+                <p><strong>🎯 Ce setări din CMS influențează booking-ul:</strong></p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li><strong>Aspect → Texte în rezervare</strong> — titlurile pașilor</li>
+                  <li><strong>Aspect → Funcționalități</strong> — activează/dezactivează programări</li>
+                  <li><strong>Aspect → Funcționalități</strong> — arată/ascunde prețurile</li>
+                  <li><strong>Servicii</strong> — ce servicii poate alege clientul</li>
+                  <li><strong>Specialiști</strong> — cine e disponibil</li>
+                  <li><strong>Disponibilitate</strong> — concedii și zile libere</li>
+                  <li><strong>Orar</strong> — programul săptămânal</li>
+                  <li><strong>Locații</strong> — ce sedii apar</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+            <p className="font-semibold mb-1">📱 CMS pe mobil</p>
+            <p>Meniul din partea de jos poate fi deschis/chis cu săgeata sus/jos. Profilul tău e în dreapta sus în antet — apasă pe numele tău pentru a vedea "Profilul meu" și "Deconectare".</p>
           </div>
         </Card>}
 
