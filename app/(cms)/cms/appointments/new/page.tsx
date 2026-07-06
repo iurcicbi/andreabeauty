@@ -85,6 +85,24 @@ export default function NuovoAppuntamentoPage() {
   const [specialistClosures, setSpecialistClosures] = useState<any[]>([]);
   const [caricamentoSpecialisti, setCaricamentoSpecialisti] = useState(true);
 
+  // STATO: Data e ora
+  const [data, setData] = useState('');
+  const [slotOrari, setSlotOrari] = useState<{ ora: string; disponibile: boolean }[]>([]);
+  const [oraSelezionata, setOraSelezionata] = useState('');
+
+  // STATO: Calendario
+  const [mese, setMese] = useState(new Date().getMonth());
+  const [anno, setAnno] = useState(new Date().getFullYear());
+
+  // STATO: Note
+  const [note, setNote] = useState('');
+
+  // STATO: UI
+  const [caricamento, setCaricamento] = useState(false);
+  const [caricamentoSlot, setCaricamentoSlot] = useState(false);
+  const [errore, setErrore] = useState('');
+  const [successo, setSuccesso] = useState('');
+
   // Carica clienti, servizi e specialisti all'avvio
   useEffect(() => {
     caricaClienti();
@@ -108,24 +126,6 @@ export default function NuovoAppuntamentoPage() {
       setSpecialistClosures([]);
     }
   }, [specialistaId, specialisti]);
-
-  // STATO: Data e ora
-  const [data, setData] = useState('');
-  const [slotOrari, setSlotOrari] = useState<{ ora: string; disponibile: boolean }[]>([]);
-  const [oraSelezionata, setOraSelezionata] = useState('');
-
-  // STATO: Calendario
-  const [mese, setMese] = useState(new Date().getMonth());
-  const [anno, setAnno] = useState(new Date().getFullYear());
-
-  // STATO: Note
-  const [note, setNote] = useState('');
-
-  // STATO: UI
-  const [caricamento, setCaricamento] = useState(false);
-  const [caricamentoSlot, setCaricamentoSlot] = useState(false);
-  const [errore, setErrore] = useState('');
-  const [successo, setSuccesso] = useState('');
 
   const caricaClienti = async () => {
     try {
