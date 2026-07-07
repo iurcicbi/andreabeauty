@@ -159,7 +159,7 @@ export default function CruscottoPage() {
                         </p>
                       </div>
                       <span className="inline-block px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800 font-medium">
-                        în așteptare
+                        {app.stato}
                       </span>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ export default function CruscottoPage() {
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {app.stato === 'confermato' ? 'confirmat' : app.stato}
+                        {app.stato}
                       </span>
                     </div>
                   </div>
