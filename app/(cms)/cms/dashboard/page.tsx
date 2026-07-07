@@ -69,6 +69,14 @@ export default function CruscottoPage() {
   };
 
   // Calcola statistiche
+  const traduciStato = (stato: string) => ({
+    in_attesa: 'în așteptare',
+    confermato: 'confirmat',
+    completato: 'completat',
+    cancellato: 'anulat',
+    scaduto: 'expirat',
+  }[stato] || stato);
+
   const appuntamentiConfermati = appuntamenti.filter(a => a.stato === 'confermato').length;
   const appuntamentiInAttesa = appuntamenti.filter(a => a.stato === 'in_attesa').length;
   const ricavoGiornaliero = appuntamenti
@@ -159,7 +167,7 @@ export default function CruscottoPage() {
                         </p>
                       </div>
                       <span className="inline-block px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800 font-medium">
-                        {app.stato}
+                        {traduciStato('in_attesa')}
                       </span>
                     </div>
                   </div>
@@ -208,12 +216,14 @@ export default function CruscottoPage() {
                         className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                           app.stato === 'confermato'
                             ? 'bg-green-100 text-green-800'
-                            : app.stato === 'completat'
+                            : app.stato === 'completato'
                             ? 'bg-blue-100 text-blue-800'
+                            : app.stato === 'cancellato' || app.stato === 'scaduto'
+                            ? 'bg-red-100 text-red-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {app.stato}
+                        {traduciStato(app.stato)}
                       </span>
                     </div>
                   </div>
