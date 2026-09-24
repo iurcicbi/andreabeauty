@@ -25,9 +25,6 @@ async function getMetadata(): Promise<Metadata> {
         description: impostazioni.seo?.descrizioneMeta || 'Platformă de prezentare a portofoliului artistic AG Studio',
         images: impostazioni.seo?.ogImage ? [impostazioni.seo.ogImage] : [],
       },
-      icons: {
-        icon: impostazioni.favicon || '/favicon.ico',
-      }
     };
   } catch (error) {
     return {

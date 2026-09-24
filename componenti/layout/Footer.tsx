@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import webservice from '@/utils/webservice';
 
+const DOMINIO = process.env.NEXT_PUBLIC_APP_URL
+  ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname
+  : 'salonix.xyz';
+
 export default function Footer() {
   const [impostazioni, setImpostazioni] = useState<any>({});
 
@@ -98,7 +102,7 @@ export default function Footer() {
               </svg>
             </div>
             <div className="text-xs leading-relaxed text-[#4d453e]" style={{ fontFamily: 'Manrope, sans-serif' }}>
-              <strong className="font-semibold">andreea-gmuastudio.com</strong> este o platformă de prezentare și un portofoliu artistic independent. 
+              <strong className="font-semibold">{DOMINIO}</strong> este o platformă de prezentare și un portofoliu artistic independent. 
               Acest formular gestionează exclusiv solicitări de contact și propuneri de colaborare fără caracter obligatoriu. 
               Pe acest site nu se efectuează tranzacții comerciale directe și nu se fac rezervări în scopuri lucrative.
             </div>
