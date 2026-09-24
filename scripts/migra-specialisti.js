@@ -40,9 +40,9 @@ async function connetti() {
     }
     
     await mongoose.connect(mongoUri);
-    console.log('✅ Connesso a MongoDB');
+    console.log(' Connesso a MongoDB');
   } catch (error) {
-    console.error('❌ Errore connessione MongoDB:', error);
+    console.error(' Errore connessione MongoDB:', error);
     throw error;
   }
 }
@@ -50,20 +50,20 @@ async function connetti() {
 // Funzione principale di migrazione
 async function migraDati() {
   try {
-    console.log('\n🚀 INIZIO MIGRAZIONE DA BARBER A SPECIALISTI\n');
+    console.log('\n INIZIO MIGRAZIONE DA BARBER A SPECIALISTI\n');
     console.log('=' .repeat(60));
     
     // ========================================================================
     // STEP 1: Migra Barber → Specialisti
     // ========================================================================
-    console.log('\n📋 STEP 1: Migrazione Barber → Specialisti');
+    console.log('\n STEP 1: Migrazione Barber  Specialisti');
     console.log('-'.repeat(60));
     
     const barbers = await Barber.find({}).populate('utente', 'nome cognome');
     console.log(`Trovati ${barbers.length} barber (legacy) da migrare`);
     
     if (barbers.length === 0) {
-      console.log('⚠️  Nessun barber (legacy) trovato. Migrazione non necessaria.');
+      console.log('  Nessun barber (legacy) trovato. Migrazione non necessaria.');
       return;
     }
     
@@ -76,7 +76,7 @@ async function migraDati() {
       const specialistaEsistente = await Specialista.findOne({ utente: barber.utente });
       
       if (specialistaEsistente) {
-        console.log(`⏭️  Specialista già esistente per utente ${barber.utente} - skip`);
+        console.log(`  Specialista già esistente per utente ${barber.utente} - skip`);
         mappaBarberSpecialista.set(barber._id.toString(), specialistaEsistente._id);
         specialistiEsistenti++;
         continue;
@@ -105,10 +105,10 @@ async function migraDati() {
       
       const nomeUtente = barber.utente?.nome || 'N/A';
       const cognomeUtente = barber.utente?.cognome || 'N/A';
-      console.log(`✅ Creato specialista: ${nomeUtente} ${cognomeUtente} (${specialista._id})`);
+      console.log(` Creato specialista: ${nomeUtente} ${cognomeUtente} (${specialista._id})`);
     }
     
-    console.log(`\n📊 Riepilogo Step 1:`);
+    console.log(`\n Riepilogo Step 1:`);
     console.log(`   - Specialisti creati: ${specialistiCreati}`);
     console.log(`   - Specialisti già esistenti: ${specialistiEsistenti}`);
     console.log(`   - Totale mappati: ${mappaBarberSpecialista.size}`);
@@ -116,14 +116,14 @@ async function migraDati() {
     // ========================================================================
     // STEP 2: Crea Associazioni Specialista-Servizio
     // ========================================================================
-    console.log('\n📋 STEP 2: Creazione Associazioni Specialista-Servizio');
+    console.log('\n STEP 2: Creazione Associazioni Specialista-Servizio');
     console.log('-'.repeat(60));
     
     const servizi = await Servizio.find({ attivo: true });
     console.log(`Trovati ${servizi.length} servizi attivi`);
     
     if (servizi.length === 0) {
-      console.log('⚠️  Nessun servizio attivo trovato. Skip associazioni.');
+      console.log('  Nessun servizio attivo trovato. Skip associazioni.');
     } else {
       let associazioniCreate = 0;
       let associazioniEsistenti = 0;
@@ -152,10 +152,10 @@ async function migraDati() {
           associazioniCreate++;
         }
         
-        console.log(`✅ Associati ${servizi.length} servizi allo specialista ${specialistaId}`);
+        console.log(` Associati ${servizi.length} servizi allo specialista ${specialistaId}`);
       }
       
-      console.log(`\n📊 Riepilogo Step 2:`);
+      console.log(`\n Riepilogo Step 2:`);
       console.log(`   - Associazioni create: ${associazioniCreate}`);
       console.log(`   - Associazioni già esistenti: ${associazioniEsistenti}`);
     }
@@ -163,7 +163,7 @@ async function migraDati() {
     // ========================================================================
     // STEP 3: Aggiorna Appuntamenti
     // ========================================================================
-    console.log('\n📋 STEP 3: Aggiornamento Appuntamenti');
+    console.log('\n STEP 3: Aggiornamento Appuntamenti');
     console.log('-'.repeat(60));
     
     const appuntamenti = await Appuntamento.find({ 
@@ -185,12 +185,12 @@ async function migraDati() {
         );
         appuntamentiAggiornati++;
       } else {
-        console.log(`⚠️  Barber ${app.barber} non trovato nella mappa - appuntamento ${app._id} non aggiornato`);
+        console.log(`  Barber ${app.barber} non trovato nella mappa - appuntamento ${app._id} non aggiornato`);
         appuntamentiNonAggiornati++;
       }
     }
     
-    console.log(`\n📊 Riepilogo Step 3:`);
+    console.log(`\n Riepilogo Step 3:`);
     console.log(`   - Appuntamenti aggiornati: ${appuntamentiAggiornati}`);
     console.log(`   - Appuntamenti non aggiornati: ${appuntamentiNonAggiornati}`);
     
@@ -198,7 +198,7 @@ async function migraDati() {
     // RIEPILOGO FINALE
     // ========================================================================
     console.log('\n' + '='.repeat(60));
-    console.log('🎉 MIGRAZIONE COMPLETATA CON SUCCESSO!');
+    console.log(' MIGRAZIONE COMPLETATA CON SUCCESSO!');
     console.log('='.repeat(60));
     console.log(`
 📊 RIEPILOGO COMPLETO:
@@ -227,7 +227,7 @@ async function migraDati() {
     `);
     
   } catch (error) {
-    console.error('\n❌ ERRORE DURANTE LA MIGRAZIONE:', error);
+    console.error('\n ERRORE DURANTE LA MIGRAZIONE:', error);
     console.error('\nStack trace:', error.stack);
     throw error;
   }
@@ -235,7 +235,7 @@ async function migraDati() {
 
 // Funzione per verificare lo stato prima della migrazione
 async function verificaStato() {
-  console.log('\n🔍 VERIFICA STATO ATTUALE');
+  console.log('\n VERIFICA STATO ATTUALE');
   console.log('='.repeat(60));
   
   const barberCount = await Barber.countDocuments();
@@ -258,7 +258,7 @@ async function verificaStato() {
   `);
   
   if (specialistaCount > 0 || associazioneCount > 0) {
-    console.log('⚠️  ATTENZIONE: Esistono già specialisti o associazioni nel database.');
+    console.log('  ATTENZIONE: Esistono già specialisti o associazioni nel database.');
     console.log('   La migrazione salterà i record esistenti.');
   }
   
@@ -289,7 +289,7 @@ async function chiediConferma() {
 async function main() {
   try {
     console.log('\n' + '='.repeat(60));
-    console.log('  SCRIPT MIGRAZIONE: BARBER → SPECIALISTI (BEAUTY SALON)');
+    console.log('  SCRIPT MIGRAZIONE: BARBER  SPECIALISTI (BEAUTY SALON)');
     console.log('='.repeat(60));
     
     // Connetti al database
@@ -302,7 +302,7 @@ async function main() {
     if (process.env.AUTO_MIGRATE !== 'true') {
       const conferma = await chiediConferma();
       if (!conferma) {
-        console.log('\n❌ Migrazione annullata dall\'utente.');
+        console.log('\n Migrazione annullata dall\'utente.');
         process.exit(0);
       }
     }
@@ -312,12 +312,12 @@ async function main() {
     
     // Disconnetti
     await mongoose.disconnect();
-    console.log('\n✅ Disconnesso da MongoDB');
+    console.log('\n Disconnesso da MongoDB');
     
     process.exit(0);
     
   } catch (error) {
-    console.error('\n❌ Errore fatale:', error);
+    console.error('\n Errore fatale:', error);
     await mongoose.disconnect();
     process.exit(1);
   }

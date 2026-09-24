@@ -47,7 +47,7 @@ export async function GET() {
       dati: impostazioni
     });
   } catch (errore: any) {
-    console.error('❌ Errore GET /api/settings:', errore);
+    console.error(' Errore GET /api/settings:', errore);
     return NextResponse.json(
       { successo: false, errore: 'Errore nel recupero delle impostazioni' },
       { status: 500 }
@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest) {
       ? 'Autenticazione richiesta'
       : 'Errore nell\'aggiornamento delle impostazioni';
     const status = errore.message?.includes('Token') ? 401 : 500;
-    console.error('❌ Errore PUT /api/settings:', errore);
+    console.error(' Errore PUT /api/settings:', errore);
     return NextResponse.json(
       { successo: false, errore: messaggio },
       { status }

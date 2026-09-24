@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const { initWhatsApp, handleIncomingMessages, sendReminder: sendReminderFn, isWhatsAppReady } = require('@/lib/whatsapp');
 
     if (!isWhatsAppReady()) {
-      console.log('🚀 Inizializzazione client WhatsApp...');
+      console.log(' Inizializzazione client WhatsApp...');
       try {
         const result = await initWhatsApp();
         if (!result.ready) {
@@ -104,14 +104,14 @@ export async function POST(request: NextRequest) {
     try {
       const { onIncomingMessage } = require('@/lib/cron/reminders');
       handleIncomingMessages(onIncomingMessage);
-      console.log('✅ Handler messaggi in arrivo (SI/NO) registrato');
+      console.log(' Handler messaggi in arrivo (SI/NO) registrato');
     } catch (_) {
-      console.log('⚠️ Handler messaggi in arrivo non registrato (non criticale)');
+      console.log(' Handler messaggi in arrivo non registrato (non criticale)');
     }
 
     // ── CASO 1: test diretto con dati custom ────────────────────────────────
     if (telefono && nome && ora && data) {
-      console.log('📱 Test diretto con dati custom:', { telefono, nome, ora, data });
+      console.log(' Test diretto con dati custom:', { telefono, nome, ora, data });
 
       const risultato = await sendReminderFn(telefono, nome, ora, data);
 
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('❌ Errore test reminder:', error);
+    console.error(' Errore test reminder:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

@@ -41,23 +41,23 @@ const Appuntamento = mongoose.model('appointments', appuntamentoSchema);
 
 async function verificaAppuntamentiEsistenti() {
   try {
-    console.log('📋 Verifica tutti gli appuntamenti nella collection "appointments"');
+    console.log(' Verifica tutti gli appuntamenti nella collection "appointments"');
     
     await mongoose.connect('mongodb://localhost:27017/beautysalon');
-    console.log('✅ Connesso al database');
+    console.log(' Connesso al database');
 
     // Trova tutti gli appuntamenti
     const tuttiAppuntamenti = await Appuntamento.find({}).sort({ created_at: -1 });
 
-    console.log(`\n📊 Trovati ${tuttiAppuntamenti.length} appuntamenti totali nella collection "appointments":`);
+    console.log(`\n Trovati ${tuttiAppuntamenti.length} appuntamenti totali nella collection "appointments":`);
     
     if (tuttiAppuntamenti.length === 0) {
-      console.log('❌ Nessun appuntamento trovato nella collection "appointments"');
-      console.log('💡 Probabilmente gli appuntamenti sono in un\'altra collection o con schema diverso');
+      console.log(' Nessun appuntamento trovato nella collection "appointments"');
+      console.log(' Probabilmente gli appuntamenti sono in un\'altra collection o con schema diverso');
       
       // Verifica altre possibili collection
       const collections = await mongoose.connection.db.listCollections().toArray();
-      console.log('\n📁 Collection disponibili nel database:');
+      console.log('\n Collection disponibili nel database:');
       collections.forEach(col => {
         console.log(`   - ${col.name}`);
       });
@@ -96,7 +96,7 @@ async function verificaAppuntamentiEsistenti() {
       promemoriInviati: tuttiAppuntamenti.filter(a => a.reminderSent).length
     };
 
-    console.log('\n📈 STATISTICHE GENERALI:');
+    console.log('\n STATISTICHE GENERALI:');
     console.log(`   Totale appuntamenti: ${stats.totale}`);
     console.log(`   In attesa: ${stats.inAttesa}`);
     console.log(`   Confermati: ${stats.confermati}`);
@@ -113,16 +113,16 @@ async function verificaAppuntamentiEsistenti() {
       new Date(a.data) > new Date()
     );
 
-    console.log(`\n📱 CANDIDATI PER PROMEMORIA WHATSAPP: ${appuntamentiConTelefono.length}`);
+    console.log(`\n CANDIDATI PER PROMEMORIA WHATSAPP: ${appuntamentiConTelefono.length}`);
     appuntamentiConTelefono.forEach(app => {
       console.log(`   - ${app.utente.nome} ${app.utente.cognome} (${app.utente.telefono}) - ${app.data}`);
     });
 
   } catch (error) {
-    console.error('❌ Errore:', error);
+    console.error(' Errore:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('\n✅ Disconnesso dal database');
+    console.log('\n Disconnesso dal database');
   }
 }
 

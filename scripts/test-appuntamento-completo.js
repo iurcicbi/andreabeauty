@@ -50,11 +50,11 @@ const Appuntamento = mongoose.model('appointments', appuntamentoSchema);
 
 async function testSistemaCompleto() {
   try {
-    console.log('🚀 Avvio test completo sistema WhatsApp');
+    console.log(' Avvio test completo sistema WhatsApp');
     
     // Connetti al database
     await mongoose.connect('mongodb://localhost:27017/beautysalon');
-    console.log('✅ Connesso al database');
+    console.log(' Connesso al database');
 
     // Crea appuntamento di test per domani alle 14:30
     const domani = new Date();
@@ -81,7 +81,7 @@ async function testSistemaCompleto() {
     });
 
     await appuntamentoTest.save();
-    console.log('✅ Appuntamento di test creato:', {
+    console.log(' Appuntamento di test creato:', {
       id: appuntamentoTest._id,
       cliente: `${appuntamentoTest.utente.nome} ${appuntamentoTest.utente.cognome}`,
       telefono: appuntamentoTest.utente.telefono,
@@ -91,20 +91,20 @@ async function testSistemaCompleto() {
     });
 
     // Test 1: Verifica configurazione sistema
-    console.log('\n📋 Test 1: Verifica configurazione sistema');
+    console.log('\n Test 1: Verifica configurazione sistema');
     const configResponse = await fetch('http://localhost:3000/api/test/whatsapp');
     const configData = await configResponse.json();
     
     if (configData.success) {
-      console.log('✅ Sistema configurato correttamente');
-      console.log('📊 Statistiche database:', configData.database);
+      console.log(' Sistema configurato correttamente');
+      console.log(' Statistiche database:', configData.database);
     } else {
-      console.log('❌ Errore configurazione:', configData.error);
+      console.log(' Errore configurazione:', configData.error);
       return;
     }
 
     // Test 2: Invio promemoria
-    console.log('\n📱 Test 2: Invio promemoria WhatsApp');
+    console.log('\n Test 2: Invio promemoria WhatsApp');
     const reminderResponse = await fetch('http://localhost:3000/api/test/whatsapp', {
       method: 'POST',
       headers: {
@@ -121,8 +121,8 @@ async function testSistemaCompleto() {
     const reminderData = await reminderResponse.json();
     
     if (reminderData.success) {
-      console.log('✅ Promemoria inviato con successo');
-      console.log('📨 Message SID:', reminderData.result.messageSid);
+      console.log(' Promemoria inviato con successo');
+      console.log(' Message SID:', reminderData.result.messageSid);
       
       // Aggiorna l'appuntamento come promemoria inviato
       await Appuntamento.findByIdAndUpdate(appuntamentoTest._id, {
@@ -130,14 +130,14 @@ async function testSistemaCompleto() {
         reminderSentAt: new Date(),
         twilioMessageSid: reminderData.result.messageSid
       });
-      console.log('✅ Appuntamento aggiornato con promemoria inviato');
+      console.log(' Appuntamento aggiornato con promemoria inviato');
       
     } else {
-      console.log('❌ Errore invio promemoria:', reminderData.error);
+      console.log(' Errore invio promemoria:', reminderData.error);
     }
 
     // Test 3: Simulazione risposta cliente CONFERMO
-    console.log('\n✅ Test 3: Simulazione risposta cliente "CONFERMO"');
+    console.log('\n Test 3: Simulazione risposta cliente "CONFERMO"');
     const confermaResponse = await fetch('http://localhost:3000/api/webhooks/whatsapp', {
       method: 'POST',
       headers: {
@@ -152,21 +152,21 @@ async function testSistemaCompleto() {
     });
 
     if (confermaResponse.ok) {
-      console.log('✅ Webhook risposta CONFERMO processato');
+      console.log(' Webhook risposta CONFERMO processato');
       
       // Verifica aggiornamento database
       const appuntamentoAggiornato = await Appuntamento.findById(appuntamentoTest._id);
-      console.log('📝 Stato appuntamento dopo conferma:', {
+      console.log(' Stato appuntamento dopo conferma:', {
         stato: appuntamentoAggiornato.stato,
         reminderSent: appuntamentoAggiornato.reminderSent,
         updatedAt: appuntamentoAggiornato.updatedAt
       });
     } else {
-      console.log('❌ Errore webhook conferma');
+      console.log(' Errore webhook conferma');
     }
 
     // Test 4: Simulazione risposta cliente CANCELLA
-    console.log('\n❌ Test 4: Simulazione risposta cliente "CANCELLA"');
+    console.log('\n Test 4: Simulazione risposta cliente "CANCELLA"');
     const cancellaResponse = await fetch('http://localhost:3000/api/webhooks/whatsapp', {
       method: 'POST',
       headers: {
@@ -181,41 +181,41 @@ async function testSistemaCompleto() {
     });
 
     if (cancellaResponse.ok) {
-      console.log('✅ Webhook risposta CANCELLA processato');
+      console.log(' Webhook risposta CANCELLA processato');
       
       // Verifica aggiornamento database
       const appuntamentoFinale = await Appuntamento.findById(appuntamentoTest._id);
-      console.log('📝 Stato finale appuntamento:', {
+      console.log(' Stato finale appuntamento:', {
         stato: appuntamentoFinale.stato,
         cancelledBy: appuntamentoFinale.cancelledBy,
         cancelledAt: appuntamentoFinale.cancelledAt
       });
     } else {
-      console.log('❌ Errore webhook cancellazione');
+      console.log(' Errore webhook cancellazione');
     }
 
     // Riepilogo finale
-    console.log('\n🎯 RIEPILOGO TEST COMPLETO');
-    console.log('✅ Appuntamento creato nel database');
-    console.log('✅ Promemoria WhatsApp inviato');
-    console.log('✅ Risposta CONFERMO gestita');
-    console.log('✅ Risposta CANCELLA gestita');
-    console.log('✅ Database aggiornato correttamente');
+    console.log('\n RIEPILOGO TEST COMPLETO');
+    console.log(' Appuntamento creato nel database');
+    console.log(' Promemoria WhatsApp inviato');
+    console.log(' Risposta CONFERMO gestita');
+    console.log(' Risposta CANCELLA gestita');
+    console.log(' Database aggiornato correttamente');
     
-    console.log('\n📱 ISTRUZIONI PER TEST REALE:');
+    console.log('\n ISTRUZIONI PER TEST REALE:');
     console.log('1. Controlla il tuo WhatsApp (+393288625535)');
     console.log('2. Dovresti aver ricevuto un promemoria');
     console.log('3. Rispondi con "CONFERMO" o "CANCELLA"');
     console.log('4. Il sistema aggiornerà automaticamente l\'appuntamento');
     
-    console.log('\n🔍 Per monitorare i log del server:');
+    console.log('\n Per monitorare i log del server:');
     console.log('Guarda il terminale dove gira "npm run dev"');
 
   } catch (error) {
-    console.error('❌ Errore durante il test:', error);
+    console.error(' Errore durante il test:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('✅ Disconnesso dal database');
+    console.log(' Disconnesso dal database');
   }
 }
 

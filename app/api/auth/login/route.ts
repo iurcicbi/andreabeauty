@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
       ruolo: utente.ruolo,
     });
 
-    console.log('🔑 Token generato per:', utente.email, '| ruolo DB:', utente.ruolo);
+    console.log(' Token generato per:', utente.email, '| ruolo DB:', utente.ruolo);
 
     // ========================================================================
     // STEP 7: RISPOSTA DI SUCCESSO

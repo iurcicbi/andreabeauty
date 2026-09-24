@@ -39,10 +39,10 @@ const Appuntamento = mongoose.model('appointments', appuntamentoSchema);
 
 async function correggiNumeroTelefono() {
   try {
-    console.log('📞 Correzione formato numero telefono per WhatsApp');
+    console.log(' Correzione formato numero telefono per WhatsApp');
     
     await mongoose.connect('mongodb://localhost:27017/beautysalon');
-    console.log('✅ Connesso al database');
+    console.log(' Connesso al database');
 
     // Trova l'appuntamento di Iurie
     const appuntamento = await Appuntamento.findOne({
@@ -52,11 +52,11 @@ async function correggiNumeroTelefono() {
     });
 
     if (!appuntamento) {
-      console.log('❌ Appuntamento di Iurie non trovato');
+      console.log(' Appuntamento di Iurie non trovato');
       return;
     }
 
-    console.log('📅 Appuntamento trovato:', {
+    console.log(' Appuntamento trovato:', {
       id: appuntamento._id,
       cliente: `${appuntamento.utente.nome} ${appuntamento.utente.cognome}`,
       telefonoVecchio: appuntamento.utente.telefono,
@@ -71,14 +71,14 @@ async function correggiNumeroTelefono() {
       'utente.telefono': numeroCorretto
     });
 
-    console.log('✅ Numero telefono aggiornato:', {
+    console.log(' Numero telefono aggiornato:', {
       vecchio: '3288625535',
       nuovo: numeroCorretto
     });
 
     // Verifica l'aggiornamento
     const appuntamentoAggiornato = await Appuntamento.findById(appuntamento._id);
-    console.log('📋 Verifica aggiornamento:', {
+    console.log(' Verifica aggiornamento:', {
       id: appuntamentoAggiornato._id,
       cliente: `${appuntamentoAggiornato.utente.nome} ${appuntamentoAggiornato.utente.cognome}`,
       telefono: appuntamentoAggiornato.utente.telefono,
@@ -86,15 +86,15 @@ async function correggiNumeroTelefono() {
       reminderSent: appuntamentoAggiornato.reminderSent
     });
 
-    console.log('\n🎯 NUMERO CORRETTO!');
-    console.log('✅ Il sistema WhatsApp ora può trovare questo appuntamento');
-    console.log('✅ Pronto per test promemoria');
+    console.log('\n NUMERO CORRETTO!');
+    console.log(' Il sistema WhatsApp ora può trovare questo appuntamento');
+    console.log(' Pronto per test promemoria');
 
   } catch (error) {
-    console.error('❌ Errore:', error);
+    console.error(' Errore:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('\n✅ Disconnesso dal database');
+    console.log('\n Disconnesso dal database');
   }
 }
 

@@ -41,17 +41,17 @@ const Appuntamento = mongoose.model('appointments', appuntamentoSchema);
 
 async function verificaAppuntamenti() {
   try {
-    console.log('📋 Verifica stato appuntamenti nel database');
+    console.log(' Verifica stato appuntamenti nel database');
     
     await mongoose.connect('mongodb://localhost:27017/beautysalon');
-    console.log('✅ Connesso al database');
+    console.log(' Connesso al database');
 
     // Trova tutti gli appuntamenti per il numero di test
     const appuntamenti = await Appuntamento.find({
       'utente.telefono': '+393288625535'
     }).sort({ createdAt: -1 });
 
-    console.log(`\n📊 Trovati ${appuntamenti.length} appuntamenti per +393288625535:`);
+    console.log(`\n Trovati ${appuntamenti.length} appuntamenti per +393288625535:`);
     
     appuntamenti.forEach((app, index) => {
       console.log(`\n${index + 1}. Appuntamento ID: ${app._id}`);
@@ -84,7 +84,7 @@ async function verificaAppuntamenti() {
       promemoriDaInviare: appuntamenti.filter(a => !a.reminderSent && a.stato === 'confermato').length
     };
 
-    console.log('\n📈 STATISTICHE:');
+    console.log('\n STATISTICHE:');
     console.log(`   Totale appuntamenti: ${stats.totale}`);
     console.log(`   Confermati: ${stats.confermati}`);
     console.log(`   Cancellati: ${stats.cancellati}`);
@@ -106,22 +106,22 @@ async function verificaAppuntamenti() {
       }
     });
 
-    console.log('\n⏰ SCHEDULER 24H:');
+    console.log('\n SCHEDULER 24H:');
     console.log(`   Finestra temporale: ${windowStart.toISOString()} - ${windowEnd.toISOString()}`);
     console.log(`   Appuntamenti da processare: ${appuntamenti24h.length}`);
     
     if (appuntamenti24h.length > 0) {
-      console.log('   📱 Lo scheduler invierà promemoria per:');
+      console.log('    Lo scheduler invierà promemoria per:');
       appuntamenti24h.forEach(app => {
         console.log(`   - ${app.utente.nome} ${app.utente.cognome} (${app.utente.telefono}) - ${app.data}`);
       });
     }
 
   } catch (error) {
-    console.error('❌ Errore:', error);
+    console.error(' Errore:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('\n✅ Disconnesso dal database');
+    console.log('\n Disconnesso dal database');
   }
 }
 

@@ -62,8 +62,8 @@ export async function GET(req: NextRequest) {
     const dataObj = new Date(data);
     const dataStr = dataObj.toISOString().split('T')[0];
     
-    console.log('📅 Date requested:', dataStr);
-    console.log('🔒 Specialist closed days:', specialist.giorniChiusura);
+    console.log(' Date requested:', dataStr);
+    console.log(' Specialist closed days:', specialist.giorniChiusura);
     
     const chiusura = specialist.giorniChiusura?.find((c: any) => {
       const dataChiusura = typeof c.data === 'string' ? c.data : new Date(c.data).toISOString().split('T')[0];
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (chiusura) {
-      console.log('❌ Closed day:', chiusura.motivo);
+      console.log(' Closed day:', chiusura.motivo);
       return NextResponse.json({
         successo: true,
         dati: { slot: [] },
@@ -81,14 +81,14 @@ export async function GET(req: NextRequest) {
     const giorniSettimana = ['domenica', 'lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'];
     const giornoSettimana = giorniSettimana[dataObj.getDay()];
 
-    console.log('📆 Day of week:', giornoSettimana);
+    console.log(' Day of week:', giornoSettimana);
 
     const orarioGiorno = specialist.orariSettimanali?.[giornoSettimana as keyof typeof specialist.orariSettimanali];
 
-    console.log('⏰ Daily schedule:', orarioGiorno);
+    console.log(' Daily schedule:', orarioGiorno);
 
     if (!orarioGiorno || !orarioGiorno.aperto) {
-      console.log('❌ Specialist does not work this day');
+      console.log(' Specialist does not work this day');
       return NextResponse.json({
         successo: true,
         dati: { slot: [] },
@@ -115,8 +115,8 @@ export async function GET(req: NextRequest) {
       serviziMap.set(servizio._id.toString(), servizio.durata);
     });
 
-    console.log('📋 Appointments found:', appuntamenti.length);
-    console.log('🔧 Services loaded:', servizi.length);
+    console.log(' Appointments found:', appuntamenti.length);
+    console.log(' Services loaded:', servizi.length);
 
     const ora = new Date();
     const blocchiTemporanei = await PrenotazioneTemporanea.find({
@@ -125,7 +125,7 @@ export async function GET(req: NextRequest) {
       scadenza: { $gt: ora },
     });
 
-    console.log('🔒 Active temporary blocks:', blocchiTemporanei.length);
+    console.log(' Active temporary blocks:', blocchiTemporanei.length);
 
     let oraInizioSlot = orarioGiorno.oraInizio || '09:00';
     let oraFineSlot = orarioGiorno.oraFine || '18:00';
@@ -161,8 +161,8 @@ export async function GET(req: NextRequest) {
       serviziMap
     );
 
-    console.log('✅ Slot generati:', slot.length);
-    console.log('📊 Slot disponibili:', slot.filter(s => s.disponibile).length);
+    console.log(' Slot generati:', slot.length);
+    console.log(' Slot disponibili:', slot.filter(s => s.disponibile).length);
 
     const sediDisponibili = await calcolaSediDelGiorno(
       orarioGiorno,
@@ -261,7 +261,7 @@ function generaSlotOrari(
 ): { ora: string; disponibile: boolean }[] {
   const slot: { ora: string; disponibile: boolean }[] = [];
 
-  console.log('🔧 Generazione slot con parametri:', {
+  console.log(' Generazione slot con parametri:', {
     oraInizio,
     oraFine,
     pausa,
@@ -277,7 +277,7 @@ function generaSlotOrari(
   const minutiPausaInizio = pausa ? orarioToMinuti(pausa.oraInizio) : null;
   const minutiPausaFine = pausa ? orarioToMinuti(pausa.oraFine) : null;
 
-  console.log('🔧 Minuti:', {
+  console.log(' Minuti:', {
     inizio: minutiInizio,
     fine: minutiFine,
     pausaInizio: minutiPausaInizio,
@@ -345,7 +345,7 @@ function generaSlotOrari(
     });
   }
 
-  console.log('🔧 Risultato generazione:', {
+  console.log(' Risultato generazione:', {
     slotGenerati: slot.length,
     slotDisponibili: slot.filter(s => s.disponibile).length,
     slotOccupati: slot.filter(s => !s.disponibile).length,

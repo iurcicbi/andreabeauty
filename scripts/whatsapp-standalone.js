@@ -19,43 +19,43 @@ const mongoose = require('mongoose');
 const { initReminderScheduler } = require('../lib/cron/reminders');
 
 async function main() {
-  console.log('🚀 WHATSAPP STANDALONE');
+  console.log(' WHATSAPP STANDALONE');
   console.log('======================\n');
 
-  console.log(`📦 MongoDB URI: ${process.env.MONGODB_URI.replace(/\/\/.*@/, '//***@')}`);
-  console.log(`📦 Pairing Phone: ${process.env.WHATSAPP_PAIRING_PHONE || 'N/A'}`);
+  console.log(` MongoDB URI: ${process.env.MONGODB_URI.replace(/\/\/.*@/, '//***@')}`);
+  console.log(` Pairing Phone: ${process.env.WHATSAPP_PAIRING_PHONE || 'N/A'}`);
 
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ MongoDB connesso con successo\n');
+    console.log(' MongoDB connesso con successo\n');
   } catch (err) {
-    console.error('❌ Errore connessione MongoDB:', err.message);
+    console.error(' Errore connessione MongoDB:', err.message);
     process.exit(1);
   }
 
   try {
     await initReminderScheduler();
-    console.log('\n✅ Sistema reminder WhatsApp avviato!');
-    console.log('📱 Scansiona il QR code o usa pairing code per collegare WhatsApp.\n');
+    console.log('\n Sistema reminder WhatsApp avviato!');
+    console.log(' Scansiona il QR code o usa pairing code per collegare WhatsApp.\n');
   } catch (err) {
-    console.error('❌ Errore avvio reminder:', err.message);
+    console.error(' Errore avvio reminder:', err.message);
   }
 
   // Tieni il processo vivo
   process.on('SIGINT', async () => {
-    console.log('\n⚠️ Arresto in corso...');
+    console.log('\n Arresto in corso...');
     await mongoose.disconnect();
     process.exit(0);
   });
 
   process.on('SIGTERM', async () => {
-    console.log('\n⚠️ Arresto in corso...');
+    console.log('\n Arresto in corso...');
     await mongoose.disconnect();
     process.exit(0);
   });
 }
 
 main().catch((err) => {
-  console.error('❌ Errore fatale:', err);
+  console.error(' Errore fatale:', err);
   process.exit(1);
 });

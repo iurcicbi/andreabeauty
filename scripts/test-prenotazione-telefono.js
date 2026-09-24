@@ -39,10 +39,10 @@ const Appuntamento = mongoose.model('appointments', appuntamentoSchema);
 
 async function testPrenotazioneTelefono() {
   try {
-    console.log('📱 Test prenotazione con normalizzazione telefono');
+    console.log(' Test prenotazione con normalizzazione telefono');
     
     await mongoose.connect('mongodb://localhost:27017/beautysalon');
-    console.log('✅ Connesso al database');
+    console.log(' Connesso al database');
 
     // Test diversi formati di telefono
     const testCases = [
@@ -52,7 +52,7 @@ async function testPrenotazioneTelefono() {
       { nome: 'Paolo', cognome: 'Neri', telefono: '393451234567', expected: '+393451234567' }
     ];
 
-    console.log('\n🧪 SIMULAZIONE PRENOTAZIONI:');
+    console.log('\n SIMULAZIONE PRENOTAZIONI:');
 
     for (let i = 0; i < testCases.length; i++) {
       const test = testCases[i];
@@ -88,32 +88,32 @@ async function testPrenotazioneTelefono() {
       console.log(`   Telefono normalizzato: "${telefonoNormalizzato}"`);
       
       const successo = telefonoNormalizzato === test.expected;
-      console.log(`   Status: ${successo ? '✅ PASS' : '❌ FAIL'}`);
+      console.log(`   Status: ${successo ? ' PASS' : ' FAIL'}`);
 
       if (successo) {
-        console.log(`   ✅ Il numero sarà salvato correttamente per WhatsApp`);
+        console.log(`    Il numero sarà salvato correttamente per WhatsApp`);
       } else {
-        console.log(`   ❌ Problema nella normalizzazione`);
+        console.log(`    Problema nella normalizzazione`);
       }
     }
 
     // Verifica appuntamenti esistenti con numeri non normalizzati
-    console.log('\n🔍 VERIFICA APPUNTAMENTI ESISTENTI:');
+    console.log('\n VERIFICA APPUNTAMENTI ESISTENTI:');
     
     const appuntamentiSenzaPrefisso = await Appuntamento.find({
       'utente.telefono': { $not: /^\+39/ }
     });
 
-    console.log(`📊 Appuntamenti senza prefisso +39: ${appuntamentiSenzaPrefisso.length}`);
+    console.log(` Appuntamenti senza prefisso +39: ${appuntamentiSenzaPrefisso.length}`);
     
     if (appuntamentiSenzaPrefisso.length > 0) {
-      console.log('⚠️ ATTENZIONE: Ci sono appuntamenti con numeri non normalizzati:');
+      console.log(' ATTENZIONE: Ci sono appuntamenti con numeri non normalizzati:');
       appuntamentiSenzaPrefisso.forEach(app => {
         console.log(`   - ${app.utente.nome} ${app.utente.cognome}: "${app.utente.telefono}"`);
       });
-      console.log('\n💡 SUGGERIMENTO: Esegui lo script di correzione per normalizzare i numeri esistenti');
+      console.log('\n SUGGERIMENTO: Esegui lo script di correzione per normalizzare i numeri esistenti');
     } else {
-      console.log('✅ Tutti gli appuntamenti hanno numeri in formato +39');
+      console.log(' Tutti gli appuntamenti hanno numeri in formato +39');
     }
 
     // Verifica appuntamenti compatibili con WhatsApp
@@ -123,22 +123,22 @@ async function testPrenotazioneTelefono() {
       reminderSent: false
     });
 
-    console.log(`\n📱 APPUNTAMENTI COMPATIBILI WHATSAPP: ${appuntamentiWhatsApp.length}`);
+    console.log(`\n APPUNTAMENTI COMPATIBILI WHATSAPP: ${appuntamentiWhatsApp.length}`);
     appuntamentiWhatsApp.forEach(app => {
       console.log(`   - ${app.utente.nome} ${app.utente.cognome}: ${app.utente.telefono} (${app.data})`);
     });
 
-    console.log('\n🎯 RISULTATO:');
-    console.log('✅ Sistema di normalizzazione implementato');
-    console.log('✅ Nuove prenotazioni avranno formato +39 automaticamente');
-    console.log('✅ Compatibilità garantita con Twilio WhatsApp');
-    console.log('✅ Promemoria funzioneranno correttamente');
+    console.log('\n RISULTATO:');
+    console.log(' Sistema di normalizzazione implementato');
+    console.log(' Nuove prenotazioni avranno formato +39 automaticamente');
+    console.log(' Compatibilità garantita con Twilio WhatsApp');
+    console.log(' Promemoria funzioneranno correttamente');
 
   } catch (error) {
-    console.error('❌ Errore:', error);
+    console.error(' Errore:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('\n✅ Disconnesso dal database');
+    console.log('\n Disconnesso dal database');
   }
 }
 

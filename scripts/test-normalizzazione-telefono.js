@@ -31,7 +31,7 @@ function normalizzaTelefono(telefono) {
   return '+39' + numeroPulito;
 }
 
-console.log('📱 Test normalizzazione numeri telefono per WhatsApp');
+console.log(' Test normalizzazione numeri telefono per WhatsApp');
 
 const testCases = [
   // Casi già corretti
@@ -56,7 +56,7 @@ const testCases = [
   { input: '  328 862 5535  ', expected: '+393288625535', desc: 'Con spazi iniziali/finali' }
 ];
 
-console.log('\n🧪 ESECUZIONE TEST:');
+console.log('\n ESECUZIONE TEST:');
 let passati = 0;
 let falliti = 0;
 
@@ -68,7 +68,7 @@ testCases.forEach((test, index) => {
   console.log(`   Input: "${test.input}"`);
   console.log(`   Expected: "${test.expected}"`);
   console.log(`   Risultato: "${risultato}"`);
-  console.log(`   Status: ${successo ? '✅ PASS' : '❌ FAIL'}`);
+  console.log(`   Status: ${successo ? ' PASS' : ' FAIL'}`);
   console.log('');
   
   if (successo) {
@@ -78,21 +78,21 @@ testCases.forEach((test, index) => {
   }
 });
 
-console.log('📊 RISULTATI:');
-console.log(`✅ Test passati: ${passati}`);
-console.log(`❌ Test falliti: ${falliti}`);
-console.log(`📈 Percentuale successo: ${Math.round((passati / testCases.length) * 100)}%`);
+console.log(' RISULTATI:');
+console.log(` Test passati: ${passati}`);
+console.log(` Test falliti: ${falliti}`);
+console.log(` Percentuale successo: ${Math.round((passati / testCases.length) * 100)}%`);
 
 if (falliti === 0) {
-  console.log('\n🎉 TUTTI I TEST PASSATI!');
-  console.log('✅ La funzione di normalizzazione funziona correttamente');
-  console.log('✅ Tutti i numeri saranno convertiti in formato +39 per Twilio');
+  console.log('\n TUTTI I TEST PASSATI!');
+  console.log(' La funzione di normalizzazione funziona correttamente');
+  console.log(' Tutti i numeri saranno convertiti in formato +39 per Twilio');
 } else {
-  console.log('\n⚠️ ALCUNI TEST FALLITI');
-  console.log('❌ La funzione necessita correzioni');
+  console.log('\n ALCUNI TEST FALLITI');
+  console.log(' La funzione necessita correzioni');
 }
 
-console.log('\n📱 ESEMPI PRATICI:');
-console.log('Input utente: "328 862 5535" → Output: "' + normalizzaTelefono('328 862 5535') + '"');
-console.log('Input utente: "06-12345678" → Output: "' + normalizzaTelefono('06-12345678') + '"');
-console.log('Input utente: "+39 328 862 5535" → Output: "' + normalizzaTelefono('+39 328 862 5535') + '"');
+console.log('\n ESEMPI PRATICI:');
+console.log('Input utente: "328 862 5535"  Output: "' + normalizzaTelefono('328 862 5535') + '"');
+console.log('Input utente: "06-12345678"  Output: "' + normalizzaTelefono('06-12345678') + '"');
+console.log('Input utente: "+39 328 862 5535"  Output: "' + normalizzaTelefono('+39 328 862 5535') + '"');

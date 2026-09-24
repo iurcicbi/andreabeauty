@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(_request: NextRequest) {
   try {
-    console.log('🔄 Test manuale scheduler avviato');
+    console.log(' Test manuale scheduler avviato');
 
     const { runDailyReminders } = require('@/lib/cron/reminders');
     await runDailyReminders();
@@ -18,7 +18,7 @@ export async function POST(_request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Errore test scheduler:', error);
+    console.error(' Errore test scheduler:', error);
 
     return NextResponse.json({
       success: false,

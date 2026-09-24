@@ -15,16 +15,16 @@ export async function GET(
     void Utente;
     void Servizio;
 
-    console.log('🔍 API /api/specialist/[id] - Searching specialist by ID:', params.id);
+    console.log(' API /api/specialist/[id] - Searching specialist by ID:', params.id);
 
     const specialist = await Specialist.findById(params.id)
       .populate('utente', 'nome cognome')
       .populate('specializzazioni', 'nome categoria durata prezzo descrizione immagine');
 
-    console.log('📦 Specialist found:', specialist ? 'YES' : 'NO');
+    console.log(' Specialist found:', specialist ? 'YES' : 'NO');
 
     if (specialist) {
-      console.log('📦 Closed days:', specialist.giorniChiusura?.length || 0);
+      console.log(' Closed days:', specialist.giorniChiusura?.length || 0);
     }
 
     if (!specialist) {
@@ -55,7 +55,7 @@ export async function GET(
     });
 
   } catch (errore: any) {
-    console.error('❌ Error fetching specialist:', errore);
+    console.error(' Error fetching specialist:', errore);
     return NextResponse.json(
       { successo: false, errore: 'Error fetching specialist' },
       { status: 500 }

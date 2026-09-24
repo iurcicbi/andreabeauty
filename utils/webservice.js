@@ -46,13 +46,13 @@ axios.interceptors.request.use(
 
     // Log in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🌐 ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(` ${config.method?.toUpperCase()} ${config.url}`);
     }
 
     return config;
   },
   (error) => {
-    console.error('❌ Errore nella richiesta:', error);
+    console.error(' Errore nella richiesta:', error);
     return Promise.reject(error);
   }
 );
@@ -65,7 +65,7 @@ axios.interceptors.response.use(
   (response) => {
     // Log in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ Risposta ${response.status} da ${response.config.url}`);
+      console.log(` Risposta ${response.status} da ${response.config.url}`);
     }
     return response;
   },
@@ -82,28 +82,28 @@ axios.interceptors.response.use(
               window.location.href = '/login';
             }
           }
-          console.error('❌ 401: Non autenticato');
+          console.error(' 401: Non autenticato');
           break;
 
         case 403:
-          console.error('❌ 403: Accesso negato');
+          console.error(' 403: Accesso negato');
           break;
 
         case 404:
-          console.error('❌ 404: Risorsa non trovata');
+          console.error(' 404: Risorsa non trovata');
           break;
 
         case 500:
-          console.error('❌ 500: Errore del server');
+          console.error(' 500: Errore del server');
           break;
 
         default:
-          console.error(`❌ Errore ${status}:`, error.response.data);
+          console.error(` Errore ${status}:`, error.response.data);
       }
     } else if (error.request) {
-      console.error('❌ Nessuna risposta dal server:', error.message);
+      console.error(' Nessuna risposta dal server:', error.message);
     } else {
-      console.error('❌ Errore nella richiesta:', error.message);
+      console.error(' Errore nella richiesta:', error.message);
     }
 
     return Promise.reject(error);
@@ -172,7 +172,7 @@ const webservice = {
     const cached = requestCache.get(cacheKey);
     
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`📦 Cache hit per ${url}`);
+      console.log(` Cache hit per ${url}`);
       return cached.data;
     }
 

@@ -68,7 +68,7 @@ async function connessioneMongoDB(): Promise<typeof mongoose> {
 
   // Se abbiamo già una connessione attiva, riutilizzala
   if (cached.conn) {
-    console.log('✅ Utilizzo connessione MongoDB esistente');
+    console.log(' Utilizzo connessione MongoDB esistente');
     return cached.conn;
   }
 
@@ -81,11 +81,11 @@ async function connessioneMongoDB(): Promise<typeof mongoose> {
       socketTimeoutMS: 45000, // Timeout socket di 45 secondi
     };
 
-    console.log('🔄 Creazione nuova connessione MongoDB...');
+    console.log(' Creazione nuova connessione MongoDB...');
     
     // Crea la promessa di connessione
     cached.promise = mongoose.connect(MONGODB_URI, opzioni).then((mongoose) => {
-      console.log('✅ Connessione MongoDB stabilita con successo');
+      console.log(' Connessione MongoDB stabilita con successo');
       return mongoose;
     });
   }
@@ -96,7 +96,7 @@ async function connessioneMongoDB(): Promise<typeof mongoose> {
   } catch (errore) {
     // In caso di errore, resetta la promessa per permettere un nuovo tentativo
     cached.promise = null;
-    console.error('❌ Errore connessione MongoDB:', errore);
+    console.error(' Errore connessione MongoDB:', errore);
     throw errore;
   }
 
@@ -112,7 +112,7 @@ export async function disconnessioneMongoDB(): Promise<void> {
     await cached.conn.disconnect();
     cached.conn = null;
     cached.promise = null;
-    console.log('🔌 Disconnessione MongoDB completata');
+    console.log(' Disconnessione MongoDB completata');
   }
 }
 

@@ -39,10 +39,10 @@ const Appuntamento = mongoose.model('appointments', appuntamentoSchema);
 
 async function correggiOrarioAppuntamento() {
   try {
-    console.log('🕐 Correzione orario appuntamento Iurie');
+    console.log(' Correzione orario appuntamento Iurie');
     
     await mongoose.connect('mongodb://localhost:27017/beautysalon');
-    console.log('✅ Connesso al database');
+    console.log(' Connesso al database');
 
     // Trova l'appuntamento di Iurie
     const appuntamento = await Appuntamento.findOne({
@@ -52,11 +52,11 @@ async function correggiOrarioAppuntamento() {
     });
 
     if (!appuntamento) {
-      console.log('❌ Appuntamento di Iurie non trovato');
+      console.log(' Appuntamento di Iurie non trovato');
       return;
     }
 
-    console.log('📅 Appuntamento attuale:', {
+    console.log(' Appuntamento attuale:', {
       id: appuntamento._id,
       cliente: `${appuntamento.utente.nome} ${appuntamento.utente.cognome}`,
       dataVecchia: appuntamento.data,
@@ -69,7 +69,7 @@ async function correggiOrarioAppuntamento() {
     domani.setDate(domani.getDate() + 1);
     domani.setHours(19, 47, 0, 0); // 19:47:00
 
-    console.log('🔄 Aggiornamento a:', {
+    console.log(' Aggiornamento a:', {
       dataNuova: domani,
       oraInizio: '19:47',
       oraFine: '19:50'
@@ -82,11 +82,11 @@ async function correggiOrarioAppuntamento() {
       oraFine: '19:50'
     });
 
-    console.log('✅ Appuntamento aggiornato con successo');
+    console.log(' Appuntamento aggiornato con successo');
 
     // Verifica l'aggiornamento
     const appuntamentoAggiornato = await Appuntamento.findById(appuntamento._id);
-    console.log('📋 Verifica aggiornamento:', {
+    console.log(' Verifica aggiornamento:', {
       id: appuntamentoAggiornato._id,
       cliente: `${appuntamentoAggiornato.utente.nome} ${appuntamentoAggiornato.utente.cognome}`,
       data: appuntamentoAggiornato.data,
@@ -104,25 +104,25 @@ async function correggiOrarioAppuntamento() {
 
     const nellaFinestra = appuntamentoAggiornato.data >= windowStart && appuntamentoAggiornato.data <= windowEnd;
 
-    console.log('\n⏰ VERIFICA SCHEDULER:');
+    console.log('\n VERIFICA SCHEDULER:');
     console.log('Finestra scheduler:', windowStart.toISOString(), '-', windowEnd.toISOString());
     console.log('Appuntamento:', appuntamentoAggiornato.data.toISOString());
-    console.log('Nella finestra 24h:', nellaFinestra ? '✅ SI' : '❌ NO');
+    console.log('Nella finestra 24h:', nellaFinestra ? ' SI' : ' NO');
 
     if (nellaFinestra) {
-      console.log('\n🎉 PERFETTO!');
-      console.log('✅ L\'appuntamento ora sarà processato dallo scheduler');
-      console.log('📱 Il promemoria verrà inviato automaticamente');
+      console.log('\n PERFETTO!');
+      console.log(' L\'appuntamento ora sarà processato dallo scheduler');
+      console.log(' Il promemoria verrà inviato automaticamente');
     } else {
       const minutiMancanti = Math.round((windowStart.getTime() - now.getTime()) / (1000 * 60));
-      console.log(`\n⏳ L'appuntamento entrerà nella finestra scheduler tra ${minutiMancanti} minuti`);
+      console.log(`\n L'appuntamento entrerà nella finestra scheduler tra ${minutiMancanti} minuti`);
     }
 
   } catch (error) {
-    console.error('❌ Errore:', error);
+    console.error(' Errore:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('\n✅ Disconnesso dal database');
+    console.log('\n Disconnesso dal database');
   }
 }
 

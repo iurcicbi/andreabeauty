@@ -135,7 +135,7 @@ export default function CMSLayout({
     try {
       const response = await fetch('/api/settings');
       const data = await response.json();
-      console.log('📦 Layout CMS - Impostazioni caricate:', data.dati);
+      console.log(' Layout CMS - Impostazioni caricate:', data.dati);
       if (data.dati) {
         // Usa logoCMS se disponibile, altrimenti logo principale
         const logoUrl = data.dati.logoCMS || data.dati.logo || '';

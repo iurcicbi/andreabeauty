@@ -12,26 +12,26 @@
 const { execSync } = require('child_process');
 
 async function cleanupAll() {
-  console.log('🧹 PULIZIA COMPLETA PROCESSI WHATSAPP');
+  console.log(' PULIZIA COMPLETA PROCESSI WHATSAPP');
   console.log('=====================================\n');
 
   try {
-    console.log('🔍 Ricerca processi attivi...');
+    console.log(' Ricerca processi attivi...');
     
     // Mostra processi Chrome/WhatsApp attivi
     try {
       const processes = execSync('ps aux | grep -E "(chrome|whatsapp|puppeteer)" | grep -v grep', { encoding: 'utf8' });
       if (processes.trim()) {
-        console.log('📋 Processi trovati:');
+        console.log(' Processi trovati:');
         console.log(processes);
       } else {
-        console.log('✅ Nessun processo Chrome/WhatsApp attivo');
+        console.log(' Nessun processo Chrome/WhatsApp attivo');
       }
     } catch (err) {
-      console.log('✅ Nessun processo Chrome/WhatsApp attivo');
+      console.log(' Nessun processo Chrome/WhatsApp attivo');
     }
 
-    console.log('\n🔥 Terminazione forzata processi...');
+    console.log('\n Terminazione forzata processi...');
     
     // Termina TUTTI i processi Chrome/puppeteer con forza
     const commands = [
@@ -52,9 +52,9 @@ async function cleanupAll() {
       }
     });
 
-    console.log('✅ Processi terminati');
+    console.log(' Processi terminati');
 
-    console.log('\n🗂️  Pulizia file di lock...');
+    console.log('\n  Pulizia file di lock...');
     
     // Rimuovi file di lock e sessioni temporanee
     const cleanupCommands = [
@@ -74,21 +74,21 @@ async function cleanupAll() {
       }
     });
 
-    console.log('✅ File di lock rimossi');
+    console.log(' File di lock rimossi');
 
-    console.log('\n⏳ Attesa stabilizzazione sistema...');
+    console.log('\n Attesa stabilizzazione sistema...');
     
     // Attesa per essere sicuri che tutto sia pulito
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    console.log('\n🎉 PULIZIA COMPLETATA!');
-    console.log('✅ Ora puoi avviare lo script WhatsApp senza conflitti');
+    console.log('\n PULIZIA COMPLETATA!');
+    console.log(' Ora puoi avviare lo script WhatsApp senza conflitti');
     console.log('\nComandi disponibili:');
     console.log('  npm run reminders        # Script principale reminder');
     console.log('  npm run test:reminder    # Test singolo appuntamento');
 
   } catch (error) {
-    console.error('❌ Errore durante la pulizia:', error.message);
+    console.error(' Errore durante la pulizia:', error.message);
     process.exit(1);
   }
 }
@@ -99,6 +99,6 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error('❌ Errore fatale:', err.message);
+  console.error(' Errore fatale:', err.message);
   process.exit(1);
 });

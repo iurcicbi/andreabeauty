@@ -34,13 +34,13 @@ async function main() {
     const mod = await import('./src/bootstrap');
     const bootstrapFn = mod.bootstrap || mod.default?.bootstrap || mod.default;
     if (typeof bootstrapFn !== 'function') {
-      console.error('❌ Bootstrap export not found. Module keys:', Object.keys(mod));
+      console.error(' Bootstrap export not found. Module keys:', Object.keys(mod));
       throw new Error('bootstrap export not found');
     }
     await bootstrapFn();
   } catch (err) {
-    console.error('❌ Bootstrap error:', err.message);
-    console.log('⚠️ Server continuing without bootstrap services');
+    console.error(' Bootstrap error:', err.message);
+    console.log(' Server continuing without bootstrap services');
   }
 
   const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
@@ -78,36 +78,36 @@ async function main() {
       }
       await handle(req, res, parsedUrl);
     } catch (err) {
-      console.error('❌ Request error:', req.url, err);
+      console.error(' Request error:', req.url, err);
       res.statusCode = 500;
       res.end('Internal Server Error');
     }
   }).listen(port, (err) => {
     if (err) throw err;
-    console.log(`✅ Server ready on http://${hostname}:${port}`);
-    console.log(`📦 Environment: ${dev ? 'development' : 'production'}`);
+    console.log(` Server ready on http://${hostname}:${port}`);
+    console.log(` Environment: ${dev ? 'development' : 'production'}`);
   });
 }
 
 main().catch(err => {
-  console.error('❌ Fatal startup error:', err);
+  console.error(' Fatal startup error:', err);
   process.exit(1);
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('❌ Uncaught Exception:', err);
+  console.error(' Uncaught Exception:', err);
 });
 
 process.on('unhandledRejection', (reason) => {
-  console.error('❌ Unhandled Rejection:', reason);
+  console.error(' Unhandled Rejection:', reason);
 });
 
 process.on('SIGTERM', () => {
-  console.log('⚠️ Shutting down...');
+  console.log(' Shutting down...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('⚠️ Shutting down...');
+  console.log(' Shutting down...');
   process.exit(0);
 });

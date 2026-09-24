@@ -109,9 +109,9 @@ export async function PUT(
     if (telefono !== undefined) specialist.telefono = telefono;
     if (orariSettimanali !== undefined) specialist.orariSettimanali = orariSettimanali;
     if (giorniChiusura !== undefined) {
-      console.log('📅 Updating closed days');
-      console.log('📅 Old closed days:', specialist.giorniChiusura.length);
-      console.log('📅 New closed days:', giorniChiusura.length);
+      console.log(' Updating closed days');
+      console.log(' Old closed days:', specialist.giorniChiusura.length);
+      console.log(' New closed days:', giorniChiusura.length);
       specialist.giorniChiusura = giorniChiusura;
     }
     if (impostazioni !== undefined) specialist.impostazioni = impostazioni;
@@ -119,7 +119,7 @@ export async function PUT(
 
     await specialist.save();
 
-    console.log('✅ Specialist saved, final closed days:', specialist.giorniChiusura.length);
+    console.log(' Specialist saved, final closed days:', specialist.giorniChiusura.length);
 
     await specialist.populate('utente', 'nome cognome email telefono attivo');
     await specialist.populate('specializzazioni', 'nome categoria durata prezzo descrizione immagine');

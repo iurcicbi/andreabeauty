@@ -127,7 +127,7 @@ export default function Sidebar({ utente, onLogout }: SidebarProps) {
   const caricaImpostazioni = async () => {
     try {
       const risposta = await webservice.get('/api/settings');
-      console.log('📦 Sidebar - Impostazioni caricate:', risposta.dati);
+      console.log(' Sidebar - Impostazioni caricate:', risposta.dati);
       if (risposta.dati) {
         // Usa logoCMS se disponibile, altrimenti logo principale
         const logoUrl = risposta.dati.logoCMS || risposta.dati.logo || '';

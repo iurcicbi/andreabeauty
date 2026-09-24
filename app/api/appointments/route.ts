@@ -57,11 +57,11 @@ export async function GET(req: NextRequest) {
     // Costruisci il filtro in base al ruolo
     let filtro: any = {};
 
-    console.log('📋 Token decoded - id:', utente.id, '| ruolo:', utente.ruolo, '| email:', utente.email);
+    console.log(' Token decoded - id:', utente.id, '| ruolo:', utente.ruolo, '| email:', utente.email);
     
     if (utente.ruolo === 'admin') {
       // Admin vede tutti gli appuntamenti senza filtri
-      console.log('📋 Admin: loading all appointments');
+      console.log(' Admin: loading all appointments');
     } else if (utente.ruolo === 'specialist' || utente.ruolo === 'barber') {
       let specialistId = utente.id;
       try {
@@ -74,18 +74,18 @@ export async function GET(req: NextRequest) {
             telefono: '',
             attivo: true,
           });
-          console.log('📋 Auto-created specialist profile:', specialist._id);
+          console.log(' Auto-created specialist profile:', specialist._id);
         }
         specialistId = specialist._id.toString();
       } catch (e) {
-        console.log('📋 Error finding/creating specialist:', e);
+        console.log(' Error finding/creating specialist:', e);
       }
       filtro['$or'] = [
         { specialista: specialistId },
         { specialista: utente.id },
         { specialistOld: utente.id },
       ];
-      console.log('📋 Appointment filter:', JSON.stringify(filtro));
+      console.log(' Appointment filter:', JSON.stringify(filtro));
     } else {
       // Per gli utenti normali, filtra per telefono (dato che ora utente è embedded)
       const utenteCompleto = await Utente.findById(utente.id);
@@ -161,7 +161,7 @@ export async function GET(req: NextRequest) {
       return obj;
     });
 
-    console.log('📋 Appointments found:', result.length, 'with filter:', JSON.stringify(filtro));
+    console.log(' Appointments found:', result.length, 'with filter:', JSON.stringify(filtro));
 
     return NextResponse.json({
       successo: true,
@@ -247,7 +247,7 @@ export async function POST(req: NextRequest) {
     let idCliente;
     let datiClientePerAppuntamento;
 
-    console.log('🔍 Dati cliente ricevuti:', { clienteNome, clienteCognome, clienteTelefono, clienteEmail });
+    console.log(' Dati cliente ricevuti:', { clienteNome, clienteCognome, clienteTelefono, clienteEmail });
 
     if (clienteId) {
       // Caso 1: Cliente esistente selezionato
@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
       let clienteEsistente = await Utente.findOne({ telefono: clienteTelefono });
       
       if (clienteEsistente) {
-        console.log('📞 Cliente esistente trovato:', clienteEsistente.nome, clienteEsistente.cognome);
+        console.log(' Cliente esistente trovato:', clienteEsistente.nome, clienteEsistente.cognome);
         
         // Aggiorna i dati del cliente esistente con quelli forniti
         clienteEsistente.nome = clienteNome;
@@ -279,7 +279,7 @@ export async function POST(req: NextRequest) {
           email: clienteEmail || clienteEsistente.email
         };
       } else {
-        console.log('👤 Creazione nuovo cliente');
+        console.log(' Creazione nuovo cliente');
         
         // Crea nuovo cliente
         const passwordTemp = Math.random().toString(36).slice(-8);
@@ -415,7 +415,7 @@ export async function POST(req: NextRequest) {
     let datiCliente;
     if (datiClientePerAppuntamento) {
       datiCliente = datiClientePerAppuntamento;
-      console.log('✅ Usando dati cliente preparati:', datiCliente);
+      console.log(' Usando dati cliente preparati:', datiCliente);
     } else {
       // Recupera i dati del cliente dal database
       const cliente = await Utente.findById(idCliente);
@@ -431,7 +431,7 @@ export async function POST(req: NextRequest) {
         telefono: cliente.telefono,
         email: cliente.email
       };
-      console.log('📋 Dati cliente dal database:', datiCliente);
+      console.log(' Dati cliente dal database:', datiCliente);
     }
 
     // Prepara dati appuntamento

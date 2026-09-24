@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const expectedAuth = process.env.CRON_SECRET;
 
     if (expectedAuth && authHeader !== `Bearer ${expectedAuth}`) {
-      console.log('❌ Autorizzazione fallita per trigger cron');
+      console.log(' Autorizzazione fallita per trigger cron');
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 });
     }
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     };
 
     if (check === 'expiry') {
-      console.log('🔄 Trigger manuale controllo scaduti');
+      console.log(' Trigger manuale controllo scaduti');
       await runExpiryCheck();
       return NextResponse.json({
         success: true,
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log('🔄 Trigger manuale reminder giornalieri');
+    console.log(' Trigger manuale reminder giornalieri');
     await runDailyReminders();
 
     return NextResponse.json({
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error('❌ Errore trigger cron:', error);
+    console.error(' Errore trigger cron:', error);
     return NextResponse.json(
       { error: 'Errore interno del server', message: error.message },
       { status: 500 }

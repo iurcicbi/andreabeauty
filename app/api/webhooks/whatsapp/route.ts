@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       body: message,
     });
   } catch (error: any) {
-    console.error('❌ Errore webhook WhatsApp:', error);
+    console.error(' Errore webhook WhatsApp:', error);
     return NextResponse.json(
       { error: 'Errore interno', message: error.message },
       { status: 500 }

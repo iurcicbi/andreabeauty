@@ -11,9 +11,9 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/beauty
 
 async function creaServiziTest() {
   try {
-    console.log('🔄 Connessione a MongoDB...');
+    console.log(' Connessione a MongoDB...');
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ Connesso a MongoDB');
+    console.log(' Connesso a MongoDB');
 
     // Schema Servizio semplificato
     const ServizioSchema = new mongoose.Schema({
@@ -75,34 +75,34 @@ async function creaServiziTest() {
     const count = await Servizio.countDocuments();
     
     if (count > 0) {
-      console.log(`⚠️  Esistono già ${count} servizi nel database`);
+      console.log(`  Esistono già ${count} servizi nel database`);
       console.log('Vuoi eliminarli e ricrearli? (Ctrl+C per annullare)');
       
       // Aspetta 3 secondi
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       await Servizio.deleteMany({});
-      console.log('🗑️  Servizi esistenti eliminati');
+      console.log('  Servizi esistenti eliminati');
     }
 
     // Crea i servizi
-    console.log('📝 Creazione servizi...');
+    console.log(' Creazione servizi...');
     const risultato = await Servizio.insertMany(servizi);
 
-    console.log(`✅ ${risultato.length} servizi creati con successo!`);
+    console.log(` ${risultato.length} servizi creati con successo!`);
     console.log('');
-    console.log('📋 Servizi creati:');
+    console.log(' Servizi creati:');
     risultato.forEach((s, i) => {
       console.log(`   ${i + 1}. ${s.nome} - €${s.prezzo} (${s.durata} min)`);
     });
     console.log('');
-    console.log('🚀 Visualizza i servizi su:');
+    console.log(' Visualizza i servizi su:');
     console.log('   http://localhost:3000/servizi');
 
     await mongoose.disconnect();
-    console.log('🔌 Disconnesso da MongoDB');
+    console.log(' Disconnesso da MongoDB');
   } catch (error) {
-    console.error('❌ Errore:', error);
+    console.error(' Errore:', error);
     process.exit(1);
   }
 }

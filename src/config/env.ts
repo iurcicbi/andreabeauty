@@ -32,7 +32,7 @@ const envSchema = z.object({
 function validateEnv(): z.infer<typeof envSchema> {
   const result = envSchema.safeParse(process.env);
   if (!result.success) {
-    console.error('❌ Environment validation failed:');
+    console.error(' Environment validation failed:');
     for (const issue of result.error.issues) {
       console.error(`  - ${issue.path.join('.')}: ${issue.message}`);
     }
